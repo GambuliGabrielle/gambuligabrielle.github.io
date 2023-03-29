@@ -1,5 +1,5 @@
 +++
-title = "Isaac Asimov, Economie Géographique et Econométrie"
+title = "Isaac Asimov, Géographie Economique et Econométrie"
 date = 2023-03-29
 description = """
 Le Cycle de Fondation, livre I
@@ -12,7 +12,7 @@ year = 2023
 [Isaac Asimov](https://fr.wikipedia.org/wiki/Isaac_Asimov) (1920-1992) était un écrivain de science-fiction très connu, notamment pour sa série de livres *Le Cycle de Fondation*. 
 J'ai lu pour la première fois Asimov cet hiver, en commençant par le roman *Fondation*, le premier livre paru de la série.
 Au fil de la lecture, on découvre que l'auteur était fasciné par une gamme de sujets très large, comme l’histoire, la politique, la physique, la psychologie, la sociologie et l’économie, dont il intègre les concepts pour conter son récit. 
-Dû à ma formation en économie, et particulièrement à mes domaines de recherche qui sont l'économie géographique et l'économétrie, je n'ai pas pu m'empêcher de faire le lien entre son roman et la littérature académique.
+Dû à ma formation en économie, et particulièrement à mes domaines de recherche qui sont la géographie économique et l'économétrie, je n'ai pas pu m'empêcher de faire le lien entre son roman et la littérature académique.
 
 Le roman se déroule dans un futur lointain, où l'humanité a colonisé la galaxie et établi un vaste empire interstellaire. 
 Dans un contexte de déclin et de chute de l'empire galactique, nous suivons un petit groupe de scientifiques qui s'efforce de préserver les connaissances et la culture humaines face à cet effondrement. La clé de leur succès réside dans leur capacité à utiliser la *psychohistoire* pour prédire l'avenir et à guider leurs actions en conséquence.
