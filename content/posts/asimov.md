@@ -9,7 +9,7 @@ year = 2023
 +++
 
 
-[Isaac Asimov](https://fr.wikipedia.org/wiki/Isaac_Asimov) (1920-1992) était un écrivain de science-fiction très connu, notamment pour sa série de livres *Le Cycle de Fondation*. 
+[Isaac Asimov](https://fr.wikipedia.org/wiki/Isaac_Asimov) (1920-1992) était un écrivain de science-fiction,  très connu notamment pour sa série de livres *Le Cycle de Fondation*. 
 J'ai lu pour la première fois Asimov cet hiver, en commençant par le roman *Fondation*, le premier livre paru de la série.
 Au fil de la lecture, on découvre que l'auteur était fasciné par une gamme de sujets très large, comme l’histoire, la politique, la physique, la psychologie, la sociologie et l’économie, dont il intègre les concepts pour conter son récit. 
 Dû à ma formation en économie, et particulièrement à mes domaines de recherche qui sont la géographie économique et l'économétrie, je n'ai pas pu m'empêcher de faire le lien entre son roman et la littérature académique.
