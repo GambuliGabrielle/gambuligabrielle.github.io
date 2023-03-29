@@ -35,3 +35,5 @@ En somme, Asimov s'est inspiré d'un large éventail de disciplines et d'idées 
 Chers collègues et étudiants en Economie, j'espère vous avoir donné envie de le lire.
 
 A Lucas, qui m'a ouvert les portes de ce monde interstellaire.
+
+![](/image/signature.png)
