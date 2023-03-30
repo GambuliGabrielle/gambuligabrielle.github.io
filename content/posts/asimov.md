@@ -1,13 +1,12 @@
 +++
 title = "Isaac Asimov, Géographie Economique et Econométrie"
-date = 2023-03-29
+date = 2023-03-30
 description = """
 Le Cycle de Fondation, livre I
 """
 [extra]
 year = 2023
 +++
-
 
 [Isaac Asimov](https://fr.wikipedia.org/wiki/Isaac_Asimov) (1920-1992) était un écrivain de science-fiction,  très connu notamment pour sa série de livres *Le Cycle de Fondation*. 
 J'ai lu pour la première fois Asimov cet hiver, en commençant par le roman *Fondation*, le premier livre paru de la série.
@@ -17,7 +16,10 @@ Dû à ma formation en économie, et particulièrement à mes domaines de recher
 Le roman se déroule dans un futur lointain, où l'humanité a colonisé la galaxie et établi un vaste empire interstellaire. 
 Dans un contexte de déclin et de chute de l'empire galactique, nous suivons un petit groupe de scientifiques qui s'efforce de préserver les connaissances et la culture humaines face à cet effondrement. La clé de leur succès réside dans leur capacité à utiliser la *psychohistoire* pour prédire l'avenir et à guider leurs actions en conséquence.
 
-La psychohistoire est présentée comme une discipline scientifique qui utilise les statistiques et probabilités pour prédire le comportement de grands groupes de personnes au fil du temps en fonction des événements qui se réalisent. Cette science est basée sur un ensemble d'équations qui peuvent prédire l'avenir de l'empire galactique avec une précision incroyable, reposant seulement sur des principes aggrégés. N'est-ce pas le principe de l'économétrie ? La psychohistoire et l'économétrie utilisent toutes deux des modèles mathématiques et statistiques pour analyser des systèmes sociaux complexes et prédire des résultats possibles ou futurs.
+La psychohistoire est présentée comme une discipline scientifique qui utilise les statistiques et probabilités pour prédire le comportement de grands groupes de personnes au fil du temps en fonction des événements qui se réalisent et de lois aggrégées de l'action de masse. N'est-ce pas le principe de l'économétrie ? Tout comme les psychohistoriens, les économètres utilisent diverses méthodes statistiques pour analyser des données, comme l’analyse de régression et l’analyse de séries temporelles. 
+L'objectif de la psychohistoire et l'économétrie est le même : modéliser les relations économiques pour ainsi comprendre des phénomènes sociaux complexes et faire des prédictions sur les résultats futurs. 
+
+En revanche, une différence fondamentale existe entre les deux sciences. Elle réside dans la précision des prédictions. Alors que la psychohistoire a une compréhension exacte du comportement humain et des forces sociales et économiques qui le façonnent, la qualité et la disponibilité des données qui permettraient de développer des modèles si précis fait défaut en réalité. Cependant, l'accès et la qualité des données s'améliore considérablement au fil des années (*et des jours*) grâce aux avancements technologiques et aux méthodes de plus en plus sophistiquées de collecte de données. Ces améliorations ont révolutionné les usages de l'économétrie. Il paraît donc raisonnable de s'attendre à ce que la filière continue d'évoluer et peut-être précéder la psychohistoire.
 
 Mon attention à également été retenue par la manière dont Asimov intègre la géographie économique dans le fonctionnement de l'empire. Plus précisément, il présente un empire qui répond aux lois du [*modèle de gravité*](https://fr.wikipedia.org/wiki/%C3%89quation_de_gravit%C3%A9_(%C3%A9conomie_internationale)) pour expliquer le mouvement des biens et des personnes en son sein. Basé sur le modèle de [Newton](https://en.wikipedia.org/wiki/Newton%27s_law_of_universal_gravitation), le modèle de gravité est résumé en une équation mathématique simple mais puissante qui décrit la manière dont la taille de deux entités géographiques et la distance qui les sépare influencent le flux commercial, la migration et d'autres formes d'intéraction entre eux - dont les collaborations inter-régionales entre inventeurs (voir [mon article](/publications/hsr-collab/) - *oui, je pratique l'auto-citation*). 
 
@@ -37,3 +39,17 @@ Chers collègues et étudiants en Economie, j'espère vous avoir donné envie de
 A Lucas, qui m'a ouvert les portes de ce monde interstellaire.
 
 ![](/image/signature.png)
+
+<p align="center" width="100%">
+    ______________________________________
+</p>
+
+Pour illustrer ce post, j'ai demandé à Dall-E de créer des images d'un réseau d’étoiles et de planètes, reliées par des routes commerciales. J'expose sa gallerie ci-dessous.
+
+<p align="center" width="100%">
+    <img width="75%" src=/image/dalle_asimov.png> 
+    <img width="75%" src=/image/dalle_asimov2.png> 
+    <img width="75%" src=/image/dalle_asimov3.png> 
+    <img width="75%" src=/image/dalle_asimov4.png> 
+</p>
+
