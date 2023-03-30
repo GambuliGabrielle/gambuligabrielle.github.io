@@ -40,9 +40,7 @@ A Lucas, qui m'a ouvert les portes de ce monde interstellaire.
 
 ![](/image/signature.png)
 
-<p align="center" width="100%">
-    ______________________________________
-</p>
+<hr />
 
 Pour illustrer ce post, j'ai demandé à Dall-E de créer des images d'un réseau d’étoiles et de planètes, reliées par des routes commerciales. J'expose sa gallerie ci-dessous.
 
