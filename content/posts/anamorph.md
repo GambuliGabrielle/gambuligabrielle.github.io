@@ -1,5 +1,5 @@
 +++
-title = "Distorting Distances: Visualizing Changes in Travel Time from Paris"
+title = "France in Motion: High-Speed Rails Distorting Distances"
 date = 2023-04-06
 description = """
 Anamorphic maps
@@ -23,14 +23,25 @@ To put it in a nutshell, this process involves using travel time data to compute
 
 Discover below how the French high-speed railway has improved travel time from Paris to other cities between 1980 and 2020, and see cities that have become more accessible.
 
-<div style="display: flex; flex-wrap: wrap;">
-  <img src="/image/anamorph/anamorph1980.png" style="width: 50%; height: auto;">
-  <img src="/image/anamorph/anamorph1990.png" style="width: 50%; height: auto;">
-  <img src="/image/anamorph/anamorph2000.png" style="width: 50%; height: auto;">
-  <img src="/image/anamorph/anamorph2010.png" style="width: 50%; height: auto;">
-</div>
 <p align="center" width="100%">
-    <img width="50%" src=/image/anamorph/anamorph2020.png> 
+	<b>Train Travel Time from Paris</b>
+	<img src="/image/anamorph/anamorphparis.gif" alt="Example GIF">
 </p>
+
+Below, you will find as well maps from the point of view of Lyon and Bordeaux.
+
+<p align="center" width="100%">
+	<b>Train Travel Time from Lyon</b>
+	<img src="/image/anamorph/anamorphlyon.gif" alt="Example GIF">
+</p>
+
+<p align="center" width="100%">
+	<b>Train Travel Time from Bordeaux</b>
+	<img src="/image/anamorph/anamorphbordeaux.gif" alt="Example GIF">
+</p>
+
+
+
+
 
 ![](/image/signature.png)
