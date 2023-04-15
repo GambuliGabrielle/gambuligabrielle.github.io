@@ -362,6 +362,8 @@ On calcule donc grâce à la formule obtenu du modèle 3:
 
 L'individu avec ces caractéristiques aura en moyenne 13 années d'éducation, qui correspond au diplôme du bac.
 
+Il est possible de jouer avec l'équation et de comparer la différence d'éducation entre deux individus aux caractéristiques différentes. Le [code R](/teaching/econometrics-undergraduate/htv.R) fournit un exemple d'application de ce type.
+
 ## Conclusion
 
 Dans cet exercice, nous avons démontré que le niveau d'éducation des individus dépend de plusieurs facteurs tels que le contexte familial, les capacités intellectuelles et le milieu de vie. Plus précisément, le niveau d'éducation des parents, la composition de la fratrie ainsi que le fait de vivre en ville ou à la campagne ont un impact significatif sur le niveau d'éducation des individus. Nous avons présenté le sens de l'impact de ces variables, positif et négatif, ainsi que la magnitude de leur impact, représenté par la valeur de leurs coefficients. 
