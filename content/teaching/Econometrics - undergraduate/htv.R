@@ -22,8 +22,8 @@ gc()
 # de différentes fonctions
 
 # Installer les packages dont nous avons besoin pour travailler sur les données
-install.packages("wooldridge") # pour télécharger données de Wooldridge
-install.packages("dplyr") # pour manipuler les données
+# install.packages("wooldridge") # pour télécharger données de Wooldridge
+# install.packages("dplyr") # pour manipuler les données
 
 # Bibliothèques
 library(dplyr) #pour faire des manipulations de données
@@ -45,6 +45,41 @@ View(htv) # ouvre une fenêtre sur l'ensemble des données
 head(htv) # affiche les premières lignes de la base dans la console
 names(htv) # affiche le noms des variables de la base dans la console
 
+## ==== STATISTIQUES DESCRIPTIVES ====
+
+# statistiques des varaibles qui nous intéressent (min, 1Q, médiane, moyenne, 3Q, max)
+summary(htv[,c("educ","motheduc","fatheduc","abil","sibs","urban")])
+
+# On peut référencer les années d'éducation en fonction des diplômes auxquelles
+# elles correspondent.
+
+# 6 années d'éducation correspond à la 6ème
+# 12 années d'éducation correspond au bac
+# 15 années = licence
+# 17 = master
+# 20 = doctorat
+
+# On crée la variable dipl pour diplôme le plus élevé obtenu par l'individu observé
+htv$dipl <- ifelse(htv$educ==20, "doctorat", NA) # Si educ == 20, dipl = "doctorat", sinon valeur manquante
+htv$dipl <- ifelse(htv$educ<20&htv$educ>=17, "master", htv$dipl) # Si 17 <= educ < 20, dipl = "master", sinon valeur déjé enregistrée
+htv$dipl <- ifelse(htv$educ<17&htv$educ>=15, "licence", htv$dipl)
+htv$dipl <- ifelse(htv$educ<15&htv$educ>=12, "bac", htv$dipl)
+htv$dipl <- ifelse(htv$educ<12&htv$educ>=9, "brevet", htv$dipl)
+htv$dipl <- ifelse(htv$educ<9, "nondef", htv$dipl)
+
+# on rapporte les statistiques pour chaque groupe de diplôme
+diplome <- htv %>% group_by(dipl) %>% count()  # compte le nombre d'observations pour chaque type de diplôme
+diplome$prop <- diplome$n/nrow(htv) # on l'exprime en proportion du nombre total d'individus
+diplome # on affiche le tableau dans la console
+
+# Résultats :
+# 55% de la population a le bac comme diplôme le plus élevé
+# 22% ont une licence comme diplôme le plus élevé
+# 7% ont un master comme diplôme le plus élevé
+# 1% ont un doctorat comme diplôme le plus élevé
+
+# Histogramme de la variable abil
+hist(htv$abil, col ="lightblue", xlab = "abil", main = "Histogramme des capacités cognitives")
 
 ## ==== REGRESSIONS ====
 
@@ -109,3 +144,59 @@ summary(regression3)
 # IV) Modèle de régression motheduc = a0 + a1 abil + a2 sibs + a3 urban + e
 regression4 <- lm(motheduc ~ abil + sibs + urban, data = htv)
 summary(regression4)
+
+
+## ==== PREDICTIONS ====
+
+## Quelle est le nombre d'années d'éducation moyen pour un individu moyen habitant en ville ?
+
+# Caractéristiques
+moth1 <- mean(htv$motheduc)
+fath1 <- mean(htv$fatheduc)
+abil1 <- mean(htv$abil)
+sibs1 <- mean(htv$sibs)
+urban1 <- 1
+
+# résultat
+indiv1 <- regression3[["coefficients"]][["(Intercept)"]] + regression3[["coefficients"]][["motheduc"]]*moth1  + regression3[["coefficients"]][["fatheduc"]]*fath1 + regression3[["coefficients"]][["abil"]]*abil1 + regression3[["coefficients"]][["sibs"]]*sibs1 + regression3[["coefficients"]][["urban"]]*urban1
+indiv1
+# 13 années d'éducation (correspond au diplôme du bac comme diplôme le plus élevé)
+
+
+# On compare l'éducation prédite de deux individus en fonction de leurs caractéristiques.
+# On peut changer les valeurs enregistrées pour faire différents tests. 
+
+# Individu 1
+moth1 <- 20
+fath1 <- 20
+abil1 <- 1.8
+sibs1 <- 1
+urban1 <- 1
+
+# Individu 2
+moth2 <- 20
+fath2 <- 20
+abil2 <- 6
+sibs2 <- 1
+urban2 <- 1
+
+# Résultats
+indiv1 <- regression3[["coefficients"]][["(Intercept)"]] + regression3[["coefficients"]][["motheduc"]]*moth1  + regression3[["coefficients"]][["fatheduc"]]*fath1 + regression3[["coefficients"]][["abil"]]*abil1 + regression3[["coefficients"]][["sibs"]]*sibs1 + regression3[["coefficients"]][["urban"]]*urban1
+indiv2 <- regression3[["coefficients"]][["(Intercept)"]] + regression3[["coefficients"]][["motheduc"]]*moth2  + regression3[["coefficients"]][["fatheduc"]]*fath2 + regression3[["coefficients"]][["abil"]]*abil2 + regression3[["coefficients"]][["sibs"]]*sibs2 + regression3[["coefficients"]][["urban"]]*urban2
+
+# Pour afficher les résultats dans la console
+indiv1
+indiv2
+
+# Pour calculer la différence d'années d'études entre les deux individus
+diff <- indiv1 - indiv2
+diff
+# ou
+diff2 <- regression3[["coefficients"]][["motheduc"]]*(moth1-moth2) + regression3[["coefficients"]][["fatheduc"]]*(fath1-fath2) + regression3[["coefficients"]][["abil"]]*(abil1-abil2) + regression3[["coefficients"]][["sibs"]]*(sibs1-sibs2) + regression3[["coefficients"]][["urban"]]*(urban1-urban2)
+diff2
+
+# L'individu 1 aurait en moyenne 2 années d'études de moins que l'individu 2.
+
+# On vérifie que cela donne la même chose
+diff==diff2 
+round(diff,2)==round(diff2,2) # vrai en arrondissant les valeurs au centième près (deuxième décimale)

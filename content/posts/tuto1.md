@@ -94,11 +94,38 @@ On ajoutera par la suite les variables :
 - ***sibs***, le nombre de frères et soeurs de l'individu, et 
 - ***urban*** une variable indicatrice égale à 1 si l'individu vit dans une ville, 0 s'il vit à la campagne.
 
+## Statistiques descriptives
+
+Avant toute régression, il faut comprendre ce que nous avons dans les données. Nous calculons les statistiques qui établissent une description basique des variables qui nous intéressent dans le cadre de notre étude avec la fonction *summary( )*. Sur l'éditeur, nous écrivons :
+
+```{r}
+summary(htv[,c("educ","motheduc","fatheduc","abil","sibs","urban")])
+```
+
+Dans la console apparaît :
+
+```{r}
+> summary(htv[,c("educ","motheduc","fatheduc","abil","sibs","urban")])
+      educ          motheduc        fatheduc          abil              sibs            urban       
+ Min.   : 6.00   Min.   : 0.00   Min.   : 0.00   Min.   :-5.6315   Min.   : 0.000   Min.   :0.0000  
+ 1st Qu.:12.00   1st Qu.:12.00   1st Qu.:11.00   1st Qu.: 0.5662   1st Qu.: 2.000   1st Qu.:1.0000  
+ Median :12.00   Median :12.00   Median :12.00   Median : 2.1498   Median : 3.000   Median :1.0000  
+ Mean   :13.04   Mean   :12.18   Mean   :12.45   Mean   : 1.7966   Mean   : 2.949   Mean   :0.8171  
+ 3rd Qu.:15.00   3rd Qu.:12.00   3rd Qu.:14.00   3rd Qu.: 3.4615   3rd Qu.: 4.000   3rd Qu.:1.0000  
+ Max.   :20.00   Max.   :20.00   Max.   :20.00   Max.   : 6.2637   Max.   :13.000   Max.   :1.0000
+```
+
+- Le nombre d'années moyen d'éducation dans les données est de 13 années, tandis que les valeurs minimale et maximale sont de 6 et 20 années respectivement. Dans le [code R](/teaching/econometrics-undergraduate/htv.R), vous trouverez la façon dont j'ai catégorisé le nombre d'années d'études en terme de diplôme le plus élevé obtenu pour étudier la proportion d'individus pour chaque diplôme.
+- Le nombre d'années moyen d'éducation des parents est similaire, légèrement plus bas. On remarque que le nombre d'années détudes est plus élevée pour les pères qui font partie des 50\% les plus éduqués que pour les mères qui font partie des 50\% les plus éduquées (au-dessus de la médiane).
+- La mesure de capacités cognitives est comprise sur l'intervalle ]-5.64 ; 6.27[, avec une moyenne à 1.8. En dessinant l'histogramme de cette variable avec la fonction *hist( )*, on observe que la distribution est inclinée vers la gauche. En effet, *le mode*, la valeur dominante, est à droite de la valeur centrale de l'intervalle).
+- La moyenne et la médiane du nombre de frères et soeurs s'élève à 3.
+- La variable *urban* est une variable indicatrice, c'est-à-dire qu'elle prend les valeurs {0;1} uniquement. Ce n'est pas une variable continue comme les autres. Sa moyenne donne la proportion d'individus dans l'échantillon qui vivent en villle (pour qui *urban* = 1). On peut en conclure que 82% des individus vivent en ville.
+
 ## Régressions
 
 ### Modèle 1
 
-On veut savoir si le niveau d'éducation des parents influence celui de leurs enfants. On pose le modèle suivant : 
+Nous voulons savoir si le niveau d'éducation des parents influence celui de leurs enfants. On pose le modèle suivant : 
 <div class="math ct"><i>educ</i><sub>i</sub> = <i>b</i><sub>0</sub> &plus; <i>b</i><sub>1</sub> <i>motheduc</i><sub>i</sub> &plus; <i>b</i><sub>2</sub> <i>fatheduc</i><sub>i</sub> &plus; <i>u</i><sub>i</sub> </div>
 
 avec ***i*** désignant l'observation (l'individu), ***b<sub>0</sub>*** la constante, ***b<sub>1</sub>*** l'effet moyen d'une année d'éducation supplémentaire d'une mère sur le nombre d'années d'éducation d'un individu, ***b<sub>2</sub>*** l'effet moyen d'une année d'éducation supplémentaire d'un père sur le nombre d'années d'éducation d'un individu, et ***u<sub>i</sub>*** le terme d'erreur.
@@ -258,7 +285,7 @@ F-statistic: 189.7 on 5 and 1224 DF,  p-value: < 2.2e-16
 #### Résultats du modèle 3
 
 Les résultats du modèle nous permettent d'écrire la relation linéaire suivante :
-<div class="math ct"><i>educ</i> = 8.44 &plus; 0.17 <i>motheduc</i> &plus; 0.11 <i>fatheduc</i> &plus; 0.49 <i>abil</i> &minus; 0.11 <i>sibs</i> &plus; 0.28 <i>urban</i> </div>
+<div class="math ct"><i>educ</i> = 8.84 &plus; 0.17 <i>motheduc</i> &plus; 0.11 <i>fatheduc</i> &plus; 0.49 <i>abil</i> &minus; 0.11 <i>sibs</i> &plus; 0.28 <i>urban</i> </div>
 
 - En moyenne, le fait d'avoir un frère ou une soeur supplémentaire dans la famille a tendance à réduire l'éducation des individus de 0.11 années, soit 1 mois. 
 	- Cette relation négative peut venir du fait que plus il y a d'enfants dans la famille, moins les parents auront les moyens de financer leurs études et moins ils ont de temps pour aider leurs enfants à étudier. Aussi, une famille nombreuse aura un revenu disponible pour chaque enfant plus faible, ce qui peut forcer les enfants à finir leurs études plus tôt pour pouvoir travailler et subvenir à leurs besoins.
@@ -321,6 +348,19 @@ Nos hypothèses sont vérifiées. Le nombre d'années d'éducation de la mère e
 - positivement associé à la capacité cognitive de son enfant, <i>a</i><sub>1</sub> > 0
 - négativement associé au nombre de frères et soeurs de l'enfant observé, <i>a</i><sub>2</sub> <0
 - positivement associé au fait de vivre en ville, <i>a</i><sub>3</sub> > 0
+
+## Prédictions
+
+Nous pouvons maintenant évaluer le nombre moyen d'années d'éducation prédit pour un individu moyen qui habite en ville. Pour cela, on fixe la valeur de toute les variables explicatives à leur moyenne, c'est-à-dire *motheduc* = 12.19, *fatheduc* = 12.45, *abil* = 1.80, *sibs* = 2.95. On choisit la valeur *urban* = 1 qui signifie que l'individu vit en ville.
+
+On calcule donc grâce à la formule obtenu du modèle 3:
+<div class="math ct"> <span style="position: relative; left: 24px; bottom: 8px;">^</span><i>educ</i> = 8.84 &plus; 0.17 <span style="position: relative; left: 30px; bottom: 15px;">_</span><i>motheduc</i> &plus; 0.11 <span style="position: relative; left: 30px; bottom: 15px;">_</span><i>fatheduc</i> &plus; 0.49 <span style="position: relative; left: 20px; bottom: 15px;">_</span><i>abil</i> &minus; 0.11 <span style="position: relative; left: 18px; bottom: 15px;">_</span><i>sibs</i> &plus; 0.28 <i>urban</i> </div>
+
+<div class="math ct"> <span style="position: relative; left: 24px; bottom: 8px;">^</span><i>educ</i> = 8.84 &plus; 0.17 &times; 12.19 &plus; 0.11 &times; 12.45 &plus; 0.49 &times; 1.80 &minus; 0.11 &times; 2.95 &plus; 0.28 &times; 1 </div>
+
+<div class="math ct"> <span style="position: relative; left: 24px; bottom: 8px;">^</span><i>educ</i> = 13.1 </div>
+
+L'individu avec ces caractéristiques aura en moyenne 13 années d'éducation, qui correspond au diplôme du bac.
 
 ## Conclusion
 
