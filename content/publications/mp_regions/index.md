@@ -7,7 +7,7 @@ authors = ["Gabrielle Gambuli"]
 year = 2023
 type = "wp"
 publication_types = "Working Paper"
-url_pdf = "/pdf/Navigating_the_Geography_of_Regional_Disparities_Market_Access_and_the_Core_Periphery_Divide.pdf" 
+url_pdf = "/pdf/Navigating_the_Geography_of_Regional_Disparities.pdf" 
 #url_slides = "path to defense slides"
 +++
 
