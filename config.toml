@@ -8,7 +8,7 @@ compile_sass = false
 build_search_index = true
 
 # theme
-theme = "kodama-theme"
+theme = "kodama-theme-new"
 
 title = "Gabrielle Gambuli"
 
