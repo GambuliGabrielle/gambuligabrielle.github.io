@@ -34,6 +34,10 @@ interests = [
   year = "2017-2019"
 
 [[extra.avatar_icons]]
+  icon = "twitter"
+  link = "https://twitter.com/GambuliG"
+
+[[extra.avatar_icons]]
   icon = "linkedin"
   link = "https://www.linkedin.com/in/gabrielle-gambuli-1a113713b/"
 
