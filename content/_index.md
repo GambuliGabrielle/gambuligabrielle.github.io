@@ -34,15 +34,16 @@ interests = [
   year = "2017-2019"
 
 [[extra.avatar_icons]]
-  icon = "github"
-  link = "https://github.com/GambuliGabrielle"
+  icon = "twitter"
+  link = "https://twitter.com/GambuliG"
 
 [[extra.avatar_icons]]
   icon = "linkedin"
   link = "https://www.linkedin.com/in/gabrielle-gambuli-1a113713b/"
 
-
-
+[[extra.avatar_icons]]
+  icon = "github"
+  link = "https://github.com/GambuliGabrielle"
 +++
 
 Welcome to my website! I am **Gabrielle Gambuli**, a PhD candidate at [CY Cergy Paris Université](https://www.cyu.fr/) and [ESSEC Business School](https://www.essec.edu/en/), attached to [THEMA](https://thema.u-cergy.fr/?lang=en) laboratory.
