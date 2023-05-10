@@ -8,6 +8,14 @@ Anamorphic maps
 year = 2023
 +++
 
+<div style="display: flex; flex-wrap: wrap;">
+  <img src="/image/anamorph/anamorph1980.png" style="width: 20%; height: auto;">
+  <img src="/image/anamorph/anamorph1990.png" style="width: 20%; height: auto;">
+  <img src="/image/anamorph/anamorph2000.png" style="width: 20%; height: auto;">
+  <img src="/image/anamorph/anamorph2010.png" style="width: 20%; height: auto;">
+  <img src="/image/anamorph/anamorph2010.png" style="width: 20%; height: auto;">
+</div>
+
 Anamorphic maps are a unique way of visualizing spatial data. They distort the shape of locations to reflect a specific variable, such as population density or economic activity. This approach can provide a fresh perspective on familiar geographic features and reveal new patterns and insights.
 As part of my research, I study the evolution of train travel times in France, which have substantially decreased with introduction of high-speed railways. High-speed networks distort the relationship between space and time. Hence, it impacts our perception of distance. To illustrate those changes, I've used anamorphic techniques that distorts the distances between french cities.
 
