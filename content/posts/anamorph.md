@@ -1,11 +1,10 @@
 +++
 title = "France in Motion: High-Speed Rails Distorting Distances"
 date = 2023-04-06
-description = """
-Anamorphic maps
-"""
+description = "Anamorphic maps"
 [extra]
 year = 2023
+image = "/image/anamorph/allanamorph.png"
 +++
 
 <div style="display: flex; flex-wrap: wrap; justify-content: center;">

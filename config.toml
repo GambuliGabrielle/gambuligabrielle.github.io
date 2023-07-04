@@ -19,12 +19,12 @@ highlight_code = false
 
 [extra]
 # Put all your custom variables here
-avatar = "static/image/profil/Gambuli_Gabrielle-02D.jpg"
+avatar = "static/image/profil/Gambuli_Gabrielle-02E.jpg"
 favicon = "static/image/favicon_gg.png"
 
 email = "gabrielle.gambuli@cyu.fr"
 
 menu_items = [
 {path = "#", name= "Home"},
-{path = "CV/CV_Gambuli.pdf", name="CV" }
+#{path = "CV/CV_Gambuli.pdf", name="CV" }
 ]

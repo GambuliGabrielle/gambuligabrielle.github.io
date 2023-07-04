@@ -15,3 +15,5 @@ This macroeconomics course covers essential concepts in macroeconomic statistics
 
 **Résumé**    
 Ce cours de macroéconomie couvre les concepts essentiels des statistiques et de la méthodologie macroéconomiques. Il présente les principaux agrégats macroéconomiques (PIB, inflation, chômage), les fluctuations économiques (chocs d'offre et de demande), la fonction monétaire et ses mécanismes.
+
+***Course taught in Fall 2019 (2 groups). Total hours: 33.***

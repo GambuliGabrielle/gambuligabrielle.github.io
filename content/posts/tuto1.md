@@ -1,12 +1,10 @@
 +++
 title = "Tutoriel d'Econométrie (for dummies) : les MCO sur R"
 date = 2023-03-29
-description = """
-Etude de la reproduction intrafamiliale du nombre d'années d'éducation
-
-"""
+description = "Etude de la reproduction intrafamiliale du nombre d'années d'éducation"
 [extra]
 year = 2023
+image = "/image/regression_tuto1.png"
 +++
 
 ## Introduction
@@ -140,7 +138,7 @@ regression1 <- lm(educ ~ motheduc + fatheduc, data = htv)
 summary(regression1)
 ```
 
-La console affiche les résultats suivant :
+La console affiche les résultats suivants :
 
 ```{r}
 > regression1 <- lm(educ ~ motheduc + fatheduc, data = htv) # lm = modèle linéaire

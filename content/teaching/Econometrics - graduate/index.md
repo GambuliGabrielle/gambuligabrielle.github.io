@@ -4,9 +4,9 @@ date = 2023-03-28
 
 [extra]
 authors = ["master, PhD level"]
-year = 2022
+year = 2023
 type = "teach"
-publication_types = "2022-2023 academic year"
+publication_types = "2023-2024 academic year"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++
@@ -16,3 +16,5 @@ This class covers both theoretical and applied subjects in econometrics, such as
 
 **Résumé**         
 Ce TD couvre à la fois des sujets théoriques et appliqués en économétrie, tels que les modèles de régression linéaire simple et multiple, l'estimateur OLS et les propriétés d'échantillon fini, les propriétés de grand échantillon avec échantillonnage aléatoire, différents tests et techniques d'inférence, les théories asymptotiques, l'hétéroscédasticité, l'analyse instrumentale les méthodes variables et les méthodes du maximum de vraisemblance. Le cours comprend des didacticiels pratiques utilisant les logiciels R et SAS.
+
+***Course taught in Fall 2022 and Fall 2023. Total hours: 27.***

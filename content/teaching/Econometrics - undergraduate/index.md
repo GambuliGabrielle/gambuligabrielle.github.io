@@ -4,9 +4,9 @@ date = 2023-03-28
 
 [extra]
 authors = ["bachelor level"]
-year = 2022
+year = 2023
 type = "teach"
-publication_types = "2022-2023 academic year"
+publication_types = "2023-2024 academic year"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++
@@ -15,6 +15,8 @@ This econometric class presents statistical tools, such as the simple and multip
 
 **Résumé**   
 Ce TD d'économétrie présente des outils statistiques, tels que les modèles de régression linéaire simple et multiple. Le cours couvre l'estimateur OLS, ainsi que divers tests et techniques d'inférence, les théories asymptotiques et l'hétéroscédasticité. L'objectif ultime du cours est de permettre aux étudiants d'analyser et d'interpréter efficacement les données économiques en utilisant des applications pratiques de ces concepts. À cette fin, des tutoriels sont donnés sur la façon d'utiliser des logiciels populaires comme Excel, R et SAS pour effectuer des analyses économétriques.
+
+***Course taught in Fall 2022 (2 groups) and Fall 2023 (1 group). Total hours: 49.5.***
 
 
 ## Pour aller plus loin

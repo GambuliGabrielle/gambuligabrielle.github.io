@@ -15,3 +15,5 @@ In this class, students are introduced to fundamental statistical tools, such as
 
 **Résumé**    
 Ce TD initie les étudiants aux outils statistiques fondamentaux, tels que la représentation d'une série statistique, le calcul d'opérateurs de somme et d'intégrale, et d'indicateurs de position, de dispersion et de concentration pour des variables discrètes et continues. Le cours couvre également les séries à deux caractères, y compris la moyenne conditionnelle, la variance-covariance et la corrélation, et fournit une introduction à l'ajustement des moindres carrés.
+
+***Course taught in Winter 2021 (1 groups). Total hours: 15.***

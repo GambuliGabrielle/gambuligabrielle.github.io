@@ -6,6 +6,8 @@ Le Cycle de Fondation, livre I
 """
 [extra]
 year = 2023
+image = "/image/dalle_asimov_bis.png"
+
 +++
 
 [Isaac Asimov](https://fr.wikipedia.org/wiki/Isaac_Asimov) (1920-1992) était un écrivain de science-fiction,  très connu notamment pour sa série de livres *Le Cycle de Fondation*. 

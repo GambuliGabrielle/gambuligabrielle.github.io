@@ -15,3 +15,5 @@ This macroeconomics class covers topics such as national accounts and balance of
 
 **Résumé**    
 Ce cours de macroéconomie couvre des sujets tels que les comptes nationaux et la balance des paiements, le marché des changes, la théorie du pouvoir d'achat, le modèle de compte courant intertemporel et le modèle Mundell-Fleming.
+
+***Course taught in Winter 2020 (1 group) and Winter 2021 (2 groups). Total hours: 49.5.***

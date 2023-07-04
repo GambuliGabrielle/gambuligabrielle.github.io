@@ -1,12 +1,16 @@
-
 {% macro page_summary(page, show_wordcount=false) %}
-<a  href="{{ page.permalink | safe }}">
+<a href="{{ page.permalink | safe }}">
   <h2 class="text-1xl font-bold text-blue-600 hover:text-blue-800 visited:text-purple-600">{{ page.title }}</h2>
   {% if page.summary -%}
-  <p class="pb-1"> {{ page.summary | safe }} </p>
+  <p class="pb-1">{{ page.summary | safe }}</p>
   {% elif page.description %}
-  <p class="pb-1"> {{ page.description | safe }} </p>
+  <p class="pb-1">{{ page.description | safe }}</p>
   {% endif -%}
-  <p class="text-sm text-slate-400"> {{ page.extra.year }} {% if show_wordcount == true -%} • wordcount: {{ page.word_count }} • {{ page.reading_time }} min read {% endif -%}</p>
+
+  {% if show_image and page.extra.image -%}
+  <img src="{{ page.extra.image }}" alt="Page Image">
+  {% endif %}
+
+  <p class="text-sm text-slate-400">{{ page.extra.year }}{% if show_wordcount == true -%} • wordcount: {{ page.word_count }} • {{ page.reading_time }} min read{% endif -%}</p>
 </a>
-{% endmacros %}
+{% endmacro %}
