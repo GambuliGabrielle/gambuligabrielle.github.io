@@ -16,6 +16,6 @@ extra.publications_types = [
 ]
 +++
 
-<div style="overflow: hidden; padding-top: 56.25%; position: relative;">
+<div style="overflow: auto; padding-top: 56.25%; position: relative; -webkit-overflow-scrolling: touch;">
   <iframe src="/CV/CV_Gambuli.pdf" frameborder="0" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>
 </div>
