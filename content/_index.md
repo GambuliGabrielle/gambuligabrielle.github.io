@@ -46,4 +46,4 @@ interests = [
   link = "https://github.com/GambuliGabrielle"
 +++
 
-Welcome to my website! I am **Gabrielle Gambuli**, a PhD candidate at [CY Cergy Paris Université](https://www.cyu.fr/) and [ESSEC Business School](https://www.essec.edu/en/), attached to [THEMA](https://thema.u-cergy.fr/?lang=en) laboratory.
+Welcome to my website! I am **Gabrielle Gambuli**, PhD candidate at [CY Cergy Paris Université](https://www.cyu.fr/) and [ESSEC Business School](https://www.essec.edu/en/), attached to [THEMA](https://thema.u-cergy.fr/?lang=en) laboratory.
