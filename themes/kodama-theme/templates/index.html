@@ -66,13 +66,14 @@
   </div>
   {% endblock biography %}
 
+
   {% block index_summaries -%}
 
   {% set_global index = 0 -%}
   {% for ssection in section.subsections -%}
   {% set ssection_data = get_section(path=ssection, metadata_only=true) -%}
   {% if ssection_data.extra.index_show -%}
-      <div class="{% if index % 2 != 0%} bg-white {% else %} bg-gray-50 {% endif %}">
+      <div class="{% if index % 2 != 0%} bg-white {% else %} bg-light-blue {% endif %}">
         <div class="container max-w-4xl mx-auto px-4 py-8">
           {% set title = ssection_data.title -%}
           {% if ssection_data.extra.index_title -%}
@@ -88,12 +89,26 @@
 
   {% block index_contact -%}
     {% if config.extra.contact_in_index and config.extra.contact_in_index == true -%}
-    <div class="{% if index % 2 != 0%} bg-white {% else %} bg-gray-50 {% endif %}">
+    <div class="{% if index % 2 != 0%} bg-white {% else %} bg-light-blue {% endif %}">
       <div class="container max-w-4xl mx-auto px-4">
       {{ macros::contact_from_config(section=section, config=config) }}
       </div>
     </div>
     {% endif -%}
   {% endblock index_contact -%}
+
+<div style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; margin-top: 20px;">
+  <img src="/image/anamorph/anamorph1980.png" style="width: 15%; height: auto;">
+  <img src="/image/anamorph/anamorph1990.png" style="width: 15%; height: auto;">
+  <img src="/image/anamorph/anamorph2000.png" style="width: 15%; height: auto;">
+  <img src="/image/anamorph/anamorph2010.png" style="width: 15%; height: auto;">
+  <img src="/image/anamorph/anamorph2020.png" style="width: 15%; height: auto;">
+</div>
+
+<style>
+  .bg-light-blue {
+    background-color: #f7faff; /* Replace with your desired light blue color */
+  }
+</style>
 
 {% endblock content-%}

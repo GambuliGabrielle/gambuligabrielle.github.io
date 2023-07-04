@@ -8,7 +8,7 @@ Anamorphic maps
 year = 2023
 +++
 
-<div style="display: flex; flex-wrap: wrap;">
+<div style="display: flex; flex-wrap: wrap; justify-content: center;">
   <img src="/image/anamorph/anamorph1980.png" style="width: 20%; height: auto;">
   <img src="/image/anamorph/anamorph1990.png" style="width: 20%; height: auto;">
   <img src="/image/anamorph/anamorph2000.png" style="width: 20%; height: auto;">
