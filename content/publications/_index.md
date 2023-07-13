@@ -21,4 +21,4 @@ extra.publications_types = [
 
 ## Topic of interest
 
-My research activities focus on the effect of Connectivity on Regional Development.
+My research activities focus on the effect of **connectivity** on **regional development** and **regional interactions**, at the intersection of *economic geography*, *transportation*, *trade* and *innovation*.
