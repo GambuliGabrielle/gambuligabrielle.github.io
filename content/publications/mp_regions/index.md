@@ -8,7 +8,7 @@ year = 2023
 type = "wp"
 publication_types = "Working Paper"
 url_pdf = "/pdf/Navigating_the_Geography_of_Regional_Disparities.pdf" 
-#url_slides = "path to defense slides"
+url_slides = "/pdf/MP_slides.pdf"
 +++
 
 This paper investigates the impact of market proximity on subnational development worldwide, considering the heterogeneous effects on core and peripheral regions, as well as on countries with different income levels. 
