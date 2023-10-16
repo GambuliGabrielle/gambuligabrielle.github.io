@@ -21,8 +21,11 @@ Ce TD d'économétrie présente des outils statistiques, tels que les modèles d
 
 ## Pour aller plus loin
 - Régressions linéaires par les Moindres Carrés Ordinaires (MCO) 
+	- Application des TD2 et 4 sur R
+		- [code R](/teaching/econometrics-undergraduate/td_2_4.R)
 	- [Interprétation des estimateurs MCO](/teaching/econometrics-undergraduate/OLS_interpretation.pdf) (*en anglais*)
 	- Etude de la reproduction intrafamiliale du nombre d'années d'éducation
 		- [tutoriel 1](/posts/tuto1/)
 		- [code R](/teaching/econometrics-undergraduate/htv.R)
+	
 		
