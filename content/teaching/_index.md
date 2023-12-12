@@ -12,8 +12,7 @@ extra.hidden_nav = false
 
 
 extra.publications_types = [
-  { title = "2023-2024 academic year", type = "teach" },
-  { title = "Past academic years (2019-2023)", type = "pastteach" }
+  { title = "Past academic years (2019-2024)", type = "pastteach" }
 ]
 +++
 

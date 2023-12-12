@@ -1,12 +1,12 @@
 +++
 title = "Applied Econometrics"
-date = 2023-03-28
+date = 2023-09-27
 
 [extra]
 authors = ["bachelor level"]
 year = 2023
-type = "teach"
-publication_types = "2023-2024 academic year"
+type = "pastteach"
+publication_types = "Past academic years (2019-2024)"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++
