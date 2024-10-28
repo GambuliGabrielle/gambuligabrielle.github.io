@@ -16,9 +16,14 @@ extra.publications_types = [
   #{ title = "Conferences and workshops ", type = "conferences" },
   { title = "Work in progress", type = "wip" },
   { title = "Working papers", type = "wp" },
+  { title = "Non-academic publication", type = "nap" },
 ]
 +++
 
 ## Topic of interest
 
-My research activities focus on the effect of **connectivity** on **regional development** and **regional interactions**, at the intersection of *economic geography*, *transportation*, *trade* and *innovation*.
+As an applied economist, my research examines the role of **connectivity** on **regional development** and **interregional interactions**, positioned at the intersection of *economic geography*, *urban economics*, and *transportation economics*. 
+
+Driven by a fascination with data, I worked with high-resolution datasets from mobile phone activity, card transactions, patent records, and transportation networks. My primary interest lies in examining shifts in location, mobility, collaboration, and consumption behaviors, in response to structural transformations such as the rise of telework practices and the expansion of high-speed rail and highway networks.
+
+

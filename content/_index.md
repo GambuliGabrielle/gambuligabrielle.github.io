@@ -10,7 +10,8 @@ interests = [
   "Economic Geography",
   "Regional Development",
   "Transportation",
-  "Innovation"
+  "Telework",
+  "Data Collection and Analysis"
 ]
 
 [[extra.education.courses]]
@@ -19,9 +20,14 @@ interests = [
   year = "2019-2023"
 
 [[extra.education.courses]]
-  course = "Ph.D. Business Admin."
+  course = "Ph.D. Business Administr."
   institution = "ESSEC Business School"
   year = "2019-2023"
+
+[[extra.education.courses]]
+  course = "M.Sc. Economic Analysis"
+  institution = "CY Cergy-Paris Université & ESSEC Business School"
+  year = "2017-2019"
 
 [[extra.avatar_icons]]
   icon = "twitter"
@@ -36,4 +42,4 @@ interests = [
   link = "https://github.com/GambuliGabrielle"
 +++
 
-Welcome to my website! I am **Gabrielle Gambuli**, Postdoc Research Fellow at [Université Gustave Eiffel - GRETTIA](https://grettia.univ-gustave-eiffel.fr/accueil) and [INSEE](https://www.insee.fr/fr/accueil) - [SSP Lab](https://ssplab.lab.sspcloud.fr/), working on [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010) with [Etienne Côme](https://www.comeetie.fr/) and [Marie-Pierre Joubert - de Bellefon](https://www.linkedin.com/in/marie-pierre-joubert-de-bellefon-538b3811/?originalSubdomain=fr). 
+Welcome to my website! I am **Gabrielle Gambuli**, Postdoc Research Fellow at [Université Gustave Eiffel - GRETTIA](https://grettia.univ-gustave-eiffel.fr/accueil) and [INSEE](https://www.insee.fr/fr/accueil) - [SSP Lab](https://ssplab.lab.sspcloud.fr/), working on [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010) with [Etienne Côme](https://www.comeetie.fr/) and [Marie-Pierre Joubert](https://www.linkedin.com/in/marie-pierre-joubert-de-bellefon-538b3811/?originalSubdomain=fr). 

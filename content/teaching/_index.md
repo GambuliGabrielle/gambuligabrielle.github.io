@@ -18,4 +18,4 @@ extra.publications_types = [
 
 ## Teaching Assistant Activities
 
-From the beginning of my doctoral journey, I serve as a teaching assistant (*Chargée de travaux dirigés*) at [CY Cergy Paris Université](https://www.cyu.fr/) for undergraduate and graduate courses. My primary areas of interest lie in **macroeconomics**, **econometrics**, and **statistics**.
+During my doctoral journey, I served as a teaching assistant (*Chargée de travaux dirigés*) at [CY Cergy Paris Université](https://www.cyu.fr/) for undergraduate and graduate courses. My primary areas of interest lie in **econometrics**, **statistics**, and **macroeconomics**.
