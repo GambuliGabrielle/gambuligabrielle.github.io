@@ -22,8 +22,9 @@ extra.publications_types = [
 
 ## Topic of interest
 
-As an applied economist, my research examines the role of **connectivity** on **regional development** and **interregional interactions**, positioned at the intersection of *economic geography*, *urban economics*, and *transportation economics*. 
+My research is positioned at the intersection of **economic geography**, **urban economics**, and **transportation economics**. 
 
-Driven by a fascination with data, I worked with high-resolution datasets from mobile phone activity, card transactions, patent records, and transportation networks. My primary interest lies in examining shifts in location, mobility, collaboration, and consumption behaviors, in response to structural transformations such as the rise of telework practices and the expansion of high-speed rail and highway networks.
+As an applied economist, I focus on analyzing how *structural transformations* — such as the rise of **telework** and the expansion of **high-speed rail** and **highway networks** — impact the *aggregated behaviors of economic agents*, including their **location choices**, **mobility patterns**, **collaboration dynamics**, and **consumption habits**.
 
+***I am a data enthusiastic! I love to uncover the stories it can tell.*** It has led me to work with high-resolution datasets — both geographic and temporal — derived from mobile phone activity, card transactions, patent records, and transportation networks. Additionally, I work on developing novel datasets that recover the evolution of travel times by train and car in relation to the creation and expansion of high-speed rail and highway networks.
 
