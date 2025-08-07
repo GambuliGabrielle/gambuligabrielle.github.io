@@ -24,7 +24,7 @@ extra.publications_types = [
 
 I'm an applied economist. My research focuses on spatial economics, at the intersection of economic geography, urban and transportation economics. 
 
-I am interested in studying the effect of structural transformations on mobility, such as telework or the expansion of high-speed ail and highways networs, on the aggregated behaviors of economic agents, including their location choices, mobility patterns, collaboration dynamics, and consumption habits.
+I am interested in studying the effect of structural transformations on mobility, such as telework or the expansion of high-speed ail and highways networks, on the aggregated behaviors of economic agents, including their location choices, mobility patterns, collaboration dynamics, and consumption habits.
 
 Enthusiastic about data, I work with high-resolution geographic and temporal datasets (mobile phone activity, card transactions, patent records, transportation networks). I also develop original datasets tracing the evolution of travel times by train and car in relation to the creation and expansion of high-speed rail and highway networks.
 

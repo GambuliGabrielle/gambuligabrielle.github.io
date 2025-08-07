@@ -26,7 +26,7 @@ year = "2019-2023"
 
 [[extra.education.courses]]
 course = "M.Sc. Economic Analysis"
-institution = "CY Cergy-Paris Université \& ESSEC Business School"
+institution = "CY Cergy-Paris Université & ESSEC Business School"
 year = "2017-2019"
 
 [[extra.avatar_icons]]
