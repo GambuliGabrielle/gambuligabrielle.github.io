@@ -1,7 +1,7 @@
 +++
 title = "Gabrielle Gambuli"
 date = 2022-10-15
-page\_template="simple-page.html"
+page_template="simple-page.html"
 
 \[extra]
 title = "Postdoc Research Fellow"
@@ -29,15 +29,15 @@ course = "M.Sc. Economic Analysis"
 institution = "CY Cergy-Paris Université \& ESSEC Business School"
 year = "2017-2019"
 
-\[\[extra.avatar\_icons]]
+\[\[extra.avatar_icons]]
 icon = "twitter"
 link = "https://twitter.com/GambuliG"
 
-\[\[extra.avatar\_icons]]
+\[\[extra.avatar_icons]]
 icon = "linkedin"
 link = "https://www.linkedin.com/in/gabrielle-gambuli-1a113713b/"
 
-\[\[extra.avatar\_icons]]
+\[\[extra.avatar_icons]]
 icon = "github"
 link = "https://github.com/GambuliGabrielle"
 +++
