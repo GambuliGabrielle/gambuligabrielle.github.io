@@ -42,5 +42,6 @@ icon = "github"
 link = "https://github.com/GambuliGabrielle"
 +++
 
-Welcome to my website! I am **Gabrielle Gambuli**, Postdoc Research Fellow at [Université Gustave Eiffel - GRETTIA](https://grettia.univ-gustave-eiffel.fr/accueil) and [INSEE](https://www.insee.fr/fr/accueil) - [SSP Lab](https://ssplab.lab.sspcloud.fr/), working on [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010) with [Etienne Côme](https://www.comeetie.fr/) and [Marie-Pierre Joubert](https://www.linkedin.com/in/marie-pierre-joubert-de-bellefon-538b3811/?originalSubdomain=fr).
+Welcome! I’m Gabrielle Gambuli, a **Postdoc Research Fellow** at Université Gustave Eiffel (Grettia) and Insee (Innovation Lab). I contribute to works on the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010) and the [Chaire Finance Digitale](https://digital-finances.com/) at Télécom Paris.
 
+My current research focuses on how telework reshapes daily mobility and in-store consumption by leveraging mobile phone and bank card transaction data.
