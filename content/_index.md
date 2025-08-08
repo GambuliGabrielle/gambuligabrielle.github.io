@@ -4,7 +4,7 @@ date = 2022-10-15
 page_template="simple-page.html"
 
 [extra]
-title = "Postdoc Research Fellow"
+title = "Postdoc Research Fellow in Applied Spatial Economics"
 
 interests = [
 "Economic Geography",
