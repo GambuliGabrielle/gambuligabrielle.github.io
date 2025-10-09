@@ -4,7 +4,7 @@ date = 2022-10-15
 page_template="simple-page.html"
 
 [extra]
-title = "Postdoc Research Fellow in Applied Spatial Economics"
+title = "Postdoc Research Fellow"
 
 interests = [
 "Economic Geography",
@@ -42,6 +42,12 @@ icon = "github"
 link = "https://github.com/GambuliGabrielle"
 +++
 
-Welcome! I’m Gabrielle Gambuli, a **Postdoc Research Fellow** at Université Gustave Eiffel (Grettia) and Insee (Innovation Lab). I contribute to works on the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010) and the [Chaire Finance Digitale](https://digital-finances.com/) at Télécom Paris.
+Welcome to my website! 
 
-My current research focuses on how telework reshapes daily mobility and in-store consumption by leveraging mobile phone and bank card transaction data.
+I'm an **applied spatial economist** focusing on the effect of transportation and telework on mobility and consumption.
+
+I’m a **postdoc research fellow** at Université Gustave Eiffel ([Grettia](https://grettia.univ-gustave-eiffel.fr/accueil)) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab). I contribute to works on the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010) and the [Digital Finance Chair](https://digital-finances.com/).
+
+In November 2025, I will be joining the [Economic Department of Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) as a postdoc.
+
+My [job market paper](https://gambuligabrielle.github.io/publications/consumption-telework/) investigates how telework reshapes daily mobility and in-store consumption by leveraging mobile phone data and bank card transaction data.

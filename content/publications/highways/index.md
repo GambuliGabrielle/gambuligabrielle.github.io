@@ -5,8 +5,8 @@ date = 2024-08-31
 [extra]
 authors = ["Gabrielle Gambuli"]
 year = 2024
-type = "wip"
-publication_types = "Work in progress"
+type = "od"
+publication_types = "Original datasets"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++

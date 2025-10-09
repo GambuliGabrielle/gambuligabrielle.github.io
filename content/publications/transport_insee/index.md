@@ -1,6 +1,6 @@
 +++
 title = "Les résidents se déplacent majoritairement en voiture pour se rendre sur leur lieu de travail, à l’exception des cadres résidant au centre du pôle (Insee Analyses)"
-date = 2025-06-01
+date = 2024-12-01
 
 [extra]
 authors = ["Guillaume Arion, Johanne Aude, Ivan Debouzy, Gabrielle Gambuli, Mélina Hillion"]

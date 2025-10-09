@@ -5,8 +5,8 @@ date = 2023-03-28
 [extra]
 authors = ["Gabrielle Gambuli", "Fernando Stipanicic"]
 year = 2023
-type = "wip"
-publication_types = "Work in progress"
+type = "od"
+publication_types = "Original datasets"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++

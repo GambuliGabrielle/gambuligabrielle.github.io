@@ -1,12 +1,12 @@
 +++
 title = "The Impact of Telework on Consumption Patterns: Evidence from Mobile Phone and Transaction Data"
-date = 2024-10-13
+date = 2025-10-13
 
 [extra]
-authors = ["David Bounie, Chloé Breton, Etienne Côme, John Galbraith, Gabrielle Gambuli"]
-year = 2024
-type = "wip"
-publication_types = "Work in progress"
+authors = ["Gabrielle Gambuli, David Bounie, Chloé Breton, Etienne Côme"]
+year = 2025
+type = "jmp"
+publication_types = "Job market paper"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++

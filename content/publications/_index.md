@@ -14,9 +14,11 @@ extra.publications_types = [
 #{ title = "Journal articles", type = "journals" },
 #{ title = "Thesis", type = "thesis" },
 #{ title = "Conferences and workshops ", type = "conferences" },
+{ title = "Job market paper", type = "jmp" },
 { title = "Work in progress", type = "wip" },
 { title = "Working papers", type = "wp" },
 { title = "Non-academic publication", type = "nap" },
+{ title = "Original datasets", type = "od" },
 ]
 +++
 

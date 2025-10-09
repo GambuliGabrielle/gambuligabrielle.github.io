@@ -1,10 +1,10 @@
 +++
 title = "Spatial Interactions of Consumption, Presence, and Mobility: Evidence from Mobile Phone and Transaction Data"
-date = 2024-09-13
+date = 2025-09-13
 
 [extra]
 authors = ["David Bounie, Chloé Breton, John Galbraith, Gabrielle Gambuli"]
-year = 2024
+year = 2025
 type = "wip"
 publication_types = "Work in progress"
 #url_pdf = "path to wp"
