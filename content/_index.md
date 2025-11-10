@@ -44,10 +44,10 @@ link = "https://github.com/GambuliGabrielle"
 
 Welcome to my website! 
 
-I'm an **applied spatial economist** focusing on the effect of transportation and telework on mobility and consumption.
+I'm an **applied digital and spatial economist** focusing on the effect of remote work and connectivity on mobility and consumption.
 
-I’m a **postdoc research fellow** at Université Gustave Eiffel ([Grettia](https://grettia.univ-gustave-eiffel.fr/accueil)) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab). I contribute to works on the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010) and the [Digital Finance Chair](https://digital-finances.com/).
+I’m a **postdoc research fellow** at the [Economics Department of Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab), and a member of the [Fondation du Risque](https://www.institutlouisbachelier.org/nous-sommes/au-sujet-de-la-fondation-du-risque) at the Institut Louis Bachelier. I contribute to the [Digital Finance Chair](https://digital-finances.com/).
 
-In November 2025, I will be joining the [Economic Department of Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) as a postdoc.
+After completing my PhD in Economics at [CY Cergy-Paris Université (Thema)](https://thema.u-cergy.fr/presentation/article/about-us) and [ESSEC Business School](https://www.essec.edu/fr/) in December 2023, I held a two-year postdoctoral position at [Université Gustave Eiffel (Grettia)](https://grettia.univ-gustave-eiffel.fr/accueil) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab), contributing to the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010).
 
-My [job market paper](https://gambuligabrielle.github.io/publications/consumption-telework/) investigates how telework reshapes daily mobility and in-store consumption by leveraging mobile phone data and bank card transaction data.
+My [job market paper](/pdf/gambuli_jmp.pdf) investigates how telework reshapes daily mobility and in-store consumption by leveraging mobile phone data and credit/debit card transaction data.

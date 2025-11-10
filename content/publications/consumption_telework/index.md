@@ -7,7 +7,7 @@ authors = ["Gabrielle Gambuli, David Bounie, Chloé Breton, Etienne Côme"]
 year = 2025
 type = "jmp"
 publication_types = "Job market paper"
-#url_pdf = "path to wp"
+url_pdf = "/pdf/gambuli_jmp.pdf" 
 #url_slides = "path to defense slides"
 +++
 
