@@ -15,8 +15,8 @@ extra.publications_types = [
 #{ title = "Thesis", type = "thesis" },
 #{ title = "Conferences and workshops ", type = "conferences" },
 { title = "Job market paper", type = "jmp" },
-{ title = "Work in progress", type = "wip" },
 { title = "Working papers", type = "wp" },
+{ title = "Work in progress", type = "wip" },
 { title = "Non-academic publication", type = "nap" },
 { title = "Original datasets", type = "od" },
 ]
@@ -24,8 +24,8 @@ extra.publications_types = [
 
 ## Topic of interest
 
-I'm an applied economist specialized in spatial economics, with a focus on telework and transportation networks.
+🗺️ I'm an applied economist specialized in spatial economics, with a focus on telework and transportation networks.
 
-My work explores how technological and infrastructural changes reshape where people live, work, consume and collaborate.
+💡My work explores how technological and infrastructural changes reshape where people live, work, consume and collaborate.
 
-Enthusiastic about data, I work with high-resolution geographic and temporal datasets, including mobile phone activity, bank card transactions, and patent records. I also build original datasets on the evolution of intercity travel times, following high-speed railways and highways roll-out.
+📊 Enthusiastic about data, I work with high-resolution geographic and temporal big data, including mobile phone activity, payment card transactions, and patent records. I also build original datasets on the evolution of intercity travel times, following high-speed railways and highways roll-out.
