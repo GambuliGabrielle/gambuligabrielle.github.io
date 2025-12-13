@@ -6,7 +6,7 @@ date = 2024-08-13
 authors = ["Johanne Aude, Ivan Debouzy, Gabrielle Gambuli, Marie-Pierre Joubert, Julien Pramil"]
 year = 2024
 type = "nap"
-publication_types = "Non-academic publication"
+publication_types = "Non-academic publications"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++

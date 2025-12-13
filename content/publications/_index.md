@@ -17,7 +17,7 @@ extra.publications_types = [
 { title = "Job market paper", type = "jmp" },
 { title = "Working papers", type = "wp" },
 { title = "Work in progress", type = "wip" },
-{ title = "Non-academic publication", type = "nap" },
+{ title = "Non-academic publications", type = "nap" },
 { title = "Original datasets", type = "od" },
 ]
 +++

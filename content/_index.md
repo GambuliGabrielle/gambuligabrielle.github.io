@@ -50,4 +50,4 @@ Welcome to my website!
 
 🎓 After completing my PhD in Economics at [CY Cergy-Paris Université (Thema)](https://thema.u-cergy.fr/presentation/article/about-us) and [ESSEC Business School](https://www.essec.edu/fr/) in December 2023, I held a two-year postdoctoral position at [Université Gustave Eiffel (Grettia)](https://grettia.univ-gustave-eiffel.fr/accueil) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab), contributing to the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010).
 
-🚨 **My [job market paper](/pdf/gambuli_jmp.pdf) investigates how hybrid work reshapes daily mobility and in-store consumption in metropolitan areas, leveraging mobile phone data and payment card transaction data.**
+🚨 **My [job market paper](/publications/consumption-telework/) investigates how hybrid work reshapes daily mobility and in-store consumption in metropolitan areas, leveraging mobile phone data and payment card transaction data.**

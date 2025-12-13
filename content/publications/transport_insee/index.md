@@ -6,7 +6,7 @@ date = 2024-12-01
 authors = ["Guillaume Arion, Johanne Aude, Ivan Debouzy, Gabrielle Gambuli, Mélina Hillion"]
 year = 2025
 type = "nap"
-publication_types = "Non-academic publication"
+publication_types = "Non-academic publications"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++
