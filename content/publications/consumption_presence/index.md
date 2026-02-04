@@ -1,5 +1,5 @@
 +++
-title = "Spatial Interactions of Consumption, Presence, and Mobility: Evidence from Mobile Phone and Transaction Data"
+title = "The Consumer City Revisited: Consumption Responses to Real-Time Population Presence"
 date = 2025-09-13
 
 [extra]
@@ -11,5 +11,4 @@ publication_types = "Work in progress"
 #url_slides = "path to defense slides"
 +++
 
-
-Mobile phone and card transaction data provide valuable insights into measuring individual presence and mobility. Mobile phone data offer continuous observation, while card transaction data reveal the underlying reasons for this presence through consumption activities. This research assesses the similarity and complementarity of mobile phone and card transaction data to evaluate whether detected presence aligns with consumption patterns, in the context of the second-largest functional area in France, Lyon. We analyze temporal and spatial variations in this relationship across different days, times, and geographic areas (city centers, urban and rural suburbs). Additionally, we integrate data from Insee to explore which types of amenities, such as shops and transportation infrastructure, are most strongly associated with presence and consumption patterns. Finally, we analyze the causal impact of rare events on foot traffic and consumption, focusing on major cultural and sporting events that act as centripetal forces, as well as adverse weather conditions and traffic disruptions that proxy for increased travel costs.
+This paper provides the first direct measurement of how real-time population presence generates economic transactions by merging high-frequency mobile phone location data with card transaction records in Lyon metropolitan area, France’s second-largest area after Paris. Using a Poisson Pseudo-Maximum Likelihood estimator, we estimate the elasticity of transactions with respect to population presence, uncovering three key findings: (1) substantial heterogeneity in consumption responsiveness, with elasticities ranging from 1.08 during peak periods to 0.84 in peripheral areas; (2) a systematic goods-services dichotomy, where food retail exhibits near-unity elasticity (1.08) while experiential services show significantly lower responsiveness (0.64); and (3) persistent spatial frictions, with transaction flows declining by about 2% for a 1% increase in distance. By integrating real-time population presence and transaction data, we advance the urban economics literature by quantifying previously unobserved heterogeneities in how population presence translates into economic activity and demonstrating that spatial constraints remain significant even at micro-geographic scales.
