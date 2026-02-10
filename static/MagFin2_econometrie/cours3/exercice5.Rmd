@@ -1,0 +1,161 @@
+---
+title: "Exercice 5 - Capital Asset Pricing Model (CAPM)"
+# author: "Gabrielle Gambuli"
+date: "2025-02-10"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Modèle d'évaluation du titre financier Mobil {-}
+
+# Charger, visualiser et manipuler les données
+
+On importe les données.
+
+```{r}
+CAPM  <-  read.csv("C:/Users/gabri/OneDrive/Documents/Teaching/TD_MagFin2/data/CAPM.csv", header=T, dec=".", sep=";")
+```
+
+On cherche la classe et la dimenson de la base, le nom et la classe de ses variables et on visualise l'a'ensemble de la base de données.
+
+```{r}
+class(CAPM)
+
+dim(CAPM)
+
+names(CAPM)
+
+unlist(lapply(CAPM, class))
+
+View(CAPM)
+```
+
+Notre base de donnée est bien un data.frame, composé de 120 observations et 9 variables: 
+
+* Ri_MOBIL : rendement anticipé de l'action mobil (numérique)
+
+* Ri_TEXACO : rendement anticipé de l'action texaco (numérique)
+
+* Ri_IBM : rendement anticipé de l'action ibm (numérique)
+
+* Ri_DATGEN : rendement anticipé de l'action datgen (numérique)
+
+* Ri_TANDY : rendement anticipé de l'action tandy (numérique)
+
+* Ri_GERBER : rendement anticipé de l'action gerber (numérique)
+
+* Ri_GENMIL : rendement anticipé de l'action genmil  (numérique)
+
+* RF_FREE : rendement sans risque  (numérique)
+
+* RM_MARKET : rendement anticipé du marché  (numérique)
+
+## Création de variable
+
+Créer la prime de risque pour chacune des 7 actions
+
+```{r}
+CAPM$PR_MOBIL <- CAPM$Ri_MOBIL - CAPM$RF_FREE
+CAPM$PR_TEXACO <- CAPM$Ri_TEXACO - CAPM$RF_FREE
+CAPM$PR_IBM <- CAPM$ Ri_IBM - CAPM$RF_FREE
+CAPM$PR_DATGEN <- CAPM$Ri_DATGEN - CAPM$RF_FREE
+CAPM$PR_TANDY <- CAPM$Ri_TANDY - CAPM$RF_FREE
+CAPM$PR_GERBER <- CAPM$Ri_GERBER - CAPM$RF_FREE
+CAPM$PR_GENMIL <- CAPM$Ri_GENMIL - CAPM$RF_FREE
+```
+
+La prime de risque est l'écart entre le rendement anticipé de l'action et le rendement sans risque.
+
+Créer la prime de risque de marché (variable explicative) :
+
+```{r}
+CAPM$PRM <- CAPM$RM_MARKET - CAPM$RF_FREE
+```
+
+La prime de risque de marché est l'écart entre le rendement anticipé du marché et le rendement sans risque.
+
+# Estimation
+
+On estime le modèle linéaire de la prime de risque des actions par la prime de risque de marché. On commence par l'action mobil puis on répliquera la procédure pour les autres.
+
+```{r}
+reg_mobil <- lm(CAPM$PR_MOBIL ~ CAPM$PRM)
+
+coef(reg_mobil)
+summary(reg_mobil)
+```
+
+Notre modèle d'évaluation des actifs financiers explique environ 37 % de la variation de la prime de risque de l'action Mobil.
+
+La constante est faible et non statistiquement significative.
+
+On observe une relation positive et hautement significative statistiquement entre la prime de risque de l'action Mobil et celle du marché. La prime de risque de l'action Mobil augmente de 0.7147 pour une unité supplémentaire de la prime de risque du marché.
+
+## Prédiction des résidus et de la variable expliquée
+
+On prédit maintenant les résidus de la régression :
+
+```{r}
+res_mobil <- residuals(reg_mobil)
+```
+
+Ainsi que  la variable expliquée :
+
+```{r}
+yhat_mobil <- fitted(reg_mobil)
+```
+
+## Représentation graphique de la droite d'ajustement
+
+**Type de graphique :**
+
+* p : points (par défaut)
+* l : lignes
+* o : points reliés par les lignes
+* h : histogramme
+* s : graphique en escalier
+
+```{r}
+plot(CAPM$PRM, CAPM$PR_MOBIL, type="p", xlab="PRM", ylab="PR_Mobil")
+abline(coef=coef(reg_mobil))
+```
+
+On observe donc bien qu'une augmentation de la prime de risque du marché augmente la prime de risque de l'action Mobil, la corrélation entre ces variables est positive et statistiquement significative.
+
+## Estimation pour les 7 actions
+
+La fonction lapply() applique une fonction à chaque éléments d'une liste ou d'un data.frame.
+
+Ici, on veut les résultats complets (fonction summary) des 7 régressions (fonction lm) de chacune des 7 variables expliquées (colonnes 10 à 16 de la base de données) sur la variable explicative (colonne 17 du data.frame).
+
+```{r}
+reg_actions <- lapply(10:16, function(x) lm(CAPM[, x] ~ CAPM[, 17]))
+
+reg_actions_results <- lapply(10:16, function(x) summary(lm(CAPM[, x] ~ CAPM[, 17])))
+
+reg_actions_results
+```
+
+```{r, echo = FALSE}
+par(mfrow = c(3, 3))
+
+for (x in 10:16) {
+    plot(CAPM[, 17], CAPM[, x],
+         type = "p",
+         main = paste("Action", x-9, "- Variable", x),
+         xlab = "Marché",
+         ylab = "Rendement")
+    
+    abline(coef(reg_actions[[x-9]]), col = "red")
+}
+
+```
+
+ 

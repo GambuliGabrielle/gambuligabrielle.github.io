@@ -1,0 +1,252 @@
+---
+title: "Exercice 4 - event studies"
+# author: "Gabrielle Gambuli"
+date: "2025-02-10"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Settings :
+
+```{r}
+options(scipen = 999)
+library(dplyr) # pour faire des manipulations de données claires et efficientes
+library(ggplot2) # pour faire de beaux graphiques
+```
+
+
+# Calcul des rendements anormaux sur l’action d’une entreprise à la suite d’une annonce de bénéfices {-}
+
+Date de l’annonce de bénéfices : 26 mars 1998.
+
+Fenêtre d’estimation : 120 jours précédant l’événement : du 7 octobre 1997 au 23 mars 1998.
+
+Fenêtre d’événement : 10 jours avant et après l’événement : du 12 mars au 9 avril 1998.
+
+Quel est l’effet attendu ?
+
+# Charger, visualiser et manipuler les données 
+
+## Importation des données
+
+On charge la base BaseTD1 qui est au format csv. Si la base est stockée dans le repertoire de travail, on peut écrire juste son nom dans la fonction read.csv(), sinon, il faut écrire tout le chemin d'accès. 
+
+**Attention :** R ne reconnaît pas les backslashs (/), à remplacer par des slashs (/) dans le chemin d’accès.
+
+On précise que la 1ère ligne du fichier contient les noms des variables (header), la symbole utilisé pour indiquer les décimales (dec) et le symbole séparateur (sep).  
+
+```{r}
+Event <- read.csv("C:/Users/gabri/OneDrive/Documents/Teaching/TD_MagFin2/data/BaseTD1.csv", header = TRUE, dec = ",", sep = ";")
+```
+
+## Information basiques sur les données
+
+On cherche la classe de l'objet Event, sa dimension, le nom et la classe de ses éléments et on visualise la base.
+
+**Attention :** : R est sensible aux majuscules et minuscules.
+
+```{r}
+dim(Event)
+
+class(Event)
+
+names(Event)
+
+unlist(lapply(Event, class))
+
+View(Event)
+```
+Notre base de donnée est bien un data.frame, composé de 149 observations et 3 variables: 
+
+* Date : dates journalières entre le 16/09/1997 et le 10/04/1998 (caractère)
+
+* Firme : rendements de la firme (numérique)
+
+* Marche : rendements du marché (numérique)
+
+Pour en savoir plus sur les données, faisons des statistiques descriptives :
+
+```{r}
+summary(Event)
+```
+Les rendements semblent être exprimés en fractions (par exemple 0,09 correspond à 9 %).
+
+## Traitement des variables de date
+
+On veut signaler à R que la variable Date contient des dates (dans un certain format) et non pas des caractères grâce à la fonction **as.Date()**.
+
+```{r, message=FALSE}
+?as.Date
+```
+
+Formats de date :
+
+| Format | Utilisation | Exemple |
+|-----|------|------|
+| %Y | année au format long (4 chiffres) | 2016, 2017 |
+| %y | année en format abrégé (2 chiffres) | 98, 02 |
+| %b | mois en format abrégé | janv. , oct. |
+| %B | mois au format long | janvier, octobre |
+| %m | mois au format numérique | 01, 10 |
+| %d | jour du mois au format numérique | 07, 16, 28 |
+
+```{r}
+Event$Date <- as.Date(Event$Date, format = "%d/%m/%Y")
+```
+
+# Estimer les paramètres du modèle de marché sur la période d’estimation 
+
+## Créer un sous-échantillon pour la période d’estimation 
+
+On cherche à estimer les paramètres du modèle de marché sur la période du 7 octobre 1997 au 23 mars 1998.
+
+Ici, notre période d'estimation ne correspond pas à l'ensemble de notre échantillon. Il faut donc sélectionner la sous-partie de notre échantillon pertinente. 
+
+Il existe plusieurs méthodes possibles.
+
+**Exemple 1 :**
+
+Grâce à View(Event), vous repérez que la période du 7 octobre 1997 au 23 mars 1998 correspond aux lignes 16 à 135 du data.frame et créez ainsi votre sous-échantillon.
+
+On peut sélectionner une partie d'un data.frame en fonction de ses observations (en lignes) ou de ses variables (en colonnes) :
+
+nom_data_frame[numéro_ou_condition_lignes, nom_ou_numéro_colonnes]
+
+Cette méthode nécessite que les dates soient ordonnées (dans l'ordre) et que la base ne soit pas trop longue pour repérer visuellement les numéros de lignes.
+
+```{r}
+subEvent <- Event[16:135, ]
+```
+
+**Exemple 2 :**
+
+Grâce à la fonction **subset()**.
+
+Cette méthode nécessite que les dates soient bien reconnues comme telles par R (voir as.Date() ci-dessus).
+
+```{r, message=FALSE}
+help(subset)
+```
+
+```{r}
+subEvent2 <- subset(Event, Date >= "1997-10-07" & Date <= "1998-03-23")
+```
+
+On peut également utiliser le package **dplyr**, qui permet d’appliquer des fonctions à un objet à l’aide des pipes (**%>%**). Cette approche facilite la manipulation des données grâce à une syntaxe claire et lisible pour filtrer, sélectionner, transformer ou agréger les variables. Elle est également plus efficace que certaines alternatives, notamment en termes de temps d’exécution.
+
+```{r}
+subEvent3 <- Event %>% 
+  filter(Date >= "1997-10-07" & Date <= "1998-03-23")
+```
+
+## Estimation
+
+On cherche à estimer les paramètres du modèle de marché : les rendements de la firme (variable expliquée) par les  rendements du marché (variable explicative) sur la période d'estimation (du 7 octobre 1997 au 23 mars 1998).
+
+```{r}
+reg3 <- lm(Firme ~ Marche, data = subEvent3)
+
+summary(reg3, digits = 1)
+```
+
+Si on n'a pas créé le sous-échantillon en amont, on peut aussi faire directement la régression sur le sous-échantillon : 
+
+```{r}
+# reg3_bis <- lm(Firme ~ Marche, data = Event, subset = (Date >= "1997-10-07" & Date <= "1998-03-23"))
+# summary(reg3_bis)
+# 
+# # ou encore
+# reg3_ter <- lm(Firme ~ Marche, data = Event %>% filter(Date >= "1997-10-07" & Date <= "1998-03-23"))
+# summary(reg3_ter)
+
+```
+
+Notre modèle de marché explique environ 25% de la variation du rendement de l'action de la firme sur la période d'estimation.
+
+La constante est très faible (-0,00001823) et non statistiquement significative.
+
+On observe une relation positive et hautement significative statistiquement entre les rendements de la firme et les  rendements du marché sur la période d'estimation (du 7 octobre 1997 au 23 mars 1998). En temps normal, les  rendements de la firme augmentent de 0.8517 pour une unité supplémentaire de rendement de marché. Autrement dit, si le rendement du marché augmente de 1 point de pourcentage (+0,01 en fraction), le rendement de la firme augmente de 0,85 point de pourcentage (+0,0085 en fraction).
+
+# Prédire les rendements normaux sur la période d’événement
+
+Prédire les rendements normaux sur la période d'évènement (event window) du 12 mars au 9 avril 1998 (lignes 128 à 148).
+
+On extrait les coefficients de la regression.
+
+```{r}
+coef_reg3 <- coef(reg3)
+```
+
+D'après le modèle de marché, rendements sur l'action de l'entreprise  = alpha (constante) + beta (coefficient lié à la variable explicative) * rendements du marché.
+
+Les coefficient lié à la constante se trouvent dans la 1ère colonne du vecteur : coef_reg3[1] et ceux liés à la variable explicative dans la 2ème colonne : coef_reg3[2].
+
+```{r}
+Rendements_normaux <- coef_reg3[2] * Event[128:148, 3] + coef_reg3[1]
+```
+
+# Calcul des rendements anormaux sur la période d’événement 
+
+On calcule maintenant les rendements anormaux sur la période d'évènement, en soustrayant aux rendements réalisés/observés (dans le tableau de données initial), les rendements normaux. En somme, les rendements anormaux correspondent au terme d'erreur.
+
+```{r}
+Rendements_anormaux <- Event[128:148, 2] - Rendements_normaux
+plot(Rendements_anormaux)
+```
+
+Avec **dplyr** and **ggplot2** :
+
+La fonction **mutate()** du package **dplyr** permet de créer de nouvelles variables ou de modifier des variables existantes en appliquant des calculs ou des transformations sur les colonnes d’un data.frame. Par exemple, on peut l’utiliser pour calculer les rendements normaux et anormaux en utilisant les résultats de notre régression.
+
+```{r}
+Event_resultats <- Event %>% 
+  filter(Date >= "1998-03-12" & Date <= "1998-04-09") %>% # filtre la data.frame
+  mutate(Rendements_normaux = coef_reg3[2] * Marche + coef_reg3[1], # mutate() 
+         Rendements_anormaux = Firme - Rendements_normaux)
+
+ggplot(Event_resultats, aes(x = Date, y = Rendements_anormaux)) +
+  geom_line(color = "blue", lwd = 1) +   # ligne principale
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red", lwd = 1) +  # ligne y=0 en pointillés
+  labs(
+    title = "Rendements Anormaux",
+    x = "Date",
+    y = "Rendement Anormal"
+  ) +
+  theme_minimal()
+```
+
+Les rendements anormaux semblent varier autour de zéro. Sont-ils majoritairement positifs ou proches de zéro ? 
+L'annonce de bénéfice peut avoir généré des rendements anormaux positifs pour l'entreprise, ou pas.
+
+Pour en être certain, on calcule les rendements anormaux cumulés (CAR) :
+
+```{r}
+CAR <- cumsum(Event_resultats$Rendements_anormaux)
+plot(CAR)
+```
+
+Ou encore, avec **dplyr** et **ggplot2** :
+
+```{r}
+Event_resultats <- Event_resultats %>%
+  mutate(CAR = cumsum(Rendements_anormaux))
+
+ggplot(Event_resultats, aes(x = Date, y = CAR)) +
+  geom_line(color = "blue", lwd = 1) +   # ligne principale
+  geom_hline(yintercept = 0, linetype = "dashed", color = "red", lwd = 1) +  # ligne y=0 en pointillés
+  labs(
+    title = "Rendements Anormaux",
+    x = "Date",
+    y = "Rendement Anormal"
+  ) +
+  theme_minimal()
+```
+
+On observe une hausse des rendements sur l’action de l'entreprise qui a annoncé des bénéfices. 
