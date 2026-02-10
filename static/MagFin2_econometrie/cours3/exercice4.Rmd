@@ -17,6 +17,7 @@ Settings :
 
 ```{r}
 options(scipen = 999)
+#install.packages("dplyr")
 library(dplyr) # pour faire des manipulations de données claires et efficientes
 library(ggplot2) # pour faire de beaux graphiques
 ```
@@ -28,7 +29,7 @@ Date de l’annonce de bénéfices : 26 mars 1998.
 
 Fenêtre d’estimation : 120 jours précédant l’événement : du 7 octobre 1997 au 23 mars 1998.
 
-Fenêtre d’événement : 10 jours avant et après l’événement : du 12 mars au 9 avril 1998.
+Fenêtre d’événement : 14 jours avant et après l’événement : du 12 mars au 9 avril 1998.
 
 Quel est l’effet attendu ?
 
@@ -153,7 +154,12 @@ On cherche à estimer les paramètres du modèle de marché : les rendements de 
 ```{r}
 reg3 <- lm(Firme ~ Marche, data = subEvent3)
 
-summary(reg3, digits = 1)
+summary(reg3)
+```
+```{r}
+# reg3b <- lm(Firme ~ -1 + Marche, data = subEvent3)
+# 
+# summary(reg3b)
 ```
 
 Si on n'a pas créé le sous-échantillon en amont, on peut aussi faire directement la régression sur le sous-échantillon : 
@@ -168,11 +174,13 @@ Si on n'a pas créé le sous-échantillon en amont, on peut aussi faire directem
 
 ```
 
-Notre modèle de marché explique environ 25% de la variation du rendement de l'action de la firme sur la période d'estimation.
+Notre modèle de marché explique environ 25% de la variation du rendement de l'action de la firme sur la période d'estimation. Autrement dit, la variation du rendement du marché explique la variation du rendement de l'entreprise à hauteur de 25%.
 
 La constante est très faible (-0,00001823) et non statistiquement significative.
 
-On observe une relation positive et hautement significative statistiquement entre les rendements de la firme et les  rendements du marché sur la période d'estimation (du 7 octobre 1997 au 23 mars 1998). En temps normal, les  rendements de la firme augmentent de 0.8517 pour une unité supplémentaire de rendement de marché. Autrement dit, si le rendement du marché augmente de 1 point de pourcentage (+0,01 en fraction), le rendement de la firme augmente de 0,85 point de pourcentage (+0,0085 en fraction).
+On observe une relation positive et hautement significative statistiquement entre les rendements de la firme et les rendements du marché sur la période d'estimation (du 7 octobre 1997 au 23 mars 1998). 
+
+En temps normal, les  rendements de la firme augmentent de 0.8517 pour une unité supplémentaire de rendement de marché. Autrement dit, si le rendement du marché augmente de 1 point de pourcentage (+0,01 en fraction), le rendement de la firme augmente de 0,85 point de pourcentage (+0,0085 en fraction).
 
 # Prédire les rendements normaux sur la période d’événement
 
@@ -189,7 +197,7 @@ D'après le modèle de marché, rendements sur l'action de l'entreprise  = alpha
 Les coefficient lié à la constante se trouvent dans la 1ère colonne du vecteur : coef_reg3[1] et ceux liés à la variable explicative dans la 2ème colonne : coef_reg3[2].
 
 ```{r}
-Rendements_normaux <- coef_reg3[2] * Event[128:148, 3] + coef_reg3[1]
+Rendements_normaux <- coef_reg3[1] + coef_reg3[2] * Event[128:148, 3]
 ```
 
 # Calcul des rendements anormaux sur la période d’événement 
@@ -225,7 +233,7 @@ ggplot(Event_resultats, aes(x = Date, y = Rendements_anormaux)) +
 Les rendements anormaux semblent varier autour de zéro. Sont-ils majoritairement positifs ou proches de zéro ? 
 L'annonce de bénéfice peut avoir généré des rendements anormaux positifs pour l'entreprise, ou pas.
 
-Pour en être certain, on calcule les rendements anormaux cumulés (CAR) :
+Pour en être "certain", on calcule les rendements anormaux cumulés (CAR) :
 
 ```{r}
 CAR <- cumsum(Event_resultats$Rendements_anormaux)
@@ -250,3 +258,30 @@ ggplot(Event_resultats, aes(x = Date, y = CAR)) +
 ```
 
 On observe une hausse des rendements sur l’action de l'entreprise qui a annoncé des bénéfices. 
+
+Cette hausse est-elle statistiquement différente de zéro ?
+
+Résultats sur rendements cumulés :
+
+```{r}
+result <- t.test(Event_resultats$CAR, mu = 0, conf.level = 0.95) # Test de student (mean(CAR)-0)/sd(CAR)
+result$p.value   # p-value
+result$estimate  # moyenne estimée
+```
+La p-value ≈ 0,0000. Comme p < 0,05, on rejette l’hypothèse nulle à 5%. Autrement dit, la moyenne des rendements anormaux cumulés est statistiquement différente de zéro.
+
+Résultat sur rendements par jour :
+
+```{r}
+result <- t.test(Event_resultats$Rendements_anormaux, mu = 0, conf.level = 0.95) # Test de student (mean(CAR)-0)/sd(CAR)
+result$p.value   # p-value
+result$estimate  # moyenne estimée
+```
+
+Résultats après annonce : 
+
+```{r}
+result <- t.test(Event_resultats$CAR[Event_resultats$Date >= "1998-03-26" & Event$Date <= "1998-04-09"], mu = 0, conf.level = 0.95) # Test de student (mean(CAR)-0)/sd(CAR)
+result$p.value   # p-value
+result$estimate  # moyenne estimée
+```
