@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  
+  <link rel="shortcut icon" href="https:&#x2F;&#x2F;gambuligabrielle.github.io&#x2F;processed_images&#x2F;favicon_gg.5f2f3da2fec3bd65.png" type="image/png">
+  <link rel="icon" href="https:&#x2F;&#x2F;gambuligabrielle.github.io&#x2F;processed_images&#x2F;favicon_gg.5f2f3da2fec3bd65.png" type="image/png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta charset="utf-8">
+
+  <!-- Custom header for users, includes custom css or js here -->
+  
+<meta name="google-site-verification" content="F-sOmnGsjpGYBgvXgphV7xoHP6aPzmQb4AxCulhnwOc" />
+<title> Gabrielle Gambuli</title>
+
+  
+<!-- CSS -->
+<link rel="stylesheet" href="https://gambuligabrielle.github.io/styles/styles.css" />
+
+    <title>Posts |  Gabrielle Gambuli</title>
+</head>
+
+<body class="bg-white">
+  <!-- Top nav bar -->
+  
+  
+  
+<nav id="header" class="w-full z-10 top-0 shadow-md mx-0">
+  <div id="progress" class="top-0"></div>
+  <!-- <div class="w-full max-w-5xl mx-auto flex flex-wrap items-center justify-between mt-0 py-2  sm:bg-green-900 md:bg-red-900 lg:bg-blue-900 bg-yellow-900"> -->
+  <div class="w-full max-w-4xl mx-auto flex sm:flex-nowrap flex-wrap items-center justify-between mt-0 py-2">
+    <div class="pl-4">
+      <a class="text-gray-900 text-base no-underline hover:no-underline font-extrabold" href="https:&#x2F;&#x2F;gambuligabrielle.github.io">
+        Gabrielle Gambuli
+      </a>
+    </div>
+
+    <div class="w-full flex-grow sm:flex sm:items-center flex-wrap sm:flex-nowrap sm:w-auto sm:block mt-2 sm:mt-0 bg-transparent z-20" id="nav-content">
+      <ul class="list-reset flex flex-wrap sm:justify-end flex-1 items-center">
+          <li class="mr-3 text-sm">
+            <a href=https://gambuligabrielle.github.io/# class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+              Home
+            </a>
+          </li>
+          <li class="mr-3 text-sm">
+            <a href=https://gambuligabrielle.github.io/CV/CV_Gambuli.pdf class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+              CV
+            </a>
+          </li>
+          <li class="mr-3 text-sm">
+              <a href=https://gambuligabrielle.github.io/publications class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+                Research
+              </a>
+            </li>
+            <li class="mr-3 text-sm">
+              <a href=https://gambuligabrielle.github.io/teaching class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+                Teaching
+              </a>
+            </li>
+            <li class="mr-3 text-sm">
+              <a href=https://gambuligabrielle.github.io/posts class="inline-block py-2 px-4 text-sky-600 font-bold no-underline">
+                Posts
+              </a>
+            </li>
+            </ul>
+    </div>
+  </div>
+
+</nav>
+
+<!-- Container -->
+  
+<div class="container max-w-3xl mx-auto px-4">
+  <div class="pt-8 flex flex">
+    <h1 class="grow font-bold font-sans break-normal text-gray-900 text-3xl">Tutoriel d&#x27;Econométrie (for dummies) : les MCO sur R</h1>
+    <p class="text-sm md:text-base font-normal text-gray-600 py-2">Published 2023-03-29</p>
+  </div>
+  <hr class="border-b-1 border-gray-400 mb-8">
+  
+  <article class="prose prose-indigo prose max-w-3xl">
+    <h2 id="introduction">Introduction<a class="zola-anchor" href="#introduction" aria-label="Anchor link for: introduction">🔗</a></h2>
+<p>Ce tutoriel présente les bases pour effectuer des régressions linéaires simples sur R. Tout d'abord, si ce n'est pas déjà fait, <a href="https://posit.co/download/rstudio-desktop/">installez</a> R (<em>le logiciel</em>) puis R Studio (<em>l'interface</em>) sur votre ordinateur. Avant de commencer, veillez à prendre en main R Studio. Je vous conseille de regarder cette <a href="https://www.youtube.com/watch?v=BGP9OzfqRPs">vidéo</a> (<em>durée: 2 minutes</em>). Il en existe pleins d'autres. Beaucoup de ressources sont mises à disposition sur internet par la grande communauté des utilisateurs de R.</p>
+<p>Dans le cadre de l'exercice, nous allons étudier la reproduction intergénérationelle de l'éducation. L'économétrie nous permettra de répondre aux questions suivantes : <em>Le niveau d'éducation scolaire des parents a-t-il un impact sur le niveau d'éducation scolaire de leurs enfants ? Quelle est la magnitude de cet impact ? Quels autres facteurs peuvent jouer un rôle ?</em> </p>
+<p>Pour répondre à ces questions, nous utilisons les <a href="https://rdrr.io/cran/wooldridge/man/htv.html">données</a> mises à disposition par <a href="https://en.wikipedia.org/wiki/Jeffrey_Wooldridge">Jeffrey M. Wooldridge</a> comme ressources complémentaires à son livre <em>Wooldridge, J. M. (2015). Introductory econometrics: A modern approach. Cengage learning</em>. D'autres bases de données sont disponibles dans le package &quot;Wooldridge&quot;.</p>
+<p>Vous pouvez télécharger le <a href="/teaching/econometrics-undergraduate/htv.R">code R</a> pour suivre les étapes du tutoriel au fil de votre lecture.</p>
+<h2 id="prise-en-main">Prise en main<a class="zola-anchor" href="#prise-en-main" aria-label="Anchor link for: prise-en-main">🔗</a></h2>
+<p>R repose sur des packages et bibliothèques (libraries) qui contiennent le code de différentes fonctions. Il faut donc d'abord installer ceux dont on a besoin pour cet exercice. Inscrivez dans votre console :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">install.packages(&quot;wooldridge&quot;) # pour télécharger les données de Wooldridge
+install.packages(&quot;dplyr&quot;) # pour manipuler les données
+</code></pre>
+<p>Ensuite, pour utiliser ces packages, il faut les appelez dans la bibliothèque. Ecrivez sur votre éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}"># Bibliothèques
+library(dplyr) # pour faire des manipulations de données
+library(wooldridge) # pour télécharger les données de Wooldridge
+</code></pre>
+<h2 id="les-donnees">Les données<a class="zola-anchor" href="#les-donnees" aria-label="Anchor link for: les-donnees">🔗</a></h2>
+<p>Pour importer les données sur les niveaux d'éducation des individus et de leurs parents, on importe les données <em>htv</em> de Wooldridge. 
+Nous écrivons dans l'éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}"># Importer les données
+data(htv) 
+</code></pre>
+<p>&quot;htv&quot; est un object enregistré dans la fenêtre environnement des données.
+Le détails des variables se trouve sur ce <a href="https://rdrr.io/cran/wooldridge/man/htv.html">site</a>.</p>
+<p>Il y a plusieurs façons de visualiser la base de données. Tout d'abord, regardons combien d'observations et de variables contient la base de données en utilisant la fonction <em>dim( )</em>, pour dimension. Nous écrivons dans l'éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">dim(htv) 
+</code></pre>
+<p>Dans la console apparaît : </p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">&gt; dim(htv)
+[1] 1230   23
+</code></pre>
+<p>Cela signifie qu'il y a <span style="color: darkblue;"><strong>1 230 observations</strong></span> et <span style="color: darkblue;"><strong>23 variables</strong></span> dans la base de données.</p>
+<p>La fonction <em>View( )</em> ouvre une nouvelle fenêtre sur l'ensemble des données. La fonction <em>head( )</em> affiche les premières lignes de la base de données dans la console. La fonction <em>names( )</em> affiche le noms des variables dans la console. Nous écrivons dans l'éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}"># Visualiser les données
+head(htv) 
+</code></pre>
+<p>Dans la console apparaît :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">&gt; head(htv) 
+       wage     abil educ ne nc west south exper motheduc fatheduc brkhme14 sibs urban ne18 nc18 south18 west18
+1 12.019231 5.027738   15  0  0    1     0     9       12       12        0    1     1    1    0       0      0
+2  8.912656 2.037170   13  1  0    0     0     8       12       10        1    4     1    1    0       0      0
+3 15.514334 2.475895   15  1  0    0     0    11       12       16        0    2     1    1    0       0      0
+4 13.333333 3.609240   15  1  0    0     0     6       12       12        0    1     1    1    0       0      0
+5 11.070110 2.636546   13  1  0    0     0    15       12       15        1    2     1    1    0       0      0
+6 17.482517 3.474334   18  1  0    0     0     8       12       12        0    2     1    1    0       0      0
+  urban18   tuit17    tuit18    lwage expersq      ctuit
+1       1 7.582914  7.260242 2.486508      81 -0.3226714
+2       1 8.595144  9.499537 2.187472      64  0.9043922
+3       1 7.311346  7.311346 2.741764     121  0.0000000
+4       1 9.499537 10.162070 2.590267      36  0.6625338
+5       1 7.311346  7.311346 2.404249     225  0
+</code></pre>
+<p>Les variables qui nous intéressent sont :</p>
+<ul>
+<li><em><strong>educ</strong></em>, pour le nombre d'années d'éducation de l'individu, </li>
+<li><em><strong>motheduc</strong></em>, pour le nombre d'années d'éducation de sa mère et </li>
+<li><em><strong>fatheduc</strong></em>, pour le nombre d'années d'éducation de son père. </li>
+</ul>
+<p>On ajoutera par la suite les variables :</p>
+<ul>
+<li><em><strong>abil</strong></em>, une mesure des capacités cognitives de l'individu, </li>
+<li><em><strong>sibs</strong></em>, le nombre de frères et soeurs de l'individu, et </li>
+<li><em><strong>urban</strong></em> une variable indicatrice égale à 1 si l'individu vit dans une ville, 0 s'il vit à la campagne.</li>
+</ul>
+<h2 id="statistiques-descriptives">Statistiques descriptives<a class="zola-anchor" href="#statistiques-descriptives" aria-label="Anchor link for: statistiques-descriptives">🔗</a></h2>
+<p>Avant toute régression, il faut comprendre ce que nous avons dans les données. Nous calculons les statistiques qui établissent une description basique des variables qui nous intéressent dans le cadre de notre étude avec la fonction <em>summary( )</em>. Sur l'éditeur, nous écrivons :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">summary(htv[,c(&quot;educ&quot;,&quot;motheduc&quot;,&quot;fatheduc&quot;,&quot;abil&quot;,&quot;sibs&quot;,&quot;urban&quot;)])
+</code></pre>
+<p>Dans la console apparaît :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">&gt; summary(htv[,c(&quot;educ&quot;,&quot;motheduc&quot;,&quot;fatheduc&quot;,&quot;abil&quot;,&quot;sibs&quot;,&quot;urban&quot;)])
+      educ          motheduc        fatheduc          abil              sibs            urban       
+ Min.   : 6.00   Min.   : 0.00   Min.   : 0.00   Min.   :-5.6315   Min.   : 0.000   Min.   :0.0000  
+ 1st Qu.:12.00   1st Qu.:12.00   1st Qu.:11.00   1st Qu.: 0.5662   1st Qu.: 2.000   1st Qu.:1.0000  
+ Median :12.00   Median :12.00   Median :12.00   Median : 2.1498   Median : 3.000   Median :1.0000  
+ Mean   :13.04   Mean   :12.18   Mean   :12.45   Mean   : 1.7966   Mean   : 2.949   Mean   :0.8171  
+ 3rd Qu.:15.00   3rd Qu.:12.00   3rd Qu.:14.00   3rd Qu.: 3.4615   3rd Qu.: 4.000   3rd Qu.:1.0000  
+ Max.   :20.00   Max.   :20.00   Max.   :20.00   Max.   : 6.2637   Max.   :13.000   Max.   :1.0000
+</code></pre>
+<ul>
+<li>Le nombre d'années moyen d'éducation dans les données est de 13 années, tandis que les valeurs minimale et maximale sont de 6 et 20 années respectivement. Dans le <a href="/teaching/econometrics-undergraduate/htv.R">code R</a>, vous trouverez la façon dont j'ai catégorisé le nombre d'années d'études en terme de diplôme le plus élevé obtenu pour étudier la proportion d'individus pour chaque diplôme.</li>
+<li>Le nombre d'années moyen d'éducation des parents est similaire, légèrement plus bas. On remarque que le nombre d'années détudes est plus élevée pour les pères qui font partie des 50% les plus éduqués que pour les mères qui font partie des 50% les plus éduquées (au-dessus de la médiane).</li>
+<li>La mesure de capacités cognitives est comprise sur l'intervalle ]-5.64 ; 6.27[, avec une moyenne à 1.8. En dessinant l'histogramme de cette variable avec la fonction <em>hist( )</em>, on observe que la distribution est inclinée vers la gauche. En effet, <em>le mode</em>, la valeur dominante, est à droite de la valeur centrale de l'intervalle).</li>
+<li>La moyenne et la médiane du nombre de frères et soeurs s'élève à 3.</li>
+<li>La variable <em>urban</em> est une variable indicatrice, c'est-à-dire qu'elle prend les valeurs {0;1} uniquement. Ce n'est pas une variable continue comme les autres. Sa moyenne donne la proportion d'individus dans l'échantillon qui vivent en villle (pour qui <em>urban</em> = 1). On peut en conclure que 82% des individus vivent en ville.</li>
+</ul>
+<h2 id="regressions">Régressions<a class="zola-anchor" href="#regressions" aria-label="Anchor link for: regressions">🔗</a></h2>
+<h3 id="modele-1">Modèle 1<a class="zola-anchor" href="#modele-1" aria-label="Anchor link for: modele-1">🔗</a></h3>
+<p>Nous voulons savoir si le niveau d'éducation des parents influence celui de leurs enfants. On pose le modèle suivant : </p>
+<div class="math ct"><i>educ</i><sub>i</sub> = <i>b</i><sub>0</sub> &plus; <i>b</i><sub>1</sub> <i>motheduc</i><sub>i</sub> &plus; <i>b</i><sub>2</sub> <i>fatheduc</i><sub>i</sub> &plus; <i>u</i><sub>i</sub> </div>
+<p>avec <em><strong>i</strong></em> désignant l'observation (l'individu), <em><strong>b<sub>0</sub></strong></em> la constante, <em><strong>b<sub>1</sub></strong></em> l'effet moyen d'une année d'éducation supplémentaire d'une mère sur le nombre d'années d'éducation d'un individu, <em><strong>b<sub>2</sub></strong></em> l'effet moyen d'une année d'éducation supplémentaire d'un père sur le nombre d'années d'éducation d'un individu, et <em><strong>u<sub>i</sub></strong></em> le terme d'erreur.</p>
+<p>La méthode des moindres carrés ordinaires (MCO) nous permet d'estimer les coefficients <em><strong>b<sub>0</sub></strong></em>, <em><strong>b<sub>1</sub></strong></em> et <em><strong>b<sub>2</sub></strong></em> en minimisant la somme des carrés des résidus, ces résidus étant les estimateurs des termes d'erreur <em><strong>u<sub>i</sub></strong></em>.
+Le modèle s'appuie sur certaines <a href="https://fr.wikipedia.org/wiki/R%C3%A9gression_lin%C3%A9aire_multiple">hypothèses</a>, qui, si respectées, estime correctement (sans biais) les coefficients. </p>
+<p>On utilise la fonction <em>lm( )</em> pour estimer notre modèle linéaire et la fonction <em>summary( )</em> pour afficher les résultats. Nous écrivons dans l'éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">regression1 &lt;- lm(educ ~ motheduc + fatheduc, data = htv)
+summary(regression1)
+</code></pre>
+<p>La console affiche les résultats suivants :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">&gt; regression1 &lt;- lm(educ ~ motheduc + fatheduc, data = htv) # lm = modèle linéaire
+&gt; summary(regression1)
+
+Call:
+lm(formula = educ ~ motheduc + fatheduc, data = htv)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-6.2898 -0.9400 -0.4037  1.1239  8.1672 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  6.96435    0.31982  21.776   &lt;2e-16 ***
+motheduc     0.30420    0.03193   9.528   &lt;2e-16 ***
+fatheduc     0.19029    0.02228   8.539   &lt;2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.042 on 1227 degrees of freedom
+Multiple R-squared:  0.2493,	Adjusted R-squared:  0.248 
+F-statistic: 203.7 on 2 and 1227 DF,  p-value: &lt; 2.2e-16
+</code></pre>
+<p>Le résumé de la régression est organisé en 4 parties:</p>
+<ol>
+<li><em><strong>Call</strong></em> : rappelle la régression effectuée.</li>
+<li><em><strong>Residuals</strong></em> : présente des statistiques sur les résidus (valeurs minimum, 1er quartile, médiane, 3ème quartile, maximum).</li>
+<li><em><strong>Coefficients</strong></em> : présente les coefficients estimés, ainsi que les écart-types, les statistiques de Student (qui teste l'hypothèse nulle selon laquelle le coefficient est égal à zéro (<em>H<sub>0</sub></em> : b=0), les p-valeur et les niveaux de significativité des estimateurs.</li>
+<li><em><strong>Statistiques complémentaires</strong></em> : présente les écart-types estimés des résidus, le R carré (ajusté et non-ajusté du nombre de variables), et les résultat du test de Fisher selon lequel aucun des coefficient n'est statistiquement différent de zéro.</li>
+</ol>
+<h4 id="resultats-du-modele-1">Résultats du modèle 1<a class="zola-anchor" href="#resultats-du-modele-1" aria-label="Anchor link for: resultats-du-modele-1">🔗</a></h4>
+<p>Les résultats du modèle nous permettent d'écrire la relation linéaire suivante :</p>
+<div class="math ct"><i>educ</i> = 6.96 &plus; 0.30 <i>motheduc</i> &plus; 0.19 <i>fatheduc</i> </div>
+<ul>
+<li>
+<p>Ceteris paribus, une année supplémentaire d'éducation chez la mère est associée en moyenne à 0.3 années supplémentaires d'éducation pour un individu (environ 4 mois). Pour le père, une année supplémentaire d'éducation est associée à 2 mois d'études supplémentaires pour l'individu. Les coefficients estimés sont très significatifs. D'après les p-valeurs, il y ait plus de 99% de chances que la différence ne soit pas due au hasard.</p>
+</li>
+<li>
+<p>Il semblerait donc que l'éducation des parents ait une influence positive et très significative sur l'éducation de leurs enfants. De plus, on trouve que l'éducation de la mère a plus d'influence que celle du père dans la durée d'éducation de leurs enfants en moyenne. Ceci est en tout cas valable pour l'échantillon étudié.</p>
+</li>
+<li>
+<p>Le R carré est le coefficient de détermination du modèle. Compris entre 0 et 1, il croît avec l’adéquation de la régression au modèle.
+Le R carré de notre régression est de 0.25, ce qui signifie que 25% de la variation de l'éducation observée dans le modèle calculé peut être expliquée par l'éducation des parents. Ce coefficient est plutôt faible, car nous avons omis du modèle beaucoup de facteurs déterminant l'éducation d'un individu. Cependant, les variables d'éducation des parents détermine à elles seules 25% de la variation de l'éducation des individus, ce qui est en fait assez conséquent.</p>
+</li>
+</ul>
+<h3 id="modele-2">Modèle 2<a class="zola-anchor" href="#modele-2" aria-label="Anchor link for: modele-2">🔗</a></h3>
+<p>Nous voulons augmenter l'adéquation de notre modèle, c'est-à-dire augmenter le R carré et éviter les biais dans les coefficients estimés.</p>
+<ul>
+<li><em>Pour augmenter la précision du modèle,</em> il faut ajouter des variables explicatives que nous pensons être importantes. </li>
+<li><em>Pour réduire le biais potentiel de nos estimateurs,</em> il faut ajouter les variables explicatives qui sont corrélées avec les variables déjà présentes dans le modèle pour éviter une corrélation entre le terme d'erreur <em>u<sub>i</sub></em> et les variables explicatives. En effet, les variables non intégrées au modèle, qui pourtant expliquent le niveau d'éducation des individus, se cachent dans le terme d'erreur.</li>
+</ul>
+<p>Nous ajoutons la variable d'habileté qui traduit des capacités cognitives des individus :</p>
+<div class="math ct"><i>educ</i><sub>i</sub> = <i>b</i><sub>0</sub> &plus; <i>b</i><sub>1</sub> <i>motheduc</i><sub>i</sub> &plus; <i>b</i><sub>2</sub> <i>fatheduc</i><sub>i</sub> &plus; <i>b</i><sub>3</sub> <i>abil</i><sub>i</sub> &plus; <i>u</i><sub>i</sub> </div>
+<p>Nous écrivons dans l'éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">regression2 &lt;- lm(educ ~ motheduc + fatheduc + abil, data = htv)
+summary(regression2)
+</code></pre>
+<p>La console affiche :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">&gt; regression2 &lt;- lm(educ ~ motheduc + fatheduc + abil, data = htv)
+&gt; summary(regression2)
+
+Call:
+lm(formula = educ ~ motheduc + fatheduc + abil, data = htv)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-5.407 -1.195 -0.199  1.076  7.012 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  8.44869    0.28954  29.180  &lt; 2e-16 ***
+motheduc     0.18913    0.02851   6.635 4.87e-11 ***
+fatheduc     0.11109    0.01988   5.586 2.85e-08 ***
+abil         0.50248    0.02572  19.538  &lt; 2e-16 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.784 on 1226 degrees of freedom
+Multiple R-squared:  0.4275,	Adjusted R-squared:  0.4261 
+F-statistic: 305.2 on 3 and 1226 DF,  p-value: &lt; 2.2e-16
+</code></pre>
+<h4 id="resultats-du-modele-2">Résultats du modèle 2<a class="zola-anchor" href="#resultats-du-modele-2" aria-label="Anchor link for: resultats-du-modele-2">🔗</a></h4>
+<p>Les résultats du modèle nous permettent d'écrire la relation linéaire suivante :</p>
+<div class="math ct"><i>educ</i> = 8.45 &plus; 0.19 <i>motheduc</i> &plus; 0.11 <i>fatheduc</i> &plus; 0.50 <i>abil</i> </div>
+<ul>
+<li>
+<p>Le coefficient positif et significatif de la variable <em>abil</em> indique que plus les capacités cognitives des individus sont élevées, plus ils auront tendance à avoir une éducation scolaire et/ou universitaire longue. Nous pouvons interpréter ce résultat de plusieurs façons : (1) des capacités cognitives élevées permettent aux individus de réussir leurs études et donc de les poursuivre; (2) les individus aux capacités cognitives élevées sont plus souvent encouragés à faire des études; (3) des capacités cognitives élevées stimulent l'envie des individus de faire des études.</p>
+</li>
+<li>
+<p>Le R carré est de 0.43. Le pouvoir de prédiction du modèle a donc fortement augmenté. Les capacités cognitives des individus représentent un déterminant important du nombre d'années d'éducation.</p>
+</li>
+<li>
+<p>On remarque aussi que l'effet estimé de l'éducation des parents a diminué. Les estimateurs du premier modèle incluaient un biais positif, certainement dû à une corrélation positive entre éducation des parents et capacités cognitives. Plus des parents sont éduqués, plus ils vont stimuler leurs enfants intellectuellement, meilleures seront les capacités cognitives de l'enfant, et plus il aura la facilité et l'envie de faire de longues études.</p>
+</li>
+</ul>
+<h3 id="modele-3">Modèle 3<a class="zola-anchor" href="#modele-3" aria-label="Anchor link for: modele-3">🔗</a></h3>
+<p>Dans un troisème, nous ajoutons d'autres variables qui sont censées avoir un effet sur l'éducation : le nombre de frères et soeurs, désigné par la variable <em>sibs (siblings)</em>, et le lieu de vie, qui est soit urbain, soit rural, désigné par la variable <em>urban</em>.</p>
+<div class="math ct"><i>educ</i><sub>i</sub> = <i>b</i><sub>0</sub> &plus; <i>b</i><sub>1</sub> <i>motheduc</i><sub>i</sub> &plus; <i>b</i><sub>2</sub> <i>fatheduc</i><sub>i</sub> &plus; <i>b</i><sub>3</sub> <i>abil</i><sub>i</sub> &plus; <i>b</i><sub>4</sub> <i>sibs</i><sub>i</sub> &plus; <i>b</i><sub>5</sub> <i>urban</i><sub>i</sub> &plus; <i>u</i><sub>i</sub> </div>
+<p>Nous écrivons dans l'éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">regression3 &lt;- lm(educ ~ motheduc + fatheduc + abil + sibs + urban, data = htv)
+summary(regression3)
+</code></pre>
+<p>La console affiche :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">&gt; regression3 &lt;- lm(educ ~ motheduc + fatheduc + abil + sibs + urban, data = htv)
+&gt; summary(regression3)
+
+Call:
+lm(formula = educ ~ motheduc + fatheduc + abil + sibs + urban, 
+    data = htv)
+
+Residuals:
+    Min      1Q  Median      3Q     Max 
+-5.7411 -1.1774 -0.1683  1.1051  6.8351 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)  8.84210    0.32327  27.352  &lt; 2e-16 ***
+motheduc     0.16967    0.02865   5.923 4.10e-09 ***
+fatheduc     0.10766    0.01984   5.428 6.88e-08 ***
+abil         0.49087    0.02567  19.120  &lt; 2e-16 ***
+sibs        -0.10870    0.02788  -3.899 0.000102 ***
+urban        0.27854    0.13326   2.090 0.036803 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 1.771 on 1224 degrees of freedom
+Multiple R-squared:  0.4365,	Adjusted R-squared:  0.4342 
+F-statistic: 189.7 on 5 and 1224 DF,  p-value: &lt; 2.2e-16
+</code></pre>
+<h4 id="resultats-du-modele-3">Résultats du modèle 3<a class="zola-anchor" href="#resultats-du-modele-3" aria-label="Anchor link for: resultats-du-modele-3">🔗</a></h4>
+<p>Les résultats du modèle nous permettent d'écrire la relation linéaire suivante :</p>
+<div class="math ct"><i>educ</i> = 8.84 &plus; 0.17 <i>motheduc</i> &plus; 0.11 <i>fatheduc</i> &plus; 0.49 <i>abil</i> &minus; 0.11 <i>sibs</i> &plus; 0.28 <i>urban</i> </div>
+<ul>
+<li>En moyenne, le fait d'avoir un frère ou une soeur supplémentaire dans la famille a tendance à réduire l'éducation des individus de 0.11 années, soit 1 mois. 
+<ul>
+<li>Cette relation négative peut venir du fait que plus il y a d'enfants dans la famille, moins les parents auront les moyens de financer leurs études et moins ils ont de temps pour aider leurs enfants à étudier. Aussi, une famille nombreuse aura un revenu disponible pour chaque enfant plus faible, ce qui peut forcer les enfants à finir leurs études plus tôt pour pouvoir travailler et subvenir à leurs besoins.</li>
+</ul>
+</li>
+<li>Habiter en ville est associé à 0.28 années d'éducation supplémentaires, soit 3 mois.
+<ul>
+<li>Habiter en ville c'est habiter à proximité des lieux d'éducation : écoles, universités, musées... Un accès géographique à l'éducation favorise le nombre d'années d'éducation des individus.</li>
+</ul>
+</li>
+<li>Le pouvoir de prédiction du modèle n'a pas vraiment augmenté, le R carré est de 0.44. L'ajout des deux nouvelles variables du modèle n'améliore pas vraiment la prédiction du nombre d'années d'éducation d'un individu.</li>
+<li>On remarque que l'effet estimé de l'éducation de la mère a diminué. L'estimateur se composait encore d'un biais dû au fait que la variable est certainement corrélée avec le nombre d'enfants dans la famille, ainsi qu'avec la variable indicatrice du milieu de vie urbain.</li>
+</ul>
+<p><em>Comment expliquer le biais du coefficient estimé de <i>b</i><sub>1</sub> ?</em></p>
+<ul>
+<li>Par rapport à l'ajout de la variable <em>sibs</em>  :
+<ol>
+<li>L'éducation d'un individu est négativement corrélée au nombre de frères et soeurs qu'il a.
+Effectivement, on trouve <i>b</i><sub>4</sub> &lt; 0.</li>
+<li>L'éducation d'une mère est négativement corrélé au nombre d'enfants qu'elle a.</li>
+</ol>
+<ul>
+<li>Résultat : Omettre la variable <em>sibs</em>, c'est ajouter un biais au coefficient estimé de <i>b</i><sub>1</sub>, qui est composé de la multiplication des corrélations expliquées en (1) et (2). Ces deux corrélations sont négatives, ce qui crée un biais positif (<em>moins par moins fait plus</em>).</li>
+</ul>
+</li>
+<li>Par rapport à l'ajout de la variable <em>urban</em>  :
+<ol>
+<li>L'éducation d'un individu est positivement corrélée au fait qu'il habite en ville.
+Effectivement, on trouve <i>b</i><sub>5</sub> &gt; 0.</li>
+<li>L'éducation d'une mère est positivement corrélé au fait d'habiter en ville, car une éducation élevée est corrélée à un revenu élevé qui permet aux individus d'habiter en ville où la vie est plus chère.</li>
+</ol>
+<ul>
+<li>Résultat : Omettre la variable <em>urban</em>, c'est ajouter un biais au coefficient estimé de <i>b</i><sub>1</sub>, qui est composé de la multiplication des corrélations expliquées en (1) et (2). Ces deux corrélations sont positives, ce qui crée un biais positif (<em>plus par plus fait plus</em>).</li>
+</ul>
+</li>
+</ul>
+<h4 id="verification-des-hypotheses-supplementaires">Vérification des hypothèses supplémentaires<a class="zola-anchor" href="#verification-des-hypotheses-supplementaires" aria-label="Anchor link for: verification-des-hypotheses-supplementaires">🔗</a></h4>
+<p>Nous avons fait des hypothèses quant aux corrélations entre éducation de la mère, capacités cognitives de son enfant, nombre de frères et soeurs et le fait d'habiter en ville. Il est possible de les vérifier. Pour cela, on peut écrire le modèle suivant :</p>
+<div class="math ct"><i>motheduc</i><sub>i</sub> = <i>a</i><sub>0</sub> &plus; <i>a</i><sub>1</sub> <i>abil</i><sub>i</sub> &plus; <i>a</i><sub>2</sub> <i>sibs</i><sub>i</sub> &plus; <i>a</i><sub>2</sub> <i>urban</i><sub>i</sub> &plus; <i>e</i><sub>i</sub> </div>
+<p>Nous écrivons dans l'éditeur :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">regression4 &lt;- lm(motheduc ~ abil + sibs + urban, data = htv)
+summary(regression4)
+</code></pre>
+<p>Et apparaît dans la console :</p>
+<pre data-lang="{r}" class="language-{r} "><code class="language-{r}" data-lang="{r}">&gt; regression4 &lt;- lm(motheduc ~ abil + sibs + urban, data = htv)
+&gt; summary(regression4)
+
+Call:
+lm(formula = motheduc ~ abil + sibs + urban, data = htv)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-10.7605  -1.0483  -0.1568   0.9411   7.6347 
+
+Coefficients:
+            Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept) 11.49920    0.17679  65.044  &lt; 2e-16 ***
+abil         0.35561    0.02751  12.927  &lt; 2e-16 ***
+sibs        -0.18249    0.03207  -5.690 1.59e-08 ***
+urban        0.70749    0.15329   4.615 4.33e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 2.064 on 1226 degrees of freedom
+Multiple R-squared:  0.181,	Adjusted R-squared:  0.179 
+F-statistic: 90.31 on 3 and 1226 DF,  p-value: &lt; 2.2e-16
+</code></pre>
+<p>Nos hypothèses sont vérifiées. Le nombre d'années d'éducation de la mère est :</p>
+<ul>
+<li>positivement associé à la capacité cognitive de son enfant, <i>a</i><sub>1</sub> &gt; 0</li>
+<li>négativement associé au nombre de frères et soeurs de l'enfant observé, <i>a</i><sub>2</sub> &lt;0</li>
+<li>positivement associé au fait de vivre en ville, <i>a</i><sub>3</sub> &gt; 0</li>
+</ul>
+<h2 id="predictions">Prédictions<a class="zola-anchor" href="#predictions" aria-label="Anchor link for: predictions">🔗</a></h2>
+<p>Nous pouvons maintenant évaluer le nombre moyen d'années d'éducation prédit pour un individu moyen qui habite en ville. Pour cela, on fixe la valeur de toute les variables explicatives à leur moyenne, c'est-à-dire <em>motheduc</em> = 12.19, <em>fatheduc</em> = 12.45, <em>abil</em> = 1.80, <em>sibs</em> = 2.95. On choisit la valeur <em>urban</em> = 1 qui signifie que l'individu vit en ville.</p>
+<p>On calcule donc grâce à la formule obtenu du modèle 3:</p>
+<div class="math ct"> <span style="position: relative; left: 24px; bottom: 8px;">^</span><i>educ</i> = 8.84 &plus; 0.17 <span style="position: relative; left: 30px; bottom: 15px;">_</span><i>motheduc</i> &plus; 0.11 <span style="position: relative; left: 30px; bottom: 15px;">_</span><i>fatheduc</i> &plus; 0.49 <span style="position: relative; left: 20px; bottom: 15px;">_</span><i>abil</i> &minus; 0.11 <span style="position: relative; left: 18px; bottom: 15px;">_</span><i>sibs</i> &plus; 0.28 <i>urban</i> </div>
+<div class="math ct"> <span style="position: relative; left: 24px; bottom: 8px;">^</span><i>educ</i> = 8.84 &plus; 0.17 &times; 12.19 &plus; 0.11 &times; 12.45 &plus; 0.49 &times; 1.80 &minus; 0.11 &times; 2.95 &plus; 0.28 &times; 1 </div>
+<div class="math ct"> <span style="position: relative; left: 24px; bottom: 8px;">^</span><i>educ</i> = 13.1 </div>
+<p>L'individu avec ces caractéristiques aura en moyenne 13 années d'éducation, qui correspond au diplôme du bac.</p>
+<p>Il est possible de jouer avec l'équation et de comparer la différence d'éducation entre deux individus aux caractéristiques différentes. Le <a href="/teaching/econometrics-undergraduate/htv.R">code R</a> fournit un exemple d'application de ce type.</p>
+<h2 id="conclusion">Conclusion<a class="zola-anchor" href="#conclusion" aria-label="Anchor link for: conclusion">🔗</a></h2>
+<p>Dans cet exercice, nous avons démontré que le niveau d'éducation des individus dépend de plusieurs facteurs tels que le contexte familial, les capacités intellectuelles et le milieu de vie. Plus précisément, le niveau d'éducation des parents, la composition de la fratrie ainsi que le fait de vivre en ville ou à la campagne ont un impact significatif sur le niveau d'éducation des individus. Nous avons présenté le sens de l'impact de ces variables, positif et négatif, ainsi que la magnitude de leur impact, représenté par la valeur de leurs coefficients. </p>
+<p>Bien que cette analyse soit limitée, nous constatons que la combinaison de ces facteurs peut engendrer de multiples inégalités dans la réussite scolaire avec des différences entre les milieux urbains et ruraux, entre les familles, ou même au sein des familles, entre les frères et soeurs. Il existe aussi certainement des différences entre les pays, mais les données que nous avons utilisées ne nous permettent pas de l'étudier.</p>
+<p><img src="/image/signature.png" alt="" /></p>
+
+  </article>
+</div>
+<!-- <div class="sticky bottom-0 px-3">
+    <a href="#page-top">Back to top of page</a>
+  </div> -->
+  <footer class="bg-white">
+    <div class="bg-white text-gray-400 container max-w-4xl mx-auto my-8 px-4">
+    © Gabrielle Gambuli.
+    Built with <a class="underline" target="_blank" href="https://www.getzola.org">Zola</a>.
+    </div>
+  </footer>
+  </body>
+
+</html>
