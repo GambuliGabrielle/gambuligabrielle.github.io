@@ -1589,16 +1589,26 @@ statistiques des différentes variables.</p>
 ##  Max.   :79.00   Max.   :896040   Max.   :621000</code></pre>
 <p><strong>Répondez aux questions suivantes :</strong></p>
 <ul>
-<li><p>Combien y a-t-il d’individus dans le jeu de données ?</p></li>
+<li>Combien y a-t-il d’individus dans le jeu de données ?</li>
+</ul>
+<pre class="r"><code>length(unique(default_data$ID))</code></pre>
+<pre><code>## [1] 30000</code></pre>
+<ul>
 <li><p>Quel est le niveau de crédit moyen ? Minimal ? Maximal ? Médian ?
 A quoi ressemble sa dispersion ?</p></li>
 <li><p>Quelle est la proportion de femmes dans le jeu de données
 ?</p></li>
+</ul>
+<pre class="r"><code>length(unique(default_data$ID[default_data$GENDER==0])) / length(unique(default_data$ID))</code></pre>
+<pre><code>## [1] 0.6037333</code></pre>
+<ul>
 <li><p>Quel est le niveau d’éducation médian ?</p></li>
 <li><p>Quel âge ont les individus étudiés ?</p></li>
 <li><p>Quel est le pourcentage d’individus qui ont fait défaut sur leur
 crédit ?</p></li>
 </ul>
+<pre class="r"><code>length(unique(default_data$ID[default_data$DEFAULT==1])) / length(unique(default_data$ID))</code></pre>
+<pre><code>## [1] 0.2212</code></pre>
 </div>
 <div id="question-économétrique-et-stratégie-didentification" class="section level1" number="5">
 <h1><span class="header-section-number">5</span> Question économétrique

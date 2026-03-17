@@ -96,15 +96,28 @@ summary(default_data)
 
 * Combien y a-t-il d'individus dans le jeu de données ?
 
+```{r}
+length(unique(default_data$ID))
+```
+
 * Quel est le niveau de crédit moyen ? Minimal ? Maximal ? Médian ? A quoi ressemble sa dispersion ?
 
+
 * Quelle est la proportion de femmes dans le jeu de données ?
+
+```{r}
+length(unique(default_data$ID[default_data$GENDER==0])) / length(unique(default_data$ID))
+```
 
 * Quel est le niveau d'éducation médian ?
 
 * Quel âge ont les individus étudiés ?
 
 * Quel est le pourcentage d'individus qui ont fait défaut sur leur crédit ?
+
+```{r}
+length(unique(default_data$ID[default_data$DEFAULT==1])) / length(unique(default_data$ID))
+```
 
 # Question économétrique et stratégie d'identification
 
