@@ -48,6 +48,13 @@ Welcome to my website!
 
 👩‍🔬 I’m a **postdoc research fellow** at the [Economics Department of Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab). I am hosted by the [Fondation du Risque](https://www.institutlouisbachelier.org/nous-sommes/au-sujet-de-la-fondation-du-risque) at the Institut Louis Bachelier and contribute to the [Digital Finance Chair](https://digital-finances.com/).
 
+📜 I was awarded the **national qualification for *Maître de conférences*** by the French National Council of Universities (CNU), Section 05, in 2026.
+
 🎓 After completing my PhD in Economics at [CY Cergy-Paris Université (Thema)](https://thema.u-cergy.fr/presentation/article/about-us) and [ESSEC Business School](https://www.essec.edu/fr/) in December 2023, I held a two-year postdoctoral position at [Université Gustave Eiffel (Grettia)](https://grettia.univ-gustave-eiffel.fr/accueil) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab), contributing to the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010).
 
 🚨 **My [job market paper](/publications/consumption-telework/) investigates how hybrid work reshapes daily mobility and in-store consumption in metropolitan areas, leveraging mobile phone data and payment card transaction data.**
+
+
+
+
+
