@@ -7,7 +7,7 @@ authors = ["Gabrielle Gambuli"]
 year = 2023
 type = "thesis"
 publication_types = "Thesis"
-url_pdf = "pdf/thesis_gambuli.pdf"
+url_pdf = "/pdf/thesis_gambuli.pdf"
 #url_slides = "path to defense slides"
 +++
 
