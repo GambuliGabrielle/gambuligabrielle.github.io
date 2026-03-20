@@ -7,11 +7,11 @@ page_template="simple-page.html"
 title = "Postdoc Research Fellow"
 
 interests = [
-"Economic Geography",
+"Regional & Urban Economics",
 "Telework",
 "Transportation",
-"Spatial & Big Data",
-"Regional & Urban Development"
+"Digital Economics",
+"Spatial & Big Data"
 ]
 
 [[extra.education.courses]]
@@ -44,7 +44,7 @@ link = "https://github.com/GambuliGabrielle"
 
 Welcome to my website! 
 
-🗺️ I'm an **applied digital and spatial economist** studying how telework, transportation, and digital connectivity shape mobility, consumption, and the dynamics of firms and cities.
+🗺️ I'm an **applied spatial and digital economist** studying how telework, transportation, and digital connectivity shape mobility, consumption, and the dynamics of firms and cities.
 
 👩‍🔬 I’m a **postdoc research fellow** at the [Economics Department of Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab). I am hosted by the [Fondation du Risque](https://www.institutlouisbachelier.org/nous-sommes/au-sujet-de-la-fondation-du-risque) at the Institut Louis Bachelier and contribute to the [Digital Finance Chair](https://digital-finances.com/).
 
