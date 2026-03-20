@@ -12,7 +12,7 @@ extra.hidden_nav = false
 
 
 extra.publications_types = [
-{ title = "Lecturer at Paris I Panthéon-Sorbonne (2026)", type = "sorbonne" },
-{ title = "Tutorial Instructor at CY Cergy Paris Université (2019-2023)", type = "cyteach" }
+{ title = "Lectures at Paris I Panthéon-Sorbonne (2026)", type = "sorbonne" },
+{ title = "Tutorials at CY Cergy Paris Université (2019-2023)", type = "cyteach" }
 ]
 +++
