@@ -5,8 +5,8 @@ date = 2025-09-13
 [extra]
 authors = ["David Bounie, Chloé Breton, John Galbraith, Gabrielle Gambuli"]
 year = 2025
-type = "wip"
-publication_types = "Work in progress"
+type = "wp"
+publication_types = "Working papers"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++
