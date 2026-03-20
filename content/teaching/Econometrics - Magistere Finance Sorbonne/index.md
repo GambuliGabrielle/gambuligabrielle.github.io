@@ -1,5 +1,5 @@
 +++
-title = "Econometrics"
+title = "Econometrics and Statistics"
 date = 2026-01-28
 
 [extra]
