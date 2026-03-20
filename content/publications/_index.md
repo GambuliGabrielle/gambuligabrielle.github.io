@@ -19,6 +19,7 @@ extra.publications_types = [
 { title = "Work in progress", type = "wip" },
 { title = "Non-academic publications", type = "nap" },
 { title = "Original datasets", type = "od" },
+{ title = "Thesis", type = "thesis" }
 ]
 +++
 
