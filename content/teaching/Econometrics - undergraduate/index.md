@@ -5,8 +5,8 @@ date = 2023-09-27
 [extra]
 authors = ["bachelor level"]
 year = 2023
-type = "pastteach"
-publication_types = "Past academic years (2019-2024)"
+type = "cyteach"
+publication_types = "*Chargée de travaux dirigés* at CY Cergy Paris Université (2019-2023)"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++

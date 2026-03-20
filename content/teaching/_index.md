@@ -12,10 +12,7 @@ extra.hidden_nav = false
 
 
 extra.publications_types = [
-  { title = "Past academic years (2019-2024)", type = "pastteach" }
+{ title = "Lecturer at Paris I Panthéon-Sorbonne (2026)", type = "sorbonne" },
+{ title = "Tutorial Instructor at CY Cergy Paris Université (2019-2023)", type = "cyteach" }
 ]
 +++
-
-## Teaching Assistant Activities
-
-During my doctoral journey, I served as a teaching assistant (*Chargée de travaux dirigés*) at [CY Cergy Paris Université](https://www.cyu.fr/) for undergraduate and graduate courses. My primary areas of interest lie in **econometrics**, **statistics**, and **macroeconomics**.
