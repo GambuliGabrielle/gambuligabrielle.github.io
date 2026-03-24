@@ -3,7 +3,7 @@ title = "Les résidents se déplacent majoritairement en voiture pour se rendre 
 date = 2024-12-01
 
 [extra]
-authors = ["Guillaume Arion, Johanne Aude, Ivan Debouzy, Gabrielle Gambuli, Mélina Hillion"]
+authors = ["Guillaume Arion, Johanne Aude, Gabrielle Gambuli, Mélina Hillion"]
 year = 2025
 type = "nap"
 publication_types = "Non-academic publications"
