@@ -7,7 +7,7 @@ authors = ["David Bounie, Chloé Breton, John Galbraith, Gabrielle Gambuli"]
 year = 2025
 type = "wp"
 publication_types = "Working papers"
-#url_pdf = "path to wp"
+url_pdf = "/pdf/consumer_city_paper.pdf"
 #url_slides = "path to defense slides"
 +++
 
