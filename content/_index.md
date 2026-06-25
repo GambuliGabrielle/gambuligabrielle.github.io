@@ -44,17 +44,9 @@ link = "https://github.com/GambuliGabrielle"
 
 Welcome to my website! 
 
-🗺️ I'm an **applied spatial and digital economist** studying how telework, transportation, and digital connectivity shape mobility, consumption, and the dynamics of firms and cities.
+👩‍🔬 I am a **postdoc research fellow** in Economics at [Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab). I received my Ph.D. in Economics from [CY Cergy-Paris Université](https://www.cyu.fr/) ([Thema](https://thema.u-cergy.fr/presentation/article/about-us)) and [ESSEC Business School](https://www.essec.edu/fr/) in December 2023.
 
-👩‍🔬 I’m a **postdoc research fellow** at the [Economics Department of Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab). I am hosted by the [Fondation du Risque](https://www.institutlouisbachelier.org/nous-sommes/au-sujet-de-la-fondation-du-risque) at the Institut Louis Bachelier and contribute to the [Digital Finance Chair](https://digital-finances.com/).
+🚨 Starting in September 2026, I will join the Economics and Management department ([IAE Nantes](https://iae.univ-nantes.fr/)) at [Nantes Université](https://www.univ-nantes.fr/) as an **Assistant Professor of Economics**.
 
-📜 I was awarded the **national qualification for *Maître de conférences*** by the French National Council of Universities (CNU), Section 05, in 2026.
-
-🎓 After completing my PhD in Economics at [CY Cergy-Paris Université (Thema)](https://thema.u-cergy.fr/presentation/article/about-us) and [ESSEC Business School](https://www.essec.edu/fr/) in December 2023, I held a two-year postdoctoral position at [Université Gustave Eiffel (Grettia)](https://grettia.univ-gustave-eiffel.fr/accueil) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab), contributing to the [MobiTIC ANR project](https://anr.fr/Project-ANR-19-CE22-0010).
-
-🚨 **My [job market paper](/publications/consumption-telework/) investigates how hybrid work reshapes daily mobility and in-store consumption in metropolitan areas, leveraging mobile phone data and payment card transaction data.**
-
-
-
-
+🗺️ My research lies in **applied spatial and digital economics**, focusing on how telework, transportation, and digital connectivity shape mobility, consumption, and the dynamics of firms and cities.
 
