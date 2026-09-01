@@ -44,9 +44,7 @@ link = "https://github.com/GambuliGabrielle"
 
 Welcome to my website! 
 
-👩‍🔬 I am a **postdoc research fellow** in Economics at [Télécom Paris](https://www.telecom-paris.fr/en/research/labs/innovation-i3/economics) (CREST) and [Insee](https://www.insee.fr/fr/accueil) (Innovation Lab). I received my Ph.D. in Economics from [CY Cergy-Paris Université](https://www.cyu.fr/) ([Thema](https://thema.u-cergy.fr/presentation/article/about-us)) and [ESSEC Business School](https://www.essec.edu/fr/) in December 2023.
-
-🚨 Starting in September 2026, I will join the Economics and Management department ([IAE Nantes](https://iae.univ-nantes.fr/)) at [Nantes Université](https://www.univ-nantes.fr/) as an **Assistant Professor of Economics**.
+👩‍🔬 I am an **Assistant Professor of Economics** in the Economics and Management department ([IAE Nantes](https://iae.univ-nantes.fr/)) at [Nantes Université](https://www.univ-nantes.fr/).
 
 🗺️ My research lies in **applied spatial and digital economics**, focusing on how telework, transportation, and digital connectivity shape mobility, consumption, and the dynamics of firms and cities.
 
