@@ -12,6 +12,7 @@ extra.hidden_nav = false
 
 
 extra.publications_types = [
+{ title = "Cours à l'IAE Nantes Economie & Management (2026-2027)", type = "iaeteach" },
 { title = "Lectures at Paris I Panthéon-Sorbonne (2026)", type = "sorbonne" },
 { title = "Tutorials at CY Cergy Paris Université (2019-2023)", type = "cyteach" }
 ]
