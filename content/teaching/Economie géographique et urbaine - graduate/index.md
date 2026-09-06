@@ -6,14 +6,13 @@ date = 2026-09-01
 authors = ["graduate level"]
 year = 2026
 type = "iaeteach"
-#publication_types = "*Chargée de travaux dirigés* at CY Cergy Paris Université (2019-2023)"
 #url_pdf = "path to wp"
 #url_slides = "path to defense slides"
 +++
 
+Ce cours, destiné aux étudiants du M2 ECAP, propose une introduction à l’économie spatiale appliquée. Il combine théorie économique, analyse empirique et traitement de données géolocalisées avec R.
 
-
-## Ce cours
+### Matériel
 - [Syllabus](/teaching/economie-geographique-et-urbaine-graduate/syllabus.pdf)
 - Séance 1
 	- [Slides](/teaching/economie-geographique-et-urbaine-graduate/slides_01.pdf)
