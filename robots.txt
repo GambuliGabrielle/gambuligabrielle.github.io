@@ -1,0 +1,4 @@
+User-agent: *
+Disallow:
+Allow: /
+Sitemap: https://gambuligabrielle.github.io/sitemap.xml

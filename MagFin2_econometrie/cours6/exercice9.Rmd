@@ -1,0 +1,300 @@
+---
+title: "Exercice 9 - Modèles avec données de panel"
+# author: "Gabrielle Gambuli"
+date: "2025-03-11"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Effet de la valeur et du stock de capital sur l'investissement brut pour 10 firmes entre 1935 et 1954 {-}
+
+On cherche à expliquer le niveau d'investissement brut des firmes par leur valeur et leur stock de capital (usines et équipements).
+
+# Installation et chargement des packages
+
+On installe et on charge le package "plm" pour travailler sur des données de panel. 
+
+```{r, warning=FALSE, message=FALSE}
+# install.packages("plm")
+# install.packages("lmtest")
+# install.packages("fixest")
+
+library(plm)                # pour le travail sur données de panel (effets fixes + effets aléatoires)
+library(fixest)             # pour estimer des modèles avec effets fixes
+library(lmtest)             # pour le test de Breusch-Pagan
+```
+
+# Importation des données 
+
+Données d'investissement "Grunfeld" incluses dans le package "plm".
+
+```{r, message=FALSE}
+data(Grunfeld)
+help(Grunfeld)
+head(Grunfeld)
+```
+
+**Description :** un panel équilibré de 10 unités d'observations (firmes) de 1935 à 1954.
+
+**Format :** Un data.frame qui contient :
+
+* **firm :** unités d'observations (firmes)
+
+* **year :** date en années
+
+* **inv :** Investissement brut
+
+* **value :** valeur des firmes
+
+* **capital :** stock de capital (usines et équipements)
+
+**Détails:** 
+
+* **Nombre total d'observations :** 200
+
+* **observation :** unités de production
+
+* **country :** Etats-Unis
+
+**Note :** Les données Grunfeld fournies dans le package plm sont identiques à celles utilisées dans Baltagi (2001).
+
+**Références :**
+
+Baltagi BH (2001). Econometric Analysis of Panel Data, 3rd edition. John Wiley and Sons ltd.
+
+Grunfeld Y (1958). The determinants of corporate investment. Ph.D. thesis, Department of Economics, University of Chicago.
+
+# Estimation d'un modèle à effets fixes
+
+On cherche à expliquer le niveau d'investissement brut de différentes firmes par leur valeur et leur stock de capital (usines et équipements) entre 1935 et 1954.
+
+Le modèle est tel que :
+
+$\text{investment}_{it} = \beta_1 * \text{firm value}_{it} + \beta_2 * \text{capital stock}_{it} + \alpha_{i} + \epsilon_{it}$
+
+On opère une **estimation "within"** (intra-individuelle) avec la fonction "panel linear model" **plm()** et son **option "within"** qui réalise directement la transformation des variables et applique la fonction lm() de la régression linéaire vue précédemment.
+
+```{r}
+model_fe <- plm(inv ~ value + capital, data = Grunfeld, model = "within")
+summary(model_fe)
+```
+
+Notre modèle à effets fixes explique environ 77 % de la variation des investissements bruts des firmes.
+
+On observe des relations positives et hautement significatives statistiquement entre le niveau d'investissement brut des firmes et leur valeur ou leur stock de capital, ceteris paribus.
+
+Les investissements bruts des firmes augmentent de 0.11 unités pour une unité supplémentaire de valeur des firmes et de 0.31 unités pour une unité supplémentaire de capital des firmes, **toutes choses égales par ailleurs (TCEPA)**.
+
+# Estimation d'un modèle à effets aléatoires
+
+Dans un **modèle à effets aléatoires**, les effets individuels sont des variables aléatoires (et non plus des paramètres comme dans les modèles à effets fixes). 
+
+On utilise donc la fonction **plm()** avec son **option "random"**. 
+
+```{r}
+model_re <- plm(inv ~ value + capital, data = Grunfeld, model = "random")
+summary(model_re)
+```
+
+Ici, les résultats et leur significativité statistique sont assez proches de ceux du modèle à effet fixe.
+
+Les estimations avec effets aléatoires sont plus efficaces quand les effets fixes sont exogènes par rapport aux variables explicatives. On doit donc réaliser le Test d’Hausman pour savoir quel modèle retenir.
+
+# Test d’Hausman
+
+On utilise la fonction **phtest()**.
+
+L'hypothèse **H0** du Test d’Hausman est que la covariance est nulle entre les effets individuels et les variables explicatives (effets individuels exogènes).
+
+```{r}
+phtest(model_fe, model_re)
+```
+
+La p-valeur étant supérieur à 0.05, on rejette H0 au seuil de 5%. On retient donc le modèle avec effets fixes plutôt que le modèle à effets aléatoires.
+
+# Obtention des effets fixes 
+
+La fonction **fixef.plm** extrait les effets fixes de notre estimation. L'option "dmean" indique la méthode de déviation autour de la moyenne. 
+
+```{r}
+fixef(model_fe, type = "dmean")
+```
+
+```{r}
+summary(fixef(model_fe, type = "dmean"))
+```
+
+La valeur des effets fixes nous indique à quel point la firme investit plus ou moins que la moyenne des firmes (après avoir retiré l’effet de value et capital). Un estimateur positif indique que la firme investit plus que la moyenne, alors qu'un estimateur négatif indique que la firme investit moins que la moyenne.
+
+Par ailleurs, on obtient les mêmes résultats pour beta1 et beta2 en estimant le modèle suivant :
+
+```{r}
+model_fe_dummies <- lm(inv ~ value + capital + as.factor(firm), data = Grunfeld)
+
+summary(model_fe_dummies)
+```
+Ou encore celui-ci :
+```{r}
+model_fe_dummies2 <- lm(inv ~ -1 + value + capital + as.factor(firm), data = Grunfeld) # ici on enlève la constante avec le "-1"
+
+summary(model_fe_dummies2)
+```
+
+Cependant, il faut remarquer que la valeur numérique des effets fixes n’est pas la même lorsque l’on utilise la méthode **within (demeaned)** et lorsque l’on estime le modèle en incluant explicitement des **variables indicatrices (dummies)** pour chaque firme.
+
+Cette différence provient du fait que les effets fixes ne sont pas identifiés de manière unique, et que les différentes méthodes d’estimation utilisent des normalisations différentes :
+
+* Dans l’approche **within (demeaned)**, les effets fixes sont reconstruits de manière à ce que leur **moyenne soit nulle**.
+* Dans l’approche utilisant des **variables indicatrices**, une catégorie de référence est omise afin d’éviter la colinéarité parfaite avec la constante. L’effet fixe de cette catégorie est alors **normalisé à zéro**, et les autres coefficients mesurent l’écart par rapport à cette catégorie. Dans le modèle `model_fe_dummies`, la constante correspond ainsi à l’effet fixe de la firme de référence (la firme 1). Lorsque l’on enlève la constante (`model_fe_dummies2`), les coefficients des indicatrices correspondent directement aux constantes spécifiques des firmes.
+
+Les effets fixes obtenus par les deux méthodes sont reliés par la relation suivante :
+
+$\alpha_i^{within} = \alpha_i^{LSDV} - \bar{\alpha}^{LSDV}$
+
+En résumé, les effets fixes de la méthode *within* correspondent simplement aux effets fixes obtenus avec les indicatrices **centrés autour de leur moyenne**. Les coefficients des variables explicatives ainsi que les valeurs prédites du modèle restent **identiques** dans les deux approches.
+
+Preuves (juste pour s'amuser) :
+
+```{r}
+sum(fixef(model_fe, type = "dmean"))
+```
+La somme des effets fixes estimés dans le modèle "dmean" est bien zéro (ou presque).
+
+```{r}
+fe_within <- fixef(model_fe, type = "dmean")
+
+fe_lsdv <- model_fe_dummies2[["coefficients"]][-c(1,2)]
+fe_lsdv_centered <- fe_lsdv - mean(fe_lsdv)
+
+comparison <- data.frame(
+  firme = names(fe_within),
+  FE_within = fe_within,
+  FE_LSDV_centered = fe_lsdv_centered
+)
+
+comparison
+```
+
+La relation entre les effets fixes "dmean" est ceux estimés par la régression avec variables indicatrices est vérifiée.
+
+# Test d'homoscédasticité 
+
+**Test de Breusch-Pagan :**
+
+H0 : homoscédasticité (variance constante).
+
+Voir notre exercice 6 pour plus de détail.
+
+```{r}
+bptest(model_fe, studentize = FALSE)
+```
+
+La valeur-p est inférieure à 0.05, on rejette l'hypothèse H0 d'homoscédasticité au seuil de significativité de 5%. Nos résidus sont donc hétéroscédastiques et il faut les corriger.
+
+# Méthodes de correction des écarts-type en panel
+
+La fonction **coeftest()** après une régression linéaire permet d'afficher les valeurs des coefficients et les écart-types.
+
+```{r}
+coeftest(model_fe)
+```
+
+**Correction :** "Robust covariance matrix estimators a la White for panel models"
+
+```{r}
+coeftest(model_fe, vcovHC)
+```
+
+**Pour les petits échantillons :**
+
+**vcovHC()** pour "Heteroscedasticity-Consistent Covariance Matrix Estimation". Ne pas hésiter à regarder l'aide pour les fonctions coeftest() et vcovHC().
+
+```{r}
+coeftest(model_fe, vcovHC(model_fe, type = "HC1"))
+coeftest(model_fe, vcovHC(model_fe, type = "HC2"))
+coeftest(model_fe, vcovHC(model_fe, type = "HC3"))
+```
+
+Observez les différences dans les écarts-type (standard errors) corrigés.
+Si il y a hétéroscédasticité, les écart-types corrigés seront plus élevés que les écart-types sans correction. Sans correction, les écart-types sont sous-estimés, ce qui peut être un problème pour la conclusion des effets de X sur Y.
+
+# Test d'autocorrélation des résidus en panel 
+
+Test Breusch-Godfrey/Wooldridge d'autocorrélation pour les modèles en panel.
+
+H0 : aléas non-autocorrélés (covariance nulle).
+
+```{r}
+pbgtest(model_fe)
+```
+
+On rejette H0, les résidus sont autocorrélés (la valeur-p est de 0,00000114, soit inférieure à notre seuil de 5 %).
+
+# Méthode de correction d'Arellano 
+
+Cette méthode permet de **corriger à la fois l'hétéroscédasticité et l'autocorrélation :**
+
+```{r}
+coeftest(model_fe, vcovHC(model_fe, type = "HC3", method = "arellano"))
+```
+
+# Erreurs robustes au clustering 
+
+**Regrouper les observations en groupe ("cluster") (1 par individu)** pour tenir compte de l'autocorrélation dans les erreurs pour chaque individu :
+
+```{r}
+coeftest(model_fe, vcovHC(model_fe, cluster = "group")) # la fonction reconnaît les effets fixes individuels avec l'argument “group”, et les effets fixes temporels avec l'argument “time”
+```
+
+En pratique, on utilise **toujours** les erreurs robustes au clustering pour faire de l'inférence en panel. On a très souvent de l'autocorrélation dans les erreurs. Les écarts-type sont souvent sous-estimés avec effets fixes, ce qui tend à faire rejeter H0 trop souvent. 
+
+Les erreurs-type robustes aux clusters sont robustes à l'hétéroscédasticité et aux corrélations entre termes d'erreur entre observations d'une même unité. 
+
+# Estimation avec le package `fixest`
+
+Le package `fixest` permet d’estimer efficacement des modèles de régression avec effets fixes multiples et des écarts-types robustes. Il gère facilement les panels de grande taille et propose des fonctions pratiques pour présenter les résultats.
+
+La fonction `feols()` fonctionne comme `plm()` mais permet d’ajouter davantage d'effets fixes, et, comme `plm()`, permet de spécifier des clusters pour corriger l’hétéroscédasticité et l’autocorrélation intra-groupe.
+
+```{r}
+model_fe2 <- feols(inv ~ value + capital | firm, data = Grunfeld, cluster="firm")
+
+etable(model_fe2)
+```
+La syntaxe `| firm` indique que l’on souhaite inclure un effet fixe pour chaque firme.
+
+L’argument `cluster = "firm"` permet de calculer des écarts-types robustes au clustering au niveau de la firme, ce qui corrige à la fois pour :
+
+* l'hétéroscédasticité intra-firme : la variance des erreurs n'est pas constante ;
+
+* l'autocorrélation intra-firme : les erreurs peuvent être corrélées dans le temps pour une même firme.
+
+Le "Within R$^2$" mesure la proportion de la variance intra-groupe (ici intra-firme) expliquée par les variables explicatives. Ici, le within R$^2$ de 0.76676 indique que les variations de la valeur d'une entreprise et de son stock de capital expliquent environ 77% des variations de l’investissement à l’intérieur de chaque firme au fil du temps, après avoir retiré les effets fixes individuels.
+Les variables explicatives capturent donc la majorité des changements temporels de l’investissement pour chaque firme, une fois que l’on a contrôlé pour ses caractéristiques permanentes (effets fixes).
+
+# Two-Way Fixed Effects (TWFE)
+
+Les effets fixes "individus" capturent les différences permanentes entre firmes.
+En ajoutant des effets fixes temporels, le modèle contrôle également les chocs (qui subviennent dans le temps) communs à toutes les firmes (par exemple, crises économiques ou tendances macroéconomiques).
+Inclure des effets fixes individuels et temporels permet d’isoler les effets causaux des variables explicatives en réduisant le biais d’omission.
+
+```{r}
+model_twfe <- feols(inv ~ value + capital | firm + year, data = Grunfeld, cluster="firm")
+
+etable(model_twfe)
+```
+
+L’ajout des effets fixes temporels change légèrement les coefficients :
+
+* Les variations de value et capital qui étaient corrélées avec les effets communs à toutes les firmes sont maintenant purgées.
+
+* On obtient donc des estimations plus précises de l’effet intra-firme réel.
+
+Le R$^2$ total augmente légèrement avec les effets fixes annuels (TWFE), car le modèle capture mieux la variation globale, tandis que le R$^2$ within diminue, car la variation intra-firme nettoyée des effets temporels est plus difficile à expliquer par value et capital seuls.

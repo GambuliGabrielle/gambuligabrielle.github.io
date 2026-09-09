@@ -1,0 +1,279 @@
+---
+title: "Exercice 11 - Endogénéité et estimateur des variables instrumentales"
+# author: "Gabrielle Gambuli"
+date: "2025-03-24"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Comment la demande de cigarettes répond-elle au prix ? {-}
+
+* **Pourquoi ne peut-on pas simplement faire une régression linéaire de Y (la demande de cigarettes) sur X (les prix) ?**
+
+On a un problème de **causalité inversée** : la demande de cigarette est affectée par les prix mais les prix dépendent également de la demande. Cette simultanéité crée un **problème d'endogénéité**.
+
+Une régression linéaire avec l'estimateur des MCO donnerait des **résultats biaisés**. Il faut donc employer un modèle à **variable instrumentale**.
+
+* **Par quoi peut-on instrumenter les prix (notre variable explicative endogène X) ?**
+
+Pour être valide, un bon instrument doit être **pertinent** (expliquer une grande partie de la variation de X) et **exogène** (non-corrélé au terme d'erreur).
+
+La taxe sur la consommation pourrait être une variable instrumentale valide pour les prix des cigarettes. En effet, cet instrument semble à la fois pertinent (une taxe sur la consommation élevée augmente le prix, toutes taxes comprises, du paquet) et exogène (il affecte la demande de cigarette indirectement, seulement à travers le prix des cigarettes).
+
+# Installation et chargement des packages
+
+On installe et on charge le package "AER" qui permet d'obtenir directement les données dont on a besoin.
+
+```{r, warning = FALSE, message = FALSE}
+#install.packages("AER")
+
+library(AER)                #pour avoir les données CigarettesSW
+```
+
+# Importation et visualisation des données 
+
+```{r, message = FALSE}
+data(CigarettesSW)
+class(CigarettesSW)
+help(CigarettesSW)
+
+#Type des variables
+unlist(lapply(CigarettesSW, class))
+
+#Visualisation des premières lignes
+head(CigarettesSW)
+```
+
+**Cigarette Consumption Panel Data**
+
+**Description :** Données de panel sur la consommation de cigarettes pour les 48 Etats américains continentaux en 1985–1995.
+
+**Utilisation : ** data("CigarettesSW")
+
+**Format :** Data.frame de 48 observations et 7 variables pour 2 périodes.
+
+**Variables :**
+
+* **state :** Variable facteur indicant l'état.
+
+* **year :** Variable facteur indicant l'année.
+
+* **cpi :** Indice des Prix à la Consommation (IPC).
+
+* **population :** Population de l'état.
+
+* **packs :** Consommation en nombre de paquets par tête.
+
+* **income :** Revenus de l'état (total, nominal).
+
+* **tax :** Taxe sur la vente de cigarettes (moyenne pour l'année fiscale).
+
+* **price :** Prix moyens pendant l'année fiscale, TTC.
+
+* **taxs:** Taxe générale sur la vente de cigarettes + TVA (moyenne pour l'année fiscale).
+
+**Source :** Compléments en ligne de Stock and Watson (2007).
+
+**Références :** Stock, J.H. and Watson, M.W. (2007). Introduction to Econometrics, 2nd ed. Boston: Addison Wesley.
+
+# Manipulation des données 
+
+On travaille sur les variables en **log** car on veut estimer **l'élasticité de la demande de cigarettes au prix**.
+
+**Rappel :** l'élasticité est le pourcentage de changement dans la demande quand le prix augmente de 1%.
+
+On divise les prix (et taxes) par l'IPC, car on travaille sur les prix (taxes) **réel(le)s** (cad, le nominal corrigé de l’effet de l’inflation).
+
+```{r}
+CigarettesSW$log_price <- log(CigarettesSW$price / CigarettesSW$cpi)    #prix réels (log)
+CigarettesSW$log_packs <- log(CigarettesSW$packs)                       # consommation de cigarettes par tête (log)
+
+CigarettesSW$tax_reel <- CigarettesSW$tax / CigarettesSW$cpi             #taxe réelle
+```
+
+On se concentre  sur les données de 1995 et on crée donc un sous-échantillon avec la fonction **subset()** :
+
+```{r}
+c1995 <- subset(CigarettesSW, year == "1995")
+```
+
+# Régression de la variable explicative endogène sur l'instrument
+
+**Première étape d'un modèle à variable instrumentale :** on régresse la variable explicative endogène sur l'instrument (a priori exogène) et éventuellement sur d'autres variables de contrôle le cas échéant.
+
+```{r}
+S1 <- lm(log_price ~ tax_reel, data = c1995)
+summary(S1)
+```
+
+On a déjà une première indication de la **pertinence de notre instrument** avec la **statistique de Fisher**.
+
+Elle est supérieure à 10 (391.4), l'instrument semble donc pertinent.
+
+Effectivement, 89.5% de la variation du log des prix réels est expliquée par la taxe. 
+
+**Rappel :** les instruments pertinents expliquent une grande partie de la variation de la variable explicative endogène.
+
+**Attention** pour l'interprétation des coefficients : l'équation est en log-niveau (log des prix pour la variable expliquée et taxe en niveau pour la variable explicative). Voir Exercice 2.
+
+Lorsque la taxe réelle sur la consommation augmente d’une unité, les prix réels TTC des cigarettes augmentent de 1.17% (100 × β) en 1995. Une taxe sur la consommation élevée augmente donc bien le prix TTC du paquet (corrélation positive et hautement statistiquement significative).
+
+Ensuite, on **prédit la part de la variable explicative endogène qui est expliquée par l'instrument** (et qui est normalement exogène) :
+
+```{r}
+c1995$log_price_pred <- predict(S1)
+
+c1995$log_price_pred2 <- S1[["coefficients"]][["(Intercept)"]] + S1[["coefficients"]][["tax_reel"]]*c1995$tax_reel
+```
+
+# Régression de la variable expliquée sur la composante prédite
+
+**Deuxième étape** du modèle à variable instrumentale : on régresse la variable expliquée (le log de la consommation de cigarette) sur la composante prédite de la variable explicative (le log des prix réel TTC des cigarettes) et éventuellement sur d'autres variables de contrôle.
+
+```{r}
+S2 <- lm(log_packs ~ log_price_pred, data = c1995)
+summary(S2)
+```
+
+Notre modèle explique 33% de la variation de la demande de paquets de cigarettes. 
+
+**Attention** pour l'interprétation des coefficients : l'équation est en log-log (voir Exercice 2).
+
+On obtient bien l'élasticité de la demande de cigarettes au prix : la demande de cigarettes diminue de 1.15% (β%) quand le prix réel TTC des cigarettes augmente de 1% en 1995. Ce coefficient est statistiquement significatif au seuil de 1%. 
+
+# Méthode directe pour l'estimateur des variables instrumentales
+
+R peut aussi faire directement les deux étapes en une seule fois avec la fonction **ivreg()** et va alors afficher uniquement les résultats de la deuxième étape.
+
+```{r}
+help(ivreg)
+
+iv1 <- ivreg(log_packs ~ log_price | tax_reel , data = c1995)
+summary(iv1)
+```
+
+On obtient bien les mêmes résultats.
+
+# Comparaison avec la méthode des MCO
+
+On peut comparer avec ce qu'on obtiendrait si on avait appliqué les MCO (qui sont biaisés en cas d'endogénéité) :
+
+```{r}
+OLS <- lm(log_packs ~ log_price, data = c1995)
+summary(OLS)
+```
+
+On obtient une élasticité de -1.21 au lieu de -1.15 (surestimation).
+
+# Erreurs-type robustes à l'hétéroscédasticité
+
+Il est d'usage d'autoriser la présence d'hétéroscédascité en calculant des erreurs-type robustes à l'hétéroscédasticité.
+
+```{r}
+coeftest(iv1, vcovHC(iv1, type = "HC1"))
+```
+
+cf. Exercice 9 sur les modèles à données de panel.
+
+# Diagnostics
+
+```{r}
+summary(iv1, vcovHC(iv1, type = "HC1"), diagnostics = TRUE)
+```
+
+**Test de "weak instruments"** (instruments faibles) : H0 = instrument faible. 
+
+Ici, la p-valeur est inférieure à 0.01, on rejette donc H0 au seuil de significativité de 1% et l'instrument semble pertinent. 
+
+**Test de Wu-Hausman :** H0 = pas de différence significative entre l'estimateur des MCO et celui des variables instrumentales. 
+
+Ici, on ne peut pas rejeter HO.
+
+**Entraînement :** faire la même chose avec l'année 1985
+
+```{r}
+c1985 <- subset(CigarettesSW, year == "1985")
+
+S1_85 <- lm(log_price ~ tax_reel, data = c1985)
+summary(S1)
+
+c1985$log_price_pred <- predict(S1)
+
+S2_85 <-lm(log_packs ~ log_price_pred, c1985)
+summary(S2)
+
+iv2 <- ivreg(log_packs ~ log_price | tax_reel , data = c1985)
+summary(iv2, vcovHC(iv2, type = "HC1"), diagnostics = TRUE)
+```
+
+# Ajout d'un régresseur manquant
+
+On ajoute maintenant un autre régresseur : le log du revenu total de chaque Etat, qui est également susceptible d'affecter la demande de cigarettes. 
+
+Pourquoi ? Parce que le revenu total d’un État peut influencer la demande de cigarettes : un État plus riche pourrait avoir une population qui consomme différemment, indépendamment du prix.
+
+Si on ne l'inclut pas et que la taxe à la consommation est corrélée avec les revenus de l'état (e.g. recettes fiscales), alors la taxe à la consommation est corrélée avec le terme d'erreur de notre modèle et on a un non-respect de la condition d'exogénéité qui biaise notre coefficient IV.
+Ainsi, avec ce contrôle, le coefficient du prix reflète mieux l’effet causal réel sur la demande de cigarettes.
+
+Une variable de contrôle doit être incluse à la fois dans la première étape (lorsque les instruments sont utilisés pour prédire X) et dans la deuxième étape (pour expliquer Y).
+
+```{r}
+c1995$log_income <- log(c1995$income)
+
+iv1_bis <- ivreg(log_packs ~ log_price + log_income | log_income + tax_reel , data = c1995)
+summary(iv1_bis, vcovHC(iv1_bis, type = "HC1"), diagnostics = TRUE)
+```
+Le coefficient de log_price diminue avec le contrôle de log_income. C'est un signe qu'il y avait bien un problème d'endogénéité persistent.
+
+# Test de la condition de sur-identification
+
+Il nous faut plus d'instruments que de variables explicatives endogènes (**sur-identification**).
+
+On ajoute donc un autre instrument, la taxe générale sur les ventes de cigarettes :
+
+La taxe générale sur les ventes de cigarettes (taxe spécifique aux cigarettes + TVA) pourrait être un instrument pertinent (une hausse de la taxe sur les cigarettes augmente les prix TTC des cigarettes) et exogène (cette taxe affecte la demande de cigarette indirectement, seulement à travers le prix des cigarettes).
+
+```{r}
+c1995$taxs_reel <- c1995$taxs / c1995$cpi
+
+iv3 <- ivreg(log_packs ~ log_price + log_income | log_income + tax_reel + taxs_reel , data = c1995)
+summary(iv3, vcovHC(iv3, type = "HC1"), diagnostics = TRUE)
+```
+
+**Test de Sargan :** H0 = les deux instruments ont des chances d’être exogènes
+
+Ici, on rejette H0, donc un de nos instrument au moins est invalide.
+
+Pourquoi ? Les Etats spécialisés dans la production de tabac peuvent avoir une plus forte consommation de cigarettes et aussi un intérêt à garder les taxes sur les cigarettes basses (pour stimuler la demande et soutenir la production) par exemple. Cela suggère qu'un facteur omis dans la demande de cigarettes - le fait que l'État cultive du tabac et produise des cigarettes - pourrait être corrélé avec les taxes spécifiques aux cigarettes. 
+
+# Estimateur des variables instrumentales avec effets fixes
+
+Même si la production de tabac n’est pas observée, inclure des effets fixes au niveau État permet de contrôler les caractéristiques permanentes des États (production, culture, politiques locales), ce qui réduit le biais dans l’estimation de l’effet causal du prix sur la demande.
+
+On peut également inclure des effets fixes "année" pour absorber toute variation qui affecte la demande de cigarettes et les prix pour tous les États la même année.
+
+```{r}
+library(fixest)
+
+CigarettesSW$taxs_reel <- CigarettesSW$taxs / CigarettesSW$cpi
+CigarettesSW$log_income <- log(CigarettesSW$income)
+
+# iv regression avec effets fixes
+iv_model <- feols(
+  log_packs ~ log_income | state + year | log_price ~ tax_reel + taxs_reel,
+  data = CigarettesSW, cluster = "state"
+)
+
+summary(iv_model, robust = TRUE)
+```
+
+Le test de Sargan vérifie l’hypothèse nulle (p-valeur < 0.01): les instruments utilisés sont valides (exogènes, non corrélés avec l’erreur).
+
+
