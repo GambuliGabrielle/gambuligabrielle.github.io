@@ -22,7 +22,7 @@ highlight_code = false
 avatar = "static/image/profil/Gambuli_Gabrielle-02E.jpg"
 favicon = "static/image/favicon_gg.png"
 
-email = "gabrielle.gambuli@gmail.com"
+email = "gabrielle.gambuli@univ-nantes.fr"
 
 menu_items = [
 {path = "#", name= "Home"},
