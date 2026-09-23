@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gabrielle Gambuli">
+
+<title>Explorer les inégalités spatiales</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="tuto_02_gecon_files/libs/clipboard/clipboard.min.js"></script>
+<script src="tuto_02_gecon_files/libs/quarto-html/quarto.js"></script>
+<script src="tuto_02_gecon_files/libs/quarto-html/popper.min.js"></script>
+<script src="tuto_02_gecon_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="tuto_02_gecon_files/libs/quarto-html/anchor.min.js"></script>
+<link href="tuto_02_gecon_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="tuto_02_gecon_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="tuto_02_gecon_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="tuto_02_gecon_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="tuto_02_gecon_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Explorer les inégalités spatiales</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Gabrielle Gambuli </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<p><strong>Quelques librairies importantes pour ce tuto :</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readxl)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(purrr)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fixest)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rnaturalearth)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="télécharger-les-données-gecon" class="level2">
+<h2 class="anchored" data-anchor-id="télécharger-les-données-gecon">Télécharger les données GEcon</h2>
+<p>Téléchargez les données <strong>G-Econ</strong> depuis la page officielle du projet : <a href="https://gecon.yale.edu/data-and-documentation-g-econ-project"><strong>→ Accéder aux données et à la documentation G-Econ</strong></a></p>
+<p>Et sauvegarder les dans le dossier que vous avez créé pour ce cours.</p>
+<p>Ca ressemble sûrement à</p>
+<p>cours_master2 &gt; cours_eco_geo &gt; data</p>
+<p>Prenez un petit temps pour regarder dans le fichier excel le nom des variables et leur définition.</p>
+</section>
+<section id="importer-les-données-dans-rstudio" class="level2">
+<h2 class="anchored" data-anchor-id="importer-les-données-dans-rstudio">Importer les données dans RStudio</h2>
+<p>Commencez par <strong>repérer le chemin d'accès</strong> au fichier contenant vos données.</p>
+<p>Remplacez ensuite le chemin indiqué dans le code ci-dessous par <strong>le chemin correspondant à votre fichier</strong>, puis exécutez le code dans R pour importer les données.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>your_path <span class="ot">&lt;-</span> <span class="st">"G:/Mon Drive/TEACHING/MCF_Nantes/cours/M2_eco_spatiale/materiel/GEcon/Gecon40_post_final.xls"</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>Gecon <span class="ot">&lt;-</span> <span class="fu">read_excel</span>(your_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Ces données sont <strong>spatiales</strong>, mais elles ne contiennent pas encore de géométrie à proprement parler : chaque carreau est simplement identifié par les coordonnées <strong>latitude–longitude de son coin inférieur gauche</strong>.</p>
+<p>Avant de pouvoir les exploiter comme des données géographiques, nous allons donc :</p>
+<ol type="1">
+<li><p><strong>nettoyer et préparer les données</strong> ;</p></li>
+<li><p><strong>indiquer leur système de coordonnées de référence (CRS)</strong>.</p></li>
+</ol>
+<p>Les coordonnées étant exprimées en <strong>latitude–longitude</strong>, nous utiliserons le <strong>WGS 84 (EPSG:4326)</strong> comme système de référence.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="do">## Construire la géométrie de la données : des carreaux</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Gecon<span class="sc">$</span>geometry <span class="ot">&lt;-</span> <span class="fu">map2</span>(</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  Gecon<span class="sc">$</span>LONGITUDE,</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  Gecon<span class="sc">$</span>LAT,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span> <span class="fu">st_polygon</span>(<span class="fu">list</span>(</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">matrix</span>(</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">c</span>(</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>        .x,     .y,</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>        .x <span class="sc">+</span> <span class="dv">1</span>, .y,</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>        .x <span class="sc">+</span> <span class="dv">1</span>, .y <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>        .x,     .y <span class="sc">+</span> <span class="dv">1</span>,</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>        .x,     .y</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>      ),</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="at">ncol =</span> <span class="dv">2</span>,</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>      <span class="at">byrow =</span> <span class="cn">TRUE</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>  ))</span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="do">## Transformer votre objet en objet spatial (sf)</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>Gecon <span class="ot">&lt;-</span> <span class="fu">st_as_sf</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a>  Gecon,</span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a>  <span class="at">crs =</span> <span class="dv">4326</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="exercice-1-explorer-les-disparités-spatiales" class="level2">
+<h2 class="anchored" data-anchor-id="exercice-1-explorer-les-disparités-spatiales">EXERCICE 1 : Explorer les disparités spatiales</h2>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+A vous de jouer !
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<section id="construire-les-variables-dintérêt" class="level3">
+<h3 class="anchored" data-anchor-id="construire-les-variables-dintérêt">1. Construire les variables d'intérêt</h3>
+<p>Calculez :</p>
+<ul>
+<li><p>le <strong>logarithme de la population en 2005</strong>, à partir de la variable <code>POPGPW_2005_40</code> ;</p></li>
+<li><p>le <strong>logarithme du PIB par habitant en 2005</strong>, à partir de la variable <code>PPP2005_40</code>.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>Attention aux unités !</strong><br>
+La population est exprimée en <strong>unités</strong>, tandis que le PIB est exprimé en <strong>milliards</strong>. Pensez donc à convertir les unités avant de calculer le PIB par habitant.</p>
+</blockquote>
+</section>
+<section id="visualiser-les-distributions" class="level3">
+<h3 class="anchored" data-anchor-id="visualiser-les-distributions">2. Visualiser les distributions</h3>
+<p>Visualisez ces deux variables sur une <strong>carte interactive</strong> à l'aide de la fonction <code>mapview()</code>.</p>
+<p>Comparez les deux cartes et décrivez brièvement les principaux motifs spatiaux que vous observez.</p>
+</section>
+<section id="quel-rôle-joue-la-géographie" class="level3">
+<h3 class="anchored" data-anchor-id="quel-rôle-joue-la-géographie">3. Quel rôle joue la géographie ?</h3>
+<p>Nous allons maintenant chercher à quantifier dans quelle mesure les caractéristiques géographiques permettent d’expliquer les différences de <strong>population</strong> et de <strong>PIB par habitant</strong>.</p>
+<section id="estimer-les-modèles" class="level4">
+<h4 class="anchored" data-anchor-id="estimer-les-modèles">3.1 Estimer les modèles</h4>
+<p>Estimez deux modèles OLS :</p>
+<ol type="1">
+<li><p>un modèle expliquant le <strong>log de la population en 2005</strong> ;</p></li>
+<li><p>un modèle expliquant le <strong>log du PIB par habitant en 2005</strong>.</p></li>
+</ol>
+<p>Dans les deux cas, utilisez comme variables explicatives :</p>
+<ul>
+<li><p>le log de la distance à l’océan ;</p></li>
+<li><p>le log de la distance à la rivière la plus proche ;</p></li>
+<li><p>le log de la moyenne des précipitations ;</p></li>
+<li><p>la température moyenne ;</p></li>
+<li><p>la température moyenne au carré ;</p></li>
+<li><p>le log de l’élévation ;</p></li>
+<li><p>le log de l’élévation au carré ;</p></li>
+<li><p>des <strong>effets fixes par pays</strong>.</p></li>
+</ul>
+<p>Pour estimer les modèles, utilisez la fonction <code>feols()</code> du package <strong><code>fixest</code></strong>. Sa syntaxe générale est :</p>
+<pre><code>feols(y ~ x1 + x2 | effet_fixe, data = Gecon)</code></pre>
+<p>Le symbole <code>|</code> permet ici d’indiquer les <strong>effets fixes</strong>.</p>
+</section>
+<section id="comparer-les-modèles" class="level4">
+<h4 class="anchored" data-anchor-id="comparer-les-modèles">3.2 Comparer les modèles</h4>
+<p>Comparez les résultats obtenus pour les deux modèles : <strong>population</strong> et <strong>PIB par habitant</strong>.</p>
+<p>Commencez par examiner les <strong>coefficients estimés</strong>.</p>
+<ul>
+<li><p>Quels coefficients diffèrent le plus entre les deux modèles ?</p></li>
+<li><p>Comment interpréter ces différences ?</p></li>
+<li><p>Pouvez-vous proposer des mécanismes économiques ou géographiques susceptibles de les expliquer ?</p></li>
+</ul>
+<p>Intéressez-vous ensuite aux deux mesures de qualité d'ajustement :</p>
+<ul>
+<li><p>le <strong>R²</strong> ;</p></li>
+<li><p>le <strong>R² within</strong>.</p></li>
+</ul>
+<blockquote class="blockquote">
+<p><strong>À retenir :</strong> le R² mesure la part de la variance totale expliquée par le modèle, tandis que le R² within mesure la part de la variance <strong>au sein des pays</strong> expliquée par les variables du modèle, une fois prise en compte l'hétérogénéité entre les pays.</p>
+</blockquote>
+<p><strong>Questions :</strong></p>
+<ol type="1">
+<li><p>Que remarquez-vous lorsque vous comparez le <strong>R²</strong> et le <strong>R² within</strong> ?</p></li>
+<li><p>Que nous apprend cette comparaison sur le rôle de la géographie <strong>entre les pays</strong> et <strong>au sein des pays</strong> ?</p></li>
+<li><p>Les résultats sont-ils similaires pour la <strong>population</strong> et pour le <strong>PIB par habitant</strong> ?</p></li>
+<li><p>Que peut-on en déduire sur l'importance relative de la géographie pour expliquer ces deux distributions ?</p></li>
+</ol>
+</section>
+</section>
+</div>
+</div>
+</section>
+<section id="exercice-2-la-loi-de-zipf" class="level2">
+<h2 class="anchored" data-anchor-id="exercice-2-la-loi-de-zipf">EXERCICE 2 : La loi de Zipf</h2>
+<p>La loi de Zipf décrit la relation entre la taille d’une ville et son rang dans la hiérarchie urbaine.</p>
+<p>Si l’on classe les villes par population décroissante, la population de la ville de rang r est donnée par : <span class="math inline">\(P_r = P_1 r^{-q}\)</span></p>
+<p>où :</p>
+<p>- <span class="math inline">\(P_r\)</span> est la population de la ville de rang <span class="math inline">\(r\)</span> ;</p>
+<p>- <span class="math inline">\(P_1\)</span> est la population de la ville la plus peuplée ;</p>
+<p>- <span class="math inline">\(r\)</span> est le rang de la ville ;</p>
+<p>- <span class="math inline">\(q\)</span> mesure la vitesse à laquelle la population décroît lorsque le rang augmente.</p>
+<p>La loi de Zipf correspond au cas particulier où :</p>
+<p><span class="math inline">\(\boxed{q \simeq 1}\)</span></p>
+<p>Dans ce cas, la population est approximativement inversement proportionnelle au rang :</p>
+<p><span class="math inline">\(P_r \simeq \frac{P_1}{r}\)</span></p>
+<p>On va tester cette relation à partir des données GEcon.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+A vous de jouer !
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<section id="construire-le-rang-des-carreaux" class="level3">
+<h3 class="anchored" data-anchor-id="construire-le-rang-des-carreaux"><strong>1. Construire le rang des carreaux</strong></h3>
+<p>À partir de la population, classez les carreaux par ordre décroissant de population et attribuez un rang à chacun :</p>
+<p>- rang 1 au carreau le plus peuplé ;</p>
+<p>- rang 2 au deuxième carreau le plus peuplé ;</p>
+<p>- etc.</p>
+</section>
+<section id="visualiser-la-relation" class="level3">
+<h3 class="anchored" data-anchor-id="visualiser-la-relation">2. Visualiser la relation</h3>
+<p>Représentez graphiquement la population $P_r$ en fonction du rang $r$.</p>
+<p>Que constatez-vous sur la forme de la distribution ?</p>
+</section>
+<section id="tester-la-loi-de-zipf" class="level3">
+<h3 class="anchored" data-anchor-id="tester-la-loi-de-zipf">3. Tester la loi de Zipf</h3>
+<p>La relation <span class="math inline">\(P_r = P_1 r^{-q}\)</span> peut être transformée en prenant le logarithme comme ceci:</p>
+<p><span class="math inline">\(\log(P_r) = \log(P_1) - q\log(r)\)</span></p>
+<p>Estimez cette relation par MCO (OLS).</p>
+<p>- Quel est le coefficient associé à <span class="math inline">\(\log(r)\)</span> ?</p>
+<p>- Que représente-t-il ?</p>
+<p>- La valeur estimée de <span class="math inline">\(q\)</span> est-elle proche de 1 ?</p>
+</section>
+<section id="vérifier-la-constante" class="level3">
+<h3 class="anchored" data-anchor-id="vérifier-la-constante">4. Vérifier la constante</h3>
+<p>Dans l’équation théorique, la constante doit être égale à <span class="math inline">\(\log(P_1)\)</span>. Comparez la constante estimée à <span class="math inline">\(\log(P_1)\)</span>. Est-elle proche de cette valeur ?</p>
+</section>
+<section id="imposer-la-constante-théorique" class="level3">
+<h3 class="anchored" data-anchor-id="imposer-la-constante-théorique">5. Imposer la constante théorique</h3>
+<p>On peut également estimer directement la pente en imposant que la constante soit égale à <span class="math inline">\(\log(P_1)\)</span>. Comment faire ?</p>
+<p>En contraignant la valeur de la constante, quelle valeur obtenez-vous pour <span class="math inline">\(q\)</span> ?</p>
+</section>
+<section id="conclusion" class="level3">
+<h3 class="anchored" data-anchor-id="conclusion">6. Conclusion</h3>
+<p>La distribution de la population des carreaux est-elle compatible avec une loi de Zipf ? Comparez votre estimation de <span class="math inline">\(q\)</span> à la valeur théorique <span class="math inline">\(q=1\)</span>.</p>
+</section>
+</div>
+</div>
+</section>
+<section id="exercice-3-la-beta-et-la-sigma-convergence" class="level2">
+<h2 class="anchored" data-anchor-id="exercice-3-la-beta-et-la-sigma-convergence">EXERCICE 3 : la <span class="math inline">\(\beta\)</span> et la <span class="math inline">\(\sigma\)</span> convergence</h2>
+<p>À partir des données GEcon, nous allons tester si les territoires initialement pauvres connaissent une croissance plus rapide et comment les disparités de PIB par habitant évoluent au cours du temps.</p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+A vous de jouer !
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<section id="beta-convergence-dans-le-monde" class="level3">
+<h3 class="anchored" data-anchor-id="beta-convergence-dans-le-monde">1. <span class="math inline">\(\beta\)</span>-convergence dans le monde</h3>
+<p>Construisez :</p>
+<p>- le logarithme du PIB par habitant au début de la période (1990) ;</p>
+<p>- le taux de croissance du PIB par habitant entre le début et la fin de la période (2005).</p>
+<p>Estimer :</p>
+<p><span class="math inline">\(\frac{1}{T}\ln\left(\frac{y_{i,T}}{y_{i,0}}\right) = \alpha+\beta\ln(y_{i,0})+\varepsilon_i\)</span></p>
+<p>avec <code>feols()</code>.</p>
+<p><strong>Interprétez le coefficient</strong> <span class="math inline">\(\beta\)</span><strong>. Les données mettent-elles en évidence une</strong> <span class="math inline">\(\beta\)</span><strong>-convergence ?</strong></p>
+</section>
+<section id="beta-convergence-au-sein-des-pays" class="level3">
+<h3 class="anchored" data-anchor-id="beta-convergence-au-sein-des-pays">2. <span class="math inline">\(\beta\)</span>-convergence au sein des pays</h3>
+<p>Ré-estimez le modèle en ajoutant un <strong>effet fixe pays</strong> :</p>
+<p><span class="math inline">\(\frac{1}{T}\ln\left(\frac{y_{i,T}}{y_{i,0}}\right) = \alpha+\beta\ln(y_{i,0})+\gamma_c+\varepsilon_i\)</span></p>
+<p>Comparez le coefficient <span class="math inline">\(\beta\)</span> avec celui obtenu précédemment.</p>
+<p>Que change l’introduction des effets fixes pays ?</p>
+</section>
+<section id="sigma-convergence" class="level3">
+<h3 class="anchored" data-anchor-id="sigma-convergence">3. <span class="math inline">\(\sigma\)</span>-convergence</h3>
+<p>Calculez, pour chaque année, la dispersion du PIB par habitant entre les carreaux :</p>
+<p><span class="math inline">\(\sigma_t = SD\left(\ln y_{i,t}\right)\)</span></p>
+<p>Représentez graphiquement l’évolution de <span class="math inline">\(\sigma_t\)</span> au cours du temps. Les disparités de PIB par habitant diminuent-elles ?</p>
+</section>
+<section id="cartographier-la-convergence" class="level3">
+<h3 class="anchored" data-anchor-id="cartographier-la-convergence">4. Cartographier la convergence</h3>
+<p>Calculez, pour chaque pays :</p>
+<p><span class="math inline">\(\Delta\sigma_c = \sigma_{c,2005}-\sigma_{c,1990}\)</span></p>
+<p>A l’aide d’un indicateur, identifiez les pays où :</p>
+<p>- <span class="math inline">\(\Delta\sigma_c &lt; 0\)</span> : convergence</p>
+<p>- <span class="math inline">\(\Delta\sigma_c &gt; 0\)</span> : divergence</p>
+<p>Représentez <span class="math inline">\(\Delta\sigma_c\)</span> ou votre indicateur binaire convergence/divergence sur une carte en utilisant le package <code>rnaturalearth</code>.</p>
+<p>Grâce au package, vous pouvez importer directement depuis RStudio le contours sf des pays en exécutant ce code :</p>
+<pre><code>mappemonde &lt;- ne_countries(scale = "small", returnclass = "sf")
+mappemonde &lt;- mappemonde %&gt;% 
+  select(admin, adm0_a3, gdp_md, pop_est, income_grp, geometry) %&gt;% # on sélectionne certaines variables pour ne pas être submergées par des variables dont on n'a pas besoin
+  arrange(admin)</code></pre>
+<p>Petit challenge : comment merger vos indicateurs d’évolution de dispersion niveau pays de <code>GEcon</code> à la base <code>mappemonde</code> ?</p>
+<p>Les dynamiques de convergence et de divergence présentent-elles une structure géographique ?</p>
+</section>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
