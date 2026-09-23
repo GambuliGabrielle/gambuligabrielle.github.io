@@ -22,4 +22,7 @@ Ce cours, destiné aux étudiants du M2 ECAP, propose une introduction à l’é
 	- [Tutoriel partie 1](/teaching/economie-geographique-et-urbaine-graduate/tutoriel_02_1_intro_donnees_spatiales.html) + [correction](/teaching/economie-geographique-et-urbaine-graduate/correction_tuto_02_partie_1.R)
 
 	- [Tutoriel partie 2](/teaching/economie-geographique-et-urbaine-graduate/tuto_02_gecon.html) + [correction exercice 1](/teaching/economie-geographique-et-urbaine-graduate/correction_tuto_02_partie_2_ex_1.R)
-
+- Séance 3
+	- Slides disponibles après la séance
+	- Tutoriel de la séance 2, partie 2 (exercices 2 et 3)
+	- [Consignes pour vos projets](/teaching/economie-geographique-et-urbaine-graduate/consigne_projets_binome.pdf)
