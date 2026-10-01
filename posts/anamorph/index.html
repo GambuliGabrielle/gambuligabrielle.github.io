@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  
+  <link rel="shortcut icon" href="https:&#x2F;&#x2F;gambuligabrielle.github.io&#x2F;processed_images&#x2F;favicon_gg.5f2f3da2fec3bd65.png" type="image/png">
+  <link rel="icon" href="https:&#x2F;&#x2F;gambuligabrielle.github.io&#x2F;processed_images&#x2F;favicon_gg.5f2f3da2fec3bd65.png" type="image/png">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta charset="utf-8">
+
+  <!-- Custom header for users, includes custom css or js here -->
+  
+<meta name="google-site-verification" content="F-sOmnGsjpGYBgvXgphV7xoHP6aPzmQb4AxCulhnwOc" />
+<title> Gabrielle Gambuli</title>
+
+  
+<!-- CSS -->
+<link rel="stylesheet" href="https://gambuligabrielle.github.io/styles/styles.css" />
+
+    <title>Posts |  Gabrielle Gambuli</title>
+</head>
+
+<body class="bg-white">
+  <!-- Top nav bar -->
+  
+  
+  
+<nav id="header" class="w-full z-10 top-0 shadow-md mx-0">
+  <div id="progress" class="top-0"></div>
+  <!-- <div class="w-full max-w-5xl mx-auto flex flex-wrap items-center justify-between mt-0 py-2  sm:bg-green-900 md:bg-red-900 lg:bg-blue-900 bg-yellow-900"> -->
+  <div class="w-full max-w-4xl mx-auto flex sm:flex-nowrap flex-wrap items-center justify-between mt-0 py-2">
+    <div class="pl-4">
+      <a class="text-gray-900 text-base no-underline hover:no-underline font-extrabold" href="https:&#x2F;&#x2F;gambuligabrielle.github.io">
+        Gabrielle Gambuli
+      </a>
+    </div>
+
+    <div class="w-full flex-grow sm:flex sm:items-center flex-wrap sm:flex-nowrap sm:w-auto sm:block mt-2 sm:mt-0 bg-transparent z-20" id="nav-content">
+      <ul class="list-reset flex flex-wrap sm:justify-end flex-1 items-center">
+          <li class="mr-3 text-sm">
+            <a href=https://gambuligabrielle.github.io/# class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+              Home
+            </a>
+          </li>
+          <li class="mr-3 text-sm">
+            <a href=https://gambuligabrielle.github.io/CV/CV_Gambuli.pdf class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+              CV
+            </a>
+          </li>
+          <li class="mr-3 text-sm">
+              <a href=https://gambuligabrielle.github.io/publications class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+                Research
+              </a>
+            </li>
+            <li class="mr-3 text-sm">
+              <a href=https://gambuligabrielle.github.io/teaching class="inline-block text-gray-600 no-underline hover:text-gray-900 hover:text-underline py-2 px-4">
+                Teaching
+              </a>
+            </li>
+            <li class="mr-3 text-sm">
+              <a href=https://gambuligabrielle.github.io/posts class="inline-block py-2 px-4 text-sky-600 font-bold no-underline">
+                Posts
+              </a>
+            </li>
+            </ul>
+    </div>
+  </div>
+
+</nav>
+
+<!-- Container -->
+  
+<div class="container max-w-3xl mx-auto px-4">
+  <div class="pt-8 flex flex">
+    <h1 class="grow font-bold font-sans break-normal text-gray-900 text-3xl">France in Motion: High-Speed Rails Distorting Distances</h1>
+    <p class="text-sm md:text-base font-normal text-gray-600 py-2">Published 2023-04-06</p>
+  </div>
+  <hr class="border-b-1 border-gray-400 mb-8">
+  
+  <article class="prose prose-indigo prose max-w-3xl">
+    <p>Anamorphic maps are a unique way of visualizing spatial data. In contrast to traditional maps, which prioritize accuracy in representing shapes and distances, anamorphic maps intentionally distort the shapes of geographical areas to highlight specific features, such as population density or economic activity. This approach can provide a fresh perspective on familiar geographic features and reveal new patterns and insights.</p>
+<p>As part of my research, I study the effect of the evolution of train travel times on regional interactions in France. As the network expended, high-speed railways has allowed to substantially decrease train travel times between cities over the years, leading to a shift in our perception of distance. In this post, using our unique train  travel time dataset (Gambuli and Stipanicic, forthcoming) and employing anamorphic techniques, I illustrate this great distortion of the relationship between space and time.</p>
+<p align="center" width="100%">
+	<b>Train Travel Time from Paris</b>
+	<img src="/image/anamorph/anamorphparis.gif" alt="Example GIF" width="70%">
+</p>
+<p>To create an anamorphic map reflecting alterations in distances corresponding to changes in travel time, we need to identify a fixed point, <em>in this case, let's consider Paris</em>, and other points, <em>other big cities</em>, within the spatial polygon of France. Additionally, we need to define a reference year, <em>1980, before the first high-speed rail roll-out</em>. The shape of France and the positioning of cities in relation to Paris are going to be normalized based on travel time to Paris in 1980. This standardization serves as the benchmark for comparing travel times in subsequent years.</p>
+<p>The goal is to depict the gradual convergence of cities toward Paris as high-speed railways expand. This involves deriving updated coordinates for each city after each high-speed rail rollout.
+To achieve this, I calculate the travel time ratio for year <em>t</em> relative to the baseline year 1980, serving as a scaling factor for distances between Paris and other cities. Simultaneously, I determine the bearing for each city, representing the direction from Paris as an angle measured from the north.
+By multiplying the original distance between Paris and each city by the travel time ratio and adjusting the bearing, I obtain the new coordinates following high-speed rail implementation.</p>
+<p>The final step involves plotting the distorted map of France using these updated coordinates for each city, along with all the points outlining national borders.
+The resulting maps depict the evolving spatial connections between Paris and major cities in France, illustrating the alterations in perceived distances driven by changes in travel time over the years.</p>
+<p>Discover above how the French high-speed railway has improved travel time from Paris to other cities between 1980 and 2020, and see cities that have become more accessible.
+Below, you will also find maps from the perspectives of Lyon and Bordeaux.</p>
+<p align="center" width="100%">
+	<b>Train Travel Time from Lyon</b>
+	<img src="/image/anamorph/anamorphlyon.gif" alt="Example GIF" width="70%">
+</p>
+<p align="center" width="100%">
+	<b>Train Travel Time from Bordeaux</b>
+	<img src="/image/anamorph/anamorphbordeaux.gif" alt="Example GIF" width="70%">
+</p>
+<p><img src="/image/signature.png" alt="" /></p>
+
+  </article>
+</div>
+<!-- <div class="sticky bottom-0 px-3">
+    <a href="#page-top">Back to top of page</a>
+  </div> -->
+  <footer class="bg-white">
+    <div class="bg-white text-gray-400 container max-w-4xl mx-auto my-8 px-4">
+    © Gabrielle Gambuli.
+    Built with <a class="underline" target="_blank" href="https://www.getzola.org">Zola</a>.
+    </div>
+  </footer>
+  </body>
+
+</html>

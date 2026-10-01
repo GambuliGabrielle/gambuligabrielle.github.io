@@ -1,0 +1,251 @@
+---
+title: "Exercice 2 - régression linéaire simple"
+# author: "Gabrielle Gambuli"
+date: "2026-02-03"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Quel est l’impact de la vitesse sur la distance de freinage d’une voiture ? {-}
+
+*A priori* : quel est l’effet anticipé ?
+
+**Objectifs :** 
+
+* Charger une base de données dans R
+
+* Regarder et décrire les données
+
+* Mettre en place une stratégie économétrique
+
+* Interpréter les coefficients estimés et leur inférence statistique
+
+* Répondre à la question initiale 
+
+# Chargement des données 
+
+Ici le jeu de données est déjà disponibles dans R donc on utilise la fonction data().
+
+```{r}
+data(cars)
+```
+
+*Vous pouvez visualiser les données disponibles dans R en exécutant :* data()
+
+# Etude des données
+
+Il est possible ici de faire appel à l'aide (Help) de R car il s'agit de données disponibles dans R.
+
+On peut également utiliser la fonction help().
+
+```{r, message=FALSE}
+?cars
+```
+
+**Vitesse et distances d'arrêt des voitures**
+
+**Description :** Les données indiquent la vitesse des voitures et les distances nécessaires pour s'arrêter. Notez que les données ont été enregistrées dans les années 1920.
+
+**Usage :** cars
+
+**Format :** Un data.frame avec 50 observations sur 2 variables.
+
+*	speed	: numerique, vitesse en milles - miles - par heure (mph).
+
+*	dist	: numerique, distance d'arrêt en pieds - feet- (ft).
+
+**Source :** Ezekiel, M. (1930) Methods of Correlation Analysis. Wiley.
+
+**Références :** McNeil, D. R. (1977) Interactive Data Analysis. Wiley.
+
+## Nombre de lignes et colonnes
+
+```{r}
+dim(cars)
+```
+
+50 lignes (observations), 2 colonnes (variables).
+
+## Nom des variables
+
+```{r}
+names(cars)
+```
+
+speed pour vitesse (mph) et dist pour distance d'arrêt (ft).
+
+## Type de chaque variable (fonction class)
+
+La fonction lapply() applique une fonction à chaque éléments d'une liste ou d'un data.frame.
+
+Ici, la fonction unlist() nous sert uniquement à avoir un résulat plus lisible.
+
+```{r}
+unlist(lapply(cars, class))
+```
+
+Les deux variables sont de type numérique.
+
+On peut également utiliser la fonction str() ou typeof().
+
+**Les différents types de variables sur R :**
+
+* **numériques** (quantitatives : entier/"integer", décimale/"double")
+
+* **facteurs** (ensemble défini de modalités)
+
+* **caractères** (chaînes de caractères)
+
+* **booléennes** ("logical" : vrai/"TRUE" ou faux/"FALSE")
+
+# Visualiser les données
+
+On peut utiliser la fonction View() ou edit() pour visualiser l'ensemble des données. La seconde permet de faire des modifications.
+
+head() permet de visualiser le nombre de lignes souhaité, utile quand la base de données est grande.
+
+```{r}
+head(cars, 10)
+```
+
+# Statistiques descriptives
+
+## Tableau
+
+```{r}
+summary(cars)
+```
+
+En moyenne, la vitesse des voitures de notre échantillon des années 1920s, est de 15.4 milles par heure (mph).
+
+25%  des voitures de notre échantillon des années 1920s roulent à une vitesse inférieure à 12 milles par heure et 75% roulent à une vitesse supérieure.
+
+Les voitures de notre échantillon des années 1920s ont besoin d'entre 2 et 120 pieds (feet) pour s'arrêter.
+
+50% des voitures de notre échantillon des années 1920s prennent moins de 36 pieds pour s'arrêter et 50% plus.
+
+## Graphique
+
+Comment semble varier la distance en fonction de la vitesse ?
+
+**Important :** On nomme les axes du graphique et on lui donne un titre.
+
+```{r}
+plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)")
+title("Speed and Stopping Distances of Cars")
+```
+
+Pour un graphe encore plus beau, utilisez la librairie ggplot2 et sa fonction.
+
+```{r}
+library(ggplot2)
+
+ggplot(cars, aes(x = speed, y = dist)) +
+  geom_point(color = "dodgerblue", size = 3, alpha = 0.6) + # vous pouvez retoucher la couleur (color), la taille des points (size) et la transparence (alpha)
+  labs(
+    title = "Speed and Stopping Distances of Cars",
+    x = "Speed (mph)",
+    y = "Stopping distance (ft)"
+  ) +
+  theme_minimal() # thème claire
+
+```
+
+On semble observer une relation positive entre la distance et la vitesse : une vitesse plus importante nécessiterait une distance de freinage plus longue.
+
+Estimons la régression entre ces deux variables pour vérifier.
+
+# Régression linéaire simple
+
+Régression linéaire de la distance d'arrêt sur la vitesse
+
+Ici, on affecte les résultats à un objet appelé reg1, qu'on appelle ensuite pour voir les résultats.
+
+```{r}
+reg1 <- lm(cars$dist ~ cars$speed)
+reg1
+```
+
+On obtient un coefficient positif de 3.93, qui semble confirmer la relation positive entre les deux variables (il faut encore vérifier sa significativité statistique).
+
+Ici, il y a peu d'intérêt à interpréter la constante (-17.58) car cela n'a pas de sens de regarder la distance d'arrêt d'un véhicule quand la vitesse est nulle.
+
+## Coefficients, significativité et tests 
+
+On affiche toutes les informations de la régression, notamment les valeurs des tests, la significativité des coefficients.
+
+```{r}
+summary(reg1)
+```
+
+Un R² de 0,65 indique que notre modèle (nos variables explicatives - la vitesse - modélisées à l'aide de la régression linéaire) explique environ 65 % de la variation de la variable dépendante (la distance de freinage des voitures de notre échantillon).
+
+Le coefficient β s’interprète comme l’effet marginal d’une unité supplémentaire de la variable explicative sur la variable expliquée (dans l'unité de la variable expliquée). Ici, la distance de freinage des voitures de notre échantillon augmente de 3.93 pieds pour un mille par heure de vitesse supplémentaire.
+
+Ce coefficient est hautement significatif statistiquement.
+
+**Attention :** il s'agit ici d'une interprétation de coefficient de régression pour un **modèle linéaire en niveau** (ou niveau-niveau, les deux variables sont exprimées en niveau, la relation est linéaire). L'interprétation est différente pour un modèle : 
+
+* **log-log** (changement de β% de la variable expliquée induite par un changement d'1% de la variable explicative).
+
+* **log-niveau** (changement en pourcentage de la variable expliquée lorsque la variable expliquée augmente d’une unité). Lorsque la variable explicative augmente d’une unité, la variable expliquée augmente donc de 100 × β.
+
+* **niveau-log** (changement en unité de la variable expliquée par rapport à une augmentation d’un pourcent de la variable explicative). Lorsque la variable explicative augmente d’un pourcent, la variable expliquée de β/100 unités.
+
+## Tracer la droite de régression linéaire
+
+Ici, en rouge.
+
+```{r}
+plot(cars, xlab = "Speed (mph)", ylab = "Stopping distance (ft)")
+title("Speed and Stopping Distances of Cars")
+abline(coef = coef(reg1), col = "red")
+```
+
+On observe donc bien qu'une augmentation de la vitesse augmente la distance de freinage des voitures, la corrélation entre ces variables est positive et statistiquement significative.
+
+En plus joli :
+```{r}
+ggplot(cars, aes(x = speed, y = dist)) +
+  geom_point(color = "dodgerblue", size = 3, alpha = 0.6) +
+  geom_abline(
+    intercept = coef(reg1)[1],
+    slope = coef(reg1)[2],
+    color = "red", 
+    linewidth = 1
+  ) +
+  labs(
+    title = "Speed and Stopping Distances of Cars",
+    x = "Speed (mph)",
+    y = "Stopping distance (ft)"
+  ) +
+  theme_minimal()
+```
+
+Ou encore, ave la fonction *geom_smooth* :
+
+```{r}
+ggplot(cars, aes(x = speed, y = dist)) +
+  geom_point(color = "dodgerblue", size = 3, alpha = 0.6) +
+  geom_smooth(
+    method = "lm", # méthode = linear model
+    se = TRUE, # afficher les erreurs standards
+    color = "red",
+    fill = "red",
+    alpha = 0.2
+  ) +
+  labs(
+    title = "Speed and Stopping Distances of Cars",
+    x = "Speed (mph)",
+    y = "Stopping distance (ft)"
+  ) +
+  theme_minimal()
+
+```
