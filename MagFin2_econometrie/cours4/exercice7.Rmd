@@ -1,0 +1,227 @@
+---
+title: "Exercice 7 - Automatiser les répétitions de procédure"
+# author: "Gabrielle Gambuli"
+date: "2025-02-17"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Boucle du modèle d'évaluation pour tous les titres financiers {-}
+
+```{r, include = FALSE}
+CAPM  <-  read.csv("C:/Users/gabri/OneDrive/Documents/Teaching/TD_MagFin2/data/CAPM.csv", header=T, dec=".", sep=";")
+
+CAPM$PR_MOBIL <- CAPM$Ri_MOBIL - CAPM$RF_FREE
+CAPM$PR_TEXACO <- CAPM$Ri_TEXACO - CAPM$RF_FREE
+CAPM$PR_IBM <- CAPM$ Ri_IBM - CAPM$RF_FREE
+CAPM$PR_DATGEN <- CAPM$Ri_DATGEN - CAPM$RF_FREE
+CAPM$PR_TANDY <- CAPM$Ri_TANDY - CAPM$RF_FREE
+CAPM$PR_GERBER <- CAPM$Ri_GERBER - CAPM$RF_FREE
+CAPM$PR_GENMIL <- CAPM$Ri_GENMIL - CAPM$RF_FREE
+
+CAPM$PRM <- CAPM$RM_MARKET - CAPM$RF_FREE
+
+reg_mobil <- lm(CAPM$PR_MOBIL ~ CAPM$PRM)
+
+res_mobil <- residuals(reg_mobil)
+
+yhat_mobil <- fitted(reg_mobil)
+
+plot(CAPM$PRM, CAPM$PR_MOBIL, type="p", xlab="PRM", ylab="PR_Mobil")
+abline(coef=coef(reg_mobil))
+```
+
+Dans l'exercice 5, on a vu qu'on pouvait estimer le Capital Asset Pricing Model (CAPM) pour toutes les actions en une seule commande avec la fonction lapply(). On estimait le modèle linéaire de la prime de risque de toutes les actions par la prime de risque de marché (PRM). 
+
+Dans cet exercice, on voit une autre méthode pour **automatiser la répétition de la procédure** et ainsi éviter de répéter la procédure pour chaque action : la **boucle**.
+
+# Installation et chargement des packages
+
+```{r, message = FALSE, warning = FALSE}
+#install.packages("lmtest")            #pour le test de Breusch-Pagan
+
+library(lmtest)
+```
+
+# Estimation du CAPM
+
+On refait l'estimation du CAPM pour les 7 actions de la base de données de l'exercice 5 simultanément en utilisant une **boucle "for"** plutôt que la fonction lapply().
+
+On répète donc une procédure en faisant une boucle "for" sur un indice i, tel que : 
+
+**for (i in...) { }**
+
+Ici, on veut les résultats complets (fonction summary) des 7 régressions (fonction lm) de chacune des 7 variables expliquées (les primes de risque de toutes les actions inscrites dans les colonnes 10 à 16 de la base de données CAPM) sur la variable explicative (la prime de risque de marché dans la colonne 17 de la base de données CAPM).
+
+```{r}
+reg = list()
+
+for (x in 10:16) {
+  reg[[x]] <- lm(CAPM[, x] ~ CAPM[, 17])
+}
+
+summary(reg[[10]])        #action MOBIL
+summary(reg[[11]])        #action TEXACO
+summary(reg[[12]])        #action IBM
+summary(reg[[13]])        #action DATGEN
+summary(reg[[14]])        #action TANDY
+summary(reg[[15]])        #action GERBER
+summary(reg[[16]])        #action GENMIL
+```
+
+On peut faire autrement, de façon plus lisible :
+```{r}
+# Sélection des noms de variables
+variables <- names(CAPM[, 10:16])
+
+# Liste pour stocker les modèles
+reg2 <- list()
+
+# Boucle pour ajuster les modèles
+for (i in 1:length(variables)) {
+  # Création de la formule dynamique
+  fmla <- as.formula(paste(variables[i], "~ PRM"))
+  
+  # Estimation du modèle
+  reg2[[variables[i]]] <- lm(fmla, data = CAPM)
+  
+  # Affichage du résumé du modèle
+  
+  cat(paste("===== Modèle expliquant",variables[i],"====="))
+  print(summary(reg2[[variables[i]]]))
+}
+
+
+```
+
+# Mise en forme des données en panel 
+
+**On garde uniquement les variables dont on a besoin pour la régression :** les primes de risque (qui sont dans les colonnes 10 à 17 de notre matrice initiale).
+
+```{r}
+new_CAPM <- CAPM[, c(10:17)]
+
+View(new_CAPM)
+```
+
+**On crée 7 nouvelles matrices** (une par action, indexée par i, qui est donc compris entre 1 et 7) avec deux variables : PR de l'action i (colonne i) et PRM (colonne 8).
+
+On les nomme capmi (avec i compris entre 1 et 7), capm1 pour la première action, capm2 pour la deuxième etc.
+
+On répète une procédure en faisant une boucle "for" sur un indice i, tel que : for (i in...) { }.
+
+```{r}
+for (i in 1:7) {
+  assign(paste("capm", i, sep = ""), new_CAPM[, c(i, 8)])
+}
+```
+
+Pour comprendre ce que font les fonctions assign() et paste() :
+
+```{r, message = FALSE}
+help(assign)
+help(paste)
+```
+
+**assign()** permet d'assigner une valeur (ici, la matrice) à un nom (capmi par exemple) et **paste()** de coller des vecteurs convertis en caractères (ici, le mot "capm" et les indices i).
+
+**On crée une liste contenant ces 7 matrices :**
+
+```{r}
+temp = list(capm1,capm2,capm3,capm4,capm5,capm6,capm7)
+```
+
+**Avec la liste, on crée une nouvelle variable indice du titre financier dans chaque matrice :** 
+
+**cbind()** lie deux objets en colonnes, là : on associe à chaque donnée de la liste l'indice i qui lui correspond (120 données pour chaque action).
+
+```{r}
+for (i in 1:7) {
+  temp[[i]] <- cbind(temp[[i]], rep(i, 120))
+}
+```
+
+**On renomme les variables (colonnes) :**
+
+```{r}
+for (i in 1:7) {
+  colnames(temp[[i]]) = c("PR", "PRM", "TITRE")
+}
+```
+
+**On "empile" les différentes matrices en ligne pour obtenir le panel de titres financiers :**
+
+**rbind()** lie deux objets en ligne
+
+```{r}
+CAPM.panel <- rbind(temp[[1]], temp[[2]], temp[[3]], temp[[4]], temp[[5]], temp[[6]], temp[[7]])
+```
+
+# Estimation du CAPM avec données au format panel
+
+**Pour avoir d'un coup les résultats de la régression linéaire sur l'ensemble des matrices :**
+
+on crée d'abord un objet liste (vide) pour stocker les résultats, on fait les régressions et on affiche les résultats.
+
+```{r}
+reg = list()
+
+for (i in 1:7) {
+  reg[[i]] <- lm(temp[[i]]$PR ~ temp[[i]]$PRM)
+}
+
+summary(reg[[1]])        #action MOBIL
+summary(reg[[2]])        #action TEXACO
+summary(reg[[3]])        #action IBM
+summary(reg[[4]])        #action DATGEN
+summary(reg[[5]])        #action TANDY
+summary(reg[[6]])        #action GERBER
+summary(reg[[7]])        #action GENMIL
+
+```
+
+**Pour obtenir uniquement les Beta :**
+
+On applique la fonction lm() avec comme arguments les variables comprises dans les colonnes 1 à 2 de l'objet CAPM.panel (PR et PRM) uniquement pour les données qui sont indexées par le même indice qui est donné dans la troisième colonne de CAPM.panel (l'indice du titre financier).
+
+**by()** applique la fonction (ici lm) séparément à chaque élément de la liste.
+
+```{r}
+by(CAPM.panel[, 1:2], CAPM.panel[, 3], lm)
+```
+
+# Test d'homoscédasticité
+
+On peut ensuite faire pareil pour avoir tous les résultats des tests de résidus, ici le **test de Breusch-Pagan avec approximation de Student :**
+
+```{r}
+BP = list()
+
+for (j in 1:6){
+  BP[[j]] <- bptest(reg[[j]])
+}
+
+BP[[10]]        #action MOBIL
+BP[[11]]        #action TEXACO
+BP[[12]]        #action IBM
+BP[[13]]        #action DATGEN
+BP[[14]]        #action TANDY
+BP[[15]]        #action GERBER
+BP[[16]]        #action GENMIL
+```
+
+La valeur-p est supérieure à 0.05 pour toutes les actions sauf la première (l'action mobil), on ne peut donc pas rejetter l'hypothèse H0 d'homoscédasticité au seuil de significativité de 5% pour ces actions. Nos résidus sont donc bien homoscédastiques pour toutes les actions sauf l'action mobil pour laquelle ils sont hétéroscédastiques (voir Exercice 6).
+
+Vous pouvez également répliquer cette méthode pour les autres tests vus dans l'exercice 6 comme le test de White ou ceux d'autocorrélation des résidus (e.g. Durbin-Watson)
+
+
+
+
+
