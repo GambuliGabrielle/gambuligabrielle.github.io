@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Gabrielle Gambuli">
+
+<title>Tutoriel séance 5 : Le gradient spatial des prix immobiliers dans l’AAV de Nantes</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="tuto_05_files/libs/clipboard/clipboard.min.js"></script>
+<script src="tuto_05_files/libs/quarto-html/quarto.js"></script>
+<script src="tuto_05_files/libs/quarto-html/popper.min.js"></script>
+<script src="tuto_05_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="tuto_05_files/libs/quarto-html/anchor.min.js"></script>
+<link href="tuto_05_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="tuto_05_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="tuto_05_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="tuto_05_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="tuto_05_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+</head>
+
+<body>
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article toc-left">
+<div id="quarto-sidebar-toc-left" class="sidebar toc-left">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#objectifs-et-question-économique" id="toc-objectifs-et-question-économique" class="nav-link active" data-scroll-target="#objectifs-et-question-économique">Objectifs et question économique</a></li>
+  <li><a href="#préparer-les-fichiers-et-r" id="toc-préparer-les-fichiers-et-r" class="nav-link" data-scroll-target="#préparer-les-fichiers-et-r">1. Préparer les fichiers et R</a>
+  <ul class="collapse">
+  <li><a href="#télécharger-les-données" id="toc-télécharger-les-données" class="nav-link" data-scroll-target="#télécharger-les-données">1.1 Télécharger les données</a></li>
+  <li><a href="#charger-les-packages" id="toc-charger-les-packages" class="nav-link" data-scroll-target="#charger-les-packages">1.2 Charger les packages</a></li>
+  </ul></li>
+  <li><a href="#délimiter-laav-de-nantes" id="toc-délimiter-laav-de-nantes" class="nav-link" data-scroll-target="#délimiter-laav-de-nantes">2. Délimiter l’AAV de Nantes</a>
+  <ul class="collapse">
+  <li><a href="#communes-de-laav" id="toc-communes-de-laav" class="nav-link" data-scroll-target="#communes-de-laav">2.1 Communes de l’AAV</a></li>
+  <li><a href="#iris-de-la-zone-détude" id="toc-iris-de-la-zone-détude" class="nav-link" data-scroll-target="#iris-de-la-zone-détude">2.2 IRIS de la zone d’étude</a></li>
+  <li><a href="#première-carte-les-communes-et-les-iris-de-notre-zone-détude" id="toc-première-carte-les-communes-et-les-iris-de-notre-zone-détude" class="nav-link" data-scroll-target="#première-carte-les-communes-et-les-iris-de-notre-zone-détude">2.3 Première carte : les communes et les IRIS de notre zone d’étude</a></li>
+  </ul></li>
+  <li><a href="#explorer-et-filtrer-les-transactions-dvf" id="toc-explorer-et-filtrer-les-transactions-dvf" class="nav-link" data-scroll-target="#explorer-et-filtrer-les-transactions-dvf">3. Explorer et filtrer les transactions DVF+</a>
+  <ul class="collapse">
+  <li><a href="#pourquoi-utiliser-parquet" id="toc-pourquoi-utiliser-parquet" class="nav-link" data-scroll-target="#pourquoi-utiliser-parquet">3.1 Pourquoi utiliser Parquet ?</a></li>
+  <li><a href="#les-principales-variables-du-fichier-dvf" id="toc-les-principales-variables-du-fichier-dvf" class="nav-link" data-scroll-target="#les-principales-variables-du-fichier-dvf">3.2 Les principales variables du fichier DVF+</a></li>
+  <li><a href="#filtrer-avant-collect" id="toc-filtrer-avant-collect" class="nav-link" data-scroll-target="#filtrer-avant-collect">3.3 Filtrer avant <code>collect()</code></a></li>
+  <li><a href="#convertir-les-listes-de-communes-et-traiter-les-géométries" id="toc-convertir-les-listes-de-communes-et-traiter-les-géométries" class="nav-link" data-scroll-target="#convertir-les-listes-de-communes-et-traiter-les-géométries">3.4 Convertir les listes de communes et traiter les géométries</a></li>
+  <li><a href="#localiser-chaque-mutation-dans-un-iris" id="toc-localiser-chaque-mutation-dans-un-iris" class="nav-link" data-scroll-target="#localiser-chaque-mutation-dans-un-iris">3.5 Localiser chaque mutation dans un IRIS</a></li>
+  </ul></li>
+  <li><a href="#construire-et-visualiser-les-variables-hédoniques" id="toc-construire-et-visualiser-les-variables-hédoniques" class="nav-link" data-scroll-target="#construire-et-visualiser-les-variables-hédoniques">4. Construire et visualiser les variables hédoniques</a>
+  <ul class="collapse">
+  <li><a href="#distribution-des-prix-au-m²" id="toc-distribution-des-prix-au-m²" class="nav-link" data-scroll-target="#distribution-des-prix-au-m²">4.1 Distribution des prix au m²</a></li>
+  <li><a href="#maisons-et-appartements" id="toc-maisons-et-appartements" class="nav-link" data-scroll-target="#maisons-et-appartements">4.2 Maisons et appartements</a></li>
+  <li><a href="#carte-des-prix-médians-par-iris" id="toc-carte-des-prix-médians-par-iris" class="nav-link" data-scroll-target="#carte-des-prix-médians-par-iris">4.3 Carte des prix médians par IRIS</a></li>
+  </ul></li>
+  <li><a href="#estimer-un-modèle-de-prix-hédonique" id="toc-estimer-un-modèle-de-prix-hédonique" class="nav-link" data-scroll-target="#estimer-un-modèle-de-prix-hédonique">5. Estimer un modèle de prix hédonique</a>
+  <ul class="collapse">
+  <li><a href="#spécification" id="toc-spécification" class="nav-link" data-scroll-target="#spécification">5.1 Spécification</a></li>
+  <li><a href="#préparer-léchantillon-destimation" id="toc-préparer-léchantillon-destimation" class="nav-link" data-scroll-target="#préparer-léchantillon-destimation">5.2 Préparer l’échantillon d’estimation</a></li>
+  <li><a href="#modèle-hédonique" id="toc-modèle-hédonique" class="nav-link" data-scroll-target="#modèle-hédonique">5.3 Modèle hédonique</a></li>
+  <li><a href="#extraire-les-effets-fixes-iris" id="toc-extraire-les-effets-fixes-iris" class="nav-link" data-scroll-target="#extraire-les-effets-fixes-iris">5.4 Extraire les effets fixes IRIS</a></li>
+  <li><a href="#prédire-le-prix-au-m2-dun-bien-de-référence" id="toc-prédire-le-prix-au-m2-dun-bien-de-référence" class="nav-link" data-scroll-target="#prédire-le-prix-au-m2-dun-bien-de-référence">5.5 Prédire le prix au m2 d’un bien de référence</a></li>
+  </ul></li>
+  <li><a href="#retrouver-le-gradient-spatial-du-modèle-monocentrique" id="toc-retrouver-le-gradient-spatial-du-modèle-monocentrique" class="nav-link" data-scroll-target="#retrouver-le-gradient-spatial-du-modèle-monocentrique">6. Retrouver le gradient spatial du modèle monocentrique</a>
+  <ul class="collapse">
+  <li><a href="#un-centre-et-une-mesure-de-distance" id="toc-un-centre-et-une-mesure-de-distance" class="nav-link" data-scroll-target="#un-centre-et-une-mesure-de-distance">6.1 Un centre et une mesure de distance</a></li>
+  <li><a href="#effets-fixes-iris-et-distance-au-cbd" id="toc-effets-fixes-iris-et-distance-au-cbd" class="nav-link" data-scroll-target="#effets-fixes-iris-et-distance-au-cbd">6.2 Effets fixes IRIS et distance au CBD</a></li>
+  <li><a href="#deuxième-étape-gradient-descriptif" id="toc-deuxième-étape-gradient-descriptif" class="nav-link" data-scroll-target="#deuxième-étape-gradient-descriptif">6.3 Deuxième étape : gradient descriptif</a></li>
+  </ul></li>
+  <li><a href="#aller-plus-loin-distance-et-temps-de-trajet-par-la-route" id="toc-aller-plus-loin-distance-et-temps-de-trajet-par-la-route" class="nav-link" data-scroll-target="#aller-plus-loin-distance-et-temps-de-trajet-par-la-route">7. Aller plus loin : distance et temps de trajet par la route</a></li>
+  </ul>
+</nav>
+</div>
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+</div>
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Tutoriel séance 5 : Le gradient spatial des prix immobiliers dans l’AAV de Nantes</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>Gabrielle Gambuli </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<section id="objectifs-et-question-économique" class="level2">
+<h2 class="anchored" data-anchor-id="objectifs-et-question-économique">Objectifs et question économique</h2>
+<p>L’objectif de ce tutoriel est d’étudier <strong>comment les prix immobiliers varient avec la distance au centre de Nantes</strong> (<em>Central Business District, CBD</em>). Nous chercherons à mettre en évidence le gradient spatial des prix immobiliers, une prédiction centrale du modèle de ville monocentrique.</p>
+<p>Notre analyse porte sur les transactions immobilières situées dans l’<strong>aire d’attraction de la ville (AAV) de Nantes</strong>, à une échelle géographique fine : celle des <strong>IRIS</strong>.</p>
+<p>Deux zonages sont donc mobilisés :</p>
+<ul>
+<li><strong>L’aire d’attraction des villes (AAV)</strong> : définie par l’INSEE, elle permet d’appréhender la ville au-delà de ses limites administratives. Elle comprend un pôle de population et d’emploi ainsi qu’une couronne de communes dont une part significative des actifs travaille dans ce pôle (autour de 15%). Elle constitue ainsi une approximation du fonctionnement économique de l’espace urbain.</li>
+<li><strong>Les IRIS</strong> (<em>Îlots Regroupés pour l’Information Statistique</em>) : ce sont des unités géographiques infracommunales définies par l’INSEE, regroupant généralement environ 2 000 habitants.</li>
+</ul>
+<p><strong>Notre démarche</strong> : identifier les communes appartenant à l’AAV de Nantes, sélectionner les IRIS correspondants, puis analyser les différences de valorisation immobilière entre ces quartiers.</p>
+<p><strong>Question</strong> : les logements situés dans les quartiers les plus proches du centre de Nantes sont-ils plus chers, une fois prises en compte leurs caractéristiques ?</p>
+</section>
+<section id="préparer-les-fichiers-et-r" class="level2">
+<h2 class="anchored" data-anchor-id="préparer-les-fichiers-et-r">1. Préparer les fichiers et R</h2>
+<section id="télécharger-les-données" class="level3">
+<h3 class="anchored" data-anchor-id="télécharger-les-données">1.1 Télécharger les données</h3>
+<ul>
+<li><strong>Communes de l’AAV de Nantes</strong> : sur <a href="https://inseefrlab.github.io/cartiflette/">Cartiflette</a>, téléchargez le fichier <strong>GeoParquet des communes de Loire-Atlantique (département 44)</strong>, millésime <strong>2026</strong>, en choisissant une <strong>simplification des géométries à 80 %</strong> afin d’alléger le fichier. <strong>Pourquoi utiliser cette source ?</strong> Outre les contours géographiques des communes, elle contient leur code d’appartenance à une <strong>aire d’attraction des villes (AAV)</strong>. Nous pourrons ainsi identifier les communes appartenant à l’AAV de Nantes et délimiter notre zone d’étude.</li>
+<li><strong>Contours IRIS</strong> : sur <a href="https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_CONTOURS-IRIS">IGN — Contours IRIS</a>, téléchargez le fichier <strong>Contours… IRIS®</strong> en sélectionnant la zone <strong>FXX France métropolitaine</strong>, au format <strong>GeoPackage</strong> et CRS <strong>RGF93 v1 / Lambert-93 - France</strong>.</li>
+<li><strong>Transactions DVF+</strong> : <a href="https://cerema.app.box.com/v/dvfplus-opendata/folder/77228357248">Cerema — DVF+</a> ; dans la livraison d’octobre 2026, récupérer le Parquet de la région Pays de la Loire.</li>
+<li><strong>Dictionnaire des variables</strong> : <a href="https://doc-datafoncier.cerema.fr/doc/dv3f/mutation">Datafoncier — table mutation</a>.</li>
+</ul>
+</section>
+<section id="charger-les-packages" class="level3">
+<h3 class="anchored" data-anchor-id="charger-les-packages">1.2 Charger les packages</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À exécuter une seule fois si nécessaire :</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages(c("arrow", "dplyr", "sf", "sfarrow", "ggplot2",</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co">#                    "fixest", "tidyr", "scales"))</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(arrow)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sf)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(sfarrow)</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(fixest)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(scales)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(osrm)</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(mapview)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># À ADAPTER sur votre ordinateur</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>path_data <span class="ot">&lt;-</span> <span class="st">"G:/Mon Drive/TEACHING/MCF_Nantes/cours/M2_eco_spatiale/data/"</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>path_aav  <span class="ot">&lt;-</span> <span class="fu">file.path</span>(path_data, <span class="st">"prix_hedoniques/COM2026.parquet"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>path_iris <span class="ot">&lt;-</span> <span class="fu">file.path</span>(path_data,</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="st">"contours_iris/1_DONNEES_LIVRAISON_2026-07-00042/CONTOURS-IRIS_3-0_GPKG_LAMB93_FXX-ED2026-01-01/iris.gpkg"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>path_dvf  <span class="ot">&lt;-</span> <span class="fu">file.path</span>(path_data, <span class="st">"prix_hedoniques/dvf_plus.parquet"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="délimiter-laav-de-nantes" class="level2">
+<h2 class="anchored" data-anchor-id="délimiter-laav-de-nantes">2. Délimiter l’AAV de Nantes</h2>
+<section id="communes-de-laav" class="level3">
+<h3 class="anchored" data-anchor-id="communes-de-laav">2.1 Communes de l’AAV</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Data communes</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>communes <span class="ot">&lt;-</span> <span class="fu">st_read_parquet</span>(path_aav)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="co"># L'AAV de Nantes est codée « 008 » (variable AAV2020).</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>communes_aav_nantes <span class="ot">&lt;-</span> communes <span class="sc">%&gt;%</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(AAV2020 <span class="sc">==</span> <span class="st">"008"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(INSEE_COM) <span class="sc">%&gt;%</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unique</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as.character</span>()</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(communes)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+À vous de jouer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Combien de communes contient l’AAV de Nantes ?</p>
+</div>
+</div>
+</section>
+<section id="iris-de-la-zone-détude" class="level3">
+<h3 class="anchored" data-anchor-id="iris-de-la-zone-détude">2.2 IRIS de la zone d’étude</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>iris <span class="ot">&lt;-</span> <span class="fu">st_read</span>(path_iris, <span class="at">quiet =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>iris_aav_nantes <span class="ot">&lt;-</span> iris <span class="sc">%&gt;%</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">as.character</span>(code_insee) <span class="sc">%in%</span> communes_aav_nantes) <span class="sc">%&gt;%</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(code_iris, code_insee, geometrie)</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">rm</span>(iris)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+À vous de jouer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Combien d’iris contient l’AAV de Nantes ? Combien d’iris se trouvent dans la commune de Nantes ?</p>
+</div>
+</div>
+</section>
+<section id="première-carte-les-communes-et-les-iris-de-notre-zone-détude" class="level3">
+<h3 class="anchored" data-anchor-id="première-carte-les-communes-et-les-iris-de-notre-zone-détude">2.3 Première carte : les communes et les IRIS de notre zone d’étude</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> iris_aav_nantes,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">fill =</span> code_insee),</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"grey35"</span>,</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.08</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_sf</span>(<span class="at">datum =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">guides</span>(<span class="at">fill =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"AAV de Nantes"</span>,</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Couleurs : communes ; traits gris : limites des IRIS"</span></span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="explorer-et-filtrer-les-transactions-dvf" class="level2">
+<h2 class="anchored" data-anchor-id="explorer-et-filtrer-les-transactions-dvf">3. Explorer et filtrer les transactions DVF+</h2>
+<section id="pourquoi-utiliser-parquet" class="level3">
+<h3 class="anchored" data-anchor-id="pourquoi-utiliser-parquet">3.1 Pourquoi utiliser Parquet ?</h3>
+<p>Le fichier DVF+ est très volumineux. Pour éviter de charger inutilement l’ensemble des données en mémoire, nous utilisons <code>open_dataset()</code>, qui permet de travailler avec des <strong>requêtes différées</strong> (<em>lazy evaluation</em>).</p>
+<p>Les opérations de filtrage (<code>filter()</code>) et de sélection des variables (<code>select()</code>) sont préparées sans charger les données. Elles ne sont exécutées qu’au moment de l’appel à <code>collect()</code>, qui importe dans R <strong>uniquement les observations et les variables retenues</strong>.</p>
+<p>Cette méthode permet de <strong>réduire la consommation de mémoire et d’accélérer le traitement des fichiers volumineux</strong>.</p>
+<p>Avant même de téléchargez les données sur notre espace de travail, on peut regarder quelles variables elles contiennent.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dvf_lazy <span class="ot">&lt;-</span> <span class="fu">open_dataset</span>(path_dvf)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a><span class="fu">names</span>(dvf_lazy)</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="co">#dvf_lazy$schema</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="les-principales-variables-du-fichier-dvf" class="level3">
+<h3 class="anchored" data-anchor-id="les-principales-variables-du-fichier-dvf">3.2 Les principales variables du fichier DVF+</h3>
+<p>Le fichier DVF+ contient des informations sur les transactions immobilières, leur localisation et les caractéristiques des biens concernés. Pour notre analyse hédonique, nous retiendrons les variables suivantes :</p>
+<ul>
+<li><strong>Identification de la transaction</strong>
+<ul>
+<li><code>idmutation</code> : identifiant de la mutation immobilière.</li>
+</ul></li>
+<li><strong>Prix immobilier</strong>
+<ul>
+<li><code>valeurfonc</code> : valeur foncière déclarée lors de la transaction (en euros). C’est notre variable d’intérêt, que l’on transformera en prix au mètre carré.</li>
+</ul></li>
+<li><strong>Localisation géographique</strong>
+<ul>
+<li><code>coddep</code> : code du département.</li>
+<li><code>l_codinsee</code> : liste des codes INSEE des communes concernées par la mutation.</li>
+<li><code>nbcomm</code> : nombre de communes concernées par la mutation.</li>
+<li><code>geompar</code> : géométrie des parcelles associées à la mutation, encodée au format WKB (<em>Well-Known Binary</em>), le format GeoParquet. Après une étape de conversion en objet spatial sf, cette variable nous permettra de cartographier les transactions immobilières et de rattacher chaque transaction à son IRIS.</li>
+</ul></li>
+<li><strong>Date de transaction</strong>
+<ul>
+<li><code>datemut</code> : date de la mutation.</li>
+<li><code>anneemut</code> : année de la mutation.</li>
+<li><code>moismut</code> : mois de la mutation.</li>
+</ul></li>
+<li><strong>Caractéristiques des biens immobiliers</strong>
+<ul>
+<li><code>libtypbien</code> : type de bien concerné par la mutation (maison, appartement, etc.).</li>
+<li><code>sbati</code> : surface bâtie totale (en m²).</li>
+<li><code>sterr</code> : surface du terrain (en m²).</li>
+<li><code>nblocmai</code> : nombre de locaux de type maison.</li>
+<li><code>nblocapt</code> : nombre de locaux de type appartement.</li>
+</ul></li>
+<li><strong>Nombre de pièces des logements</strong>
+<ul>
+<li><code>nbapt1pp</code> à <code>nbapt5pp</code> : nombre d’appartements selon leur catégorie de pièces principales (de 1 à 5 pièces ou plus).</li>
+<li><code>nbmai1pp</code> à <code>nbmai5pp</code> : même information pour les maisons.</li>
+</ul></li>
+</ul>
+<p>Ces variables nous permettront de construire un <strong>prix au m²</strong>, de contrôler les principales caractéristiques des logements et d’étudier les différences de prix entre quartiers.</p>
+<p><strong>Point de vigilance :</strong> une mutation peut concerner plusieurs biens ou parcelles. Nous sélectionnerons donc les transactions correspondant à une seule maison ou à un seul appartement, afin de disposer d’un échantillon plus homogène pour l’estimation du modèle hédonique.</p>
+</section>
+<section id="filtrer-avant-collect" class="level3">
+<h3 class="anchored" data-anchor-id="filtrer-avant-collect">3.3 Filtrer avant <code>collect()</code></h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf_lazy <span class="sc">%&gt;%</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    coddep <span class="sc">==</span> <span class="st">"44"</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    nbcomm <span class="sc">==</span> <span class="dv">1</span>,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    libnatmut <span class="sc">==</span> <span class="st">"Vente"</span>,</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    libtypbien <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"UNE MAISON"</span>, <span class="st">"UN APPARTEMENT"</span>),</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    nblocmai<span class="sc">+</span>nblocapt<span class="sc">==</span><span class="dv">1</span>,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(sbati), sbati <span class="sc">&gt;</span> <span class="dv">20</span>,</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(valeurfonc), valeurfonc <span class="sc">&gt;</span> <span class="dv">0</span>,</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="sc">!</span><span class="fu">is.na</span>(geompar)</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(</span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    idmutation, valeurfonc, l_codinsee, coddep,</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>    datemut, anneemut, moismut, sbati, sterr,</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>    nblocmai, nblocapt,</span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>    nbapt1pp, nbapt2pp, nbapt3pp, nbapt4pp, nbapt5pp,</span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>    nbmai1pp, nbmai2pp, nbmai3pp, nbmai4pp, nbmai5pp,</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>    libtypbien, geompar</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="convertir-les-listes-de-communes-et-traiter-les-géométries" class="level3">
+<h3 class="anchored" data-anchor-id="convertir-les-listes-de-communes-et-traiter-les-géométries">3.4 Convertir les listes de communes et traiter les géométries</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Avec nbcomm == 1, on extrait le seul code de la liste.</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>dvf<span class="sc">$</span>codinsee <span class="ot">&lt;-</span> <span class="fu">vapply</span>(dvf<span class="sc">$</span>l_codinsee, <span class="cf">function</span>(x) {</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(x) <span class="sc">==</span> <span class="dv">0</span> <span class="sc">||</span> <span class="fu">is.na</span>(x[[<span class="dv">1</span>]])) <span class="cn">NA_character_</span> <span class="cf">else</span> <span class="fu">as.character</span>(x[[<span class="dv">1</span>]])</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>}, <span class="fu">character</span>(<span class="dv">1</span>))</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(codinsee <span class="sc">%in%</span> communes_aav_nantes)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="co"># WKB : écarter les vecteurs binaires de longueur nulle.</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>wkb <span class="ot">&lt;-</span> <span class="fu">lapply</span>(dvf<span class="sc">$</span>geompar, as.raw)</span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>garde <span class="ot">&lt;-</span> <span class="fu">lengths</span>(wkb) <span class="sc">&gt;</span> <span class="dv">0</span></span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span>(<span class="st">"Géométries binaires vides écartées :"</span>, <span class="fu">sum</span>(<span class="sc">!</span>garde), <span class="st">"</span><span class="sc">\n</span><span class="st">"</span>)</span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf[garde, ]</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>wkb <span class="ot">&lt;-</span> wkb[garde]</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(wkb) <span class="ot">&lt;-</span> <span class="st">"WKB"</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Attribution du CRS : valable seulement si geompar est déjà en Lambert-93.</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>dvf<span class="sc">$</span>geometry <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_as_sfc</span>(wkb, <span class="at">crs =</span> <span class="dv">2154</span>)</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>dvf_sf <span class="ot">&lt;-</span> sf<span class="sc">::</span><span class="fu">st_as_sf</span>(dvf, <span class="at">sf_column_name =</span> <span class="st">"geometry"</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span>sf<span class="sc">::</span><span class="fu">st_is_empty</span>(geometry))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="localiser-chaque-mutation-dans-un-iris" class="level3">
+<h3 class="anchored" data-anchor-id="localiser-chaque-mutation-dans-un-iris">3.5 Localiser chaque mutation dans un IRIS</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Un point représentatif situé dans la géométrie de parcelle.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>dvf_points <span class="ot">&lt;-</span> dvf_sf <span class="sc">%&gt;%</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">geometry =</span> sf<span class="sc">::</span><span class="fu">st_point_on_surface</span>(geometry)) <span class="sc">%&gt;%</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_join</span>(iris_aav_nantes <span class="sc">%&gt;%</span> <span class="fu">select</span>(code_iris), <span class="at">join =</span> st_within, <span class="at">left =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="fu">nrow</span>(dvf_points)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="fu">n_distinct</span>(dvf_points<span class="sc">$</span>code_iris)</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Vérification d'une éventuelle duplication due à la jointure spatiale</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(<span class="fu">duplicated</span>(dvf_points<span class="sc">$</span>idmutation))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="construire-et-visualiser-les-variables-hédoniques" class="level2">
+<h2 class="anchored" data-anchor-id="construire-et-visualiser-les-variables-hédoniques">4. Construire et visualiser les variables hédoniques</h2>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dvf_points <span class="ot">&lt;-</span> dvf_points <span class="sc">%&gt;%</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="co"># DUMMIES TYPE DE BIEN</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">appartement =</span> <span class="fu">ifelse</span>(nblocapt <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">maison =</span> <span class="fu">ifelse</span>(nblocmai <span class="sc">&gt;</span> <span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">0</span>),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    <span class="co"># RECONSTRUCTION DU NOMBRE DE PIÈCES</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">nb_pieces_appart =</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>      <span class="dv">1</span> <span class="sc">*</span> nbapt1pp <span class="sc">+</span></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>      <span class="dv">2</span> <span class="sc">*</span> nbapt2pp <span class="sc">+</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>      <span class="dv">3</span> <span class="sc">*</span> nbapt3pp <span class="sc">+</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>      <span class="dv">4</span> <span class="sc">*</span> nbapt4pp <span class="sc">+</span></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>      <span class="dv">5</span> <span class="sc">*</span> nbapt5pp,</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">nb_pieces_maison =</span></span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>      <span class="dv">1</span> <span class="sc">*</span> nbmai1pp <span class="sc">+</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>      <span class="dv">2</span> <span class="sc">*</span> nbmai2pp <span class="sc">+</span></span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>      <span class="dv">3</span> <span class="sc">*</span> nbmai3pp <span class="sc">+</span></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>      <span class="dv">4</span> <span class="sc">*</span> nbmai4pp <span class="sc">+</span></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>      <span class="dv">5</span> <span class="sc">*</span> nbmai5pp,</span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>    <span class="co"># total pièces</span></span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">nb_pieces_total =</span> nb_pieces_appart <span class="sc">+</span> nb_pieces_maison,</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a>    <span class="co"># renommer les autres variables</span></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">prix =</span> valeurfonc,</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">surface =</span> sbati,</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">surf_terrain =</span> sterr,</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">annee =</span> anneemut,</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">mois =</span> moismut,</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a>    <span class="co"># calculer variable dépendante</span></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">prix_m2 =</span> prix <span class="sc">/</span> surface</span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.finite</span>(prix_m2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Statistiques descriptives des biens immobiliers :</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dvf_points <span class="sc">%&gt;%</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">transactions =</span> <span class="fu">n</span>(),</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">prix_m2_median =</span> <span class="fu">median</span>(prix_m2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">surface_mediane =</span> <span class="fu">median</span>(surface, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">part_maisons =</span> <span class="fu">mean</span>(maison, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">premiere_annee =</span> <span class="fu">min</span>(annee, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">derniere_annee =</span> <span class="fu">max</span>(annee, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<section id="distribution-des-prix-au-m²" class="level3">
+<h3 class="anchored" data-anchor-id="distribution-des-prix-au-m²">4.1 Distribution des prix au m²</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dvf_points <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>(), <span class="fu">aes</span>(<span class="at">x =</span> prix_m2)) <span class="sc">+</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">1000</span>, <span class="at">fill =</span> <span class="st">"#4477AA"</span>, <span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">labels =</span> <span class="fu">label_number</span>(<span class="at">big.mark =</span> <span class="st">" "</span>)) <span class="sc">+</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">xlim =</span> <span class="fu">quantile</span>(dvf_points<span class="sc">$</span>prix_m2, <span class="fu">c</span>(.<span class="dv">01</span>, .<span class="dv">99</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Distribution des prix au m²"</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Zoom visuel entre les 1er et 99e percentiles (observations conservées)"</span>,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Prix au m² (€)"</span>, <span class="at">y =</span> <span class="st">"Nombre de mutations"</span>) <span class="sc">+</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="maisons-et-appartements" class="level3">
+<h3 class="anchored" data-anchor-id="maisons-et-appartements">4.2 Maisons et appartements</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(dvf_points <span class="sc">%&gt;%</span> <span class="fu">st_drop_geometry</span>(),</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> libtypbien, <span class="at">y =</span> prix_m2)) <span class="sc">+</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"#66AACC"</span>, <span class="at">outlier.alpha =</span> .<span class="dv">08</span>) <span class="sc">+</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_cartesian</span>(<span class="at">ylim =</span> <span class="fu">quantile</span>(dvf_points<span class="sc">$</span>prix_m2, <span class="fu">c</span>(.<span class="dv">01</span>, .<span class="dv">95</span>), <span class="at">na.rm =</span> <span class="cn">TRUE</span>)) <span class="sc">+</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Prix au m² selon le type de bien"</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="st">"Prix au m² (€)"</span>) <span class="sc">+</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="carte-des-prix-médians-par-iris" class="level3">
+<h3 class="anchored" data-anchor-id="carte-des-prix-médians-par-iris">4.3 Carte des prix médians par IRIS</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>stat_iris <span class="ot">&lt;-</span> dvf_points <span class="sc">%&gt;%</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_iris) <span class="sc">%&gt;%</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>(), <span class="at">prix_m2_median =</span> <span class="fu">median</span>(prix_m2, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>carte_prix <span class="ot">&lt;-</span> iris_aav_nantes <span class="sc">%&gt;%</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(stat_iris, <span class="at">by =</span> <span class="st">"code_iris"</span>)</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(carte_prix) <span class="sc">+</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">fill =</span> prix_m2_median), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">linewidth =</span> .<span class="dv">07</span>) <span class="sc">+</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(<span class="at">option =</span> <span class="st">"C"</span>, <span class="at">na.value =</span> <span class="st">"grey90"</span>,</span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a>                       <span class="at">labels =</span> <span class="fu">label_number</span>(<span class="at">big.mark =</span> <span class="st">" "</span>)) <span class="sc">+</span></span>
+<span id="cb14-14"><a href="#cb14-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Prix médians au m² par IRIS"</span>, <span class="at">fill =</span> <span class="st">"€/m²"</span>,</span>
+<span id="cb14-15"><a href="#cb14-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">caption =</span> <span class="st">"Gris : aucune mutation retenue dans l'IRIS"</span>) <span class="sc">+</span></span>
+<span id="cb14-16"><a href="#cb14-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-caution callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Attention
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Certains IRIS enregistrent très peu de transactions immobilières, ce qui rend le calcul du prix moyen au m² peu représentatif du marché immobilier local.</p>
+<p>Par exemple, l’IRIS 440260106 ne compte que 6 transactions, avec un prix moyen de 5 171 €/m². Ce prix élevé doit donc être interprété avec prudence.</p>
+<p>En visualisant cet IRIS avec mapview et un fond de carte OpenStreetMap, on constate qu’il se situe dans une zone à dominante industrielle. Le faible nombre de transactions peut ainsi refléter la faible présence de logements dans ce quartier.</p>
+<p>Pour limiter l’influence de ces observations peu représentatives, nous choisissons de conserver uniquement les IRIS comptant au moins 30 transactions sur la période étudiée.</p>
+</div>
+</div>
+</section>
+</section>
+<section id="estimer-un-modèle-de-prix-hédonique" class="level2">
+<h2 class="anchored" data-anchor-id="estimer-un-modèle-de-prix-hédonique">5. Estimer un modèle de prix hédonique</h2>
+<section id="spécification" class="level3">
+<h3 class="anchored" data-anchor-id="spécification">5.1 Spécification</h3>
+<p>On estime :</p>
+<p><span class="math display">\[
+\ln(p_{izt}/m^2) = \beta_1\ln(Surface_{izt}) + \beta_2 Pieces_{izt}
++ \beta_3 Maison_{izt} + \beta_4\operatorname{asinh}(Terrain_{izt})
++ \alpha_z + \gamma_t + \varepsilon_{izt}.
+\]</span></p>
+<p>Les effets fixes <span class="math inline">\(\alpha_z\)</span> absorbent les caractéristiques <strong>invariantes dans le temps</strong> des IRIS ; les effets fixes <span class="math inline">\(\gamma_t\)</span> absorbent les chocs annuels communs. Le modèle reste descriptif en présence de caractéristiques non observées variant dans le temps ou de tri résidentiel.</p>
+</section>
+<section id="préparer-léchantillon-destimation" class="level3">
+<h3 class="anchored" data-anchor-id="préparer-léchantillon-destimation">5.2 Préparer l’échantillon d’estimation</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Exclure les IRIS ayant trop peu de transactions (choix pédagogique).</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>iris_retenus <span class="ot">&lt;-</span> stat_iris <span class="sc">%&gt;%</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(n <span class="sc">&gt;</span> <span class="dv">30</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(code_iris)</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>dvf_est <span class="ot">&lt;-</span> dvf_points <span class="sc">%&gt;%</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(code_iris <span class="sc">%in%</span> iris_retenus) <span class="sc">%&gt;%</span></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">surf_terrain =</span> <span class="fu">coalesce</span>(surf_terrain, <span class="dv">0</span>)) <span class="sc">%&gt;%</span></span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(nb_pieces_total), <span class="sc">!</span><span class="fu">is.na</span>(annee))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="modèle-hédonique" class="level3">
+<h3 class="anchored" data-anchor-id="modèle-hédonique">5.3 Modèle hédonique</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>modele_hedonique <span class="ot">&lt;-</span> <span class="fu">feols</span>(</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">log</span>(prix_m2) <span class="sc">~</span> <span class="fu">log</span>(surface) <span class="sc">+</span> nb_pieces_total <span class="sc">+</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    maison <span class="sc">+</span> <span class="fu">asinh</span>(surf_terrain) <span class="sc">|</span> code_iris <span class="sc">+</span> annee<span class="sc">^</span>mois,</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> dvf_est,</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">vcov =</span> <span class="sc">~</span>code_iris</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a><span class="fu">etable</span>(modele_hedonique, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="extraire-les-effets-fixes-iris" class="level3">
+<h3 class="anchored" data-anchor-id="extraire-les-effets-fixes-iris">5.4 Extraire les effets fixes IRIS</h3>
+<p>On recouvre les effets fixes des zones iris et on visualise le niveau de valorisation immobilière propre à chaque iris.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>fe <span class="ot">&lt;-</span> <span class="fu">fixef</span>(modele_hedonique)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>fe_iris <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">code_iris =</span> <span class="fu">names</span>(fe[[<span class="st">"code_iris"</span>]]),</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">fe_iris_log =</span> <span class="fu">as.numeric</span>(fe[[<span class="st">"code_iris"</span>]])</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>fe_iris<span class="sc">$</span>fe_iris <span class="ot">&lt;-</span> <span class="fu">exp</span>(fe_iris<span class="sc">$</span>fe_iris_log)</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>fe_iris_sf <span class="ot">&lt;-</span> iris_aav_nantes <span class="sc">%&gt;%</span> </span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(fe_iris)</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="fu">mapview</span>(fe_iris_sf, <span class="at">zcol=</span><span class="st">"fe_iris"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Les <strong>effets fixes IRIS</strong> sont estimés en prenant comme référence une situation fictive dans laquelle les caractéristiques des logements sont égales à zéro, de même que l’effet de l’année de référence. Leur valeur absolue n’est donc <strong>pas interprétable économiquement</strong>.</p>
+<p>En revanche, ce sont les <strong>écarts entre les effets fixes des différents IRIS</strong> qui nous intéressent : ils permettent de mesurer les différences de valorisation immobilière entre quartiers, une fois contrôlées les caractéristiques observées des logements et les effets temporels communs.</p>
+<p>Ces écarts reflètent notamment des caractéristiques locales non observées dans le modèle, comme l’accessibilité, les aménités ou la qualité de l’environnement résidentiel.</p>
+</section>
+<section id="prédire-le-prix-au-m2-dun-bien-de-référence" class="level3">
+<h3 class="anchored" data-anchor-id="prédire-le-prix-au-m2-dun-bien-de-référence">5.5 Prédire le prix au m2 d’un bien de référence</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Le bien de référence : appartement ou maison ?</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>prop_maison <span class="ot">&lt;-</span> dvf_points <span class="sc">%&gt;%</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">maison_prop =</span> <span class="fu">mean</span>(maison))</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>maison_ref <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(prop_maison<span class="sc">$</span>maison_prop<span class="sc">&gt;</span><span class="fl">0.5</span>,<span class="dv">1</span>,<span class="dv">0</span>)</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Logement de référence</span></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>logement_ref <span class="ot">&lt;-</span> dvf_points <span class="sc">%&gt;%</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(maison <span class="sc">==</span> maison_ref) <span class="sc">%&gt;%</span></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">surface =</span> <span class="fu">median</span>(surface, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">nb_pieces_total =</span> <span class="fu">as.numeric</span>(</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>      <span class="fu">names</span>(<span class="fu">which.max</span>(<span class="fu">table</span>(nb_pieces_total)))</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">surf_terrain =</span> <span class="fu">median</span>(surf_terrain, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">maison =</span> <span class="fu">unique</span>(maison)</span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Prédire le prix au m² du logement de référence dans chaque IRIS</span></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Coefficients estimés des caractéristiques du logement</span></span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>beta <span class="ot">&lt;-</span> <span class="fu">coef</span>(modele_hedonique)</span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Calcul du prix au m² ajusté</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>fe_iris_sf <span class="ot">&lt;-</span> fe_iris_sf <span class="sc">%&gt;%</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">prix_m2_ref_log =</span></span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>      beta[<span class="st">"log(surface)"</span>] <span class="sc">*</span> <span class="fu">log</span>(logement_ref<span class="sc">$</span>surface) <span class="sc">+</span></span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>      beta[<span class="st">"nb_pieces_total"</span>] <span class="sc">*</span> logement_ref<span class="sc">$</span>nb_pieces_total <span class="sc">+</span></span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>      beta[<span class="st">"maison"</span>] <span class="sc">*</span> logement_ref<span class="sc">$</span>maison <span class="sc">+</span></span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>      beta[<span class="st">"asinh(surf_terrain)"</span>] <span class="sc">*</span> <span class="fu">asinh</span>(logement_ref<span class="sc">$</span>surf_terrain) <span class="sc">+</span></span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a>      fe_iris_log,</span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Conversion en euros par m²</span></span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>    <span class="at">prix_m2_ref =</span> <span class="fu">exp</span>(prix_m2_ref_log)</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a>fe_iris <span class="ot">&lt;-</span> fe_iris_sf <span class="sc">%&gt;%</span> </span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_drop_geometry</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Carte</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Carte du prix au m² prédit pour le logement de référence</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Contours communaux pour faciliter la lecture</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>contours_communes <span class="ot">&lt;-</span> fe_iris_sf <span class="sc">%&gt;%</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_insee) <span class="sc">%&gt;%</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Prix ajustés par IRIS</span></span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> fe_iris_sf,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">fill =</span> prix_m2_ref),</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="cn">NA</span>,</span>
+<span id="cb19-14"><a href="#cb19-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.08</span></span>
+<span id="cb19-15"><a href="#cb19-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-16"><a href="#cb19-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-17"><a href="#cb19-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Limites communales</span></span>
+<span id="cb19-18"><a href="#cb19-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(</span>
+<span id="cb19-19"><a href="#cb19-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> contours_communes,</span>
+<span id="cb19-20"><a href="#cb19-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">fill =</span> <span class="cn">NA</span>,</span>
+<span id="cb19-21"><a href="#cb19-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"grey35"</span>,</span>
+<span id="cb19-22"><a href="#cb19-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">0.25</span></span>
+<span id="cb19-23"><a href="#cb19-23" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-24"><a href="#cb19-24" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-25"><a href="#cb19-25" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Palette et légende</span></span>
+<span id="cb19-26"><a href="#cb19-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_viridis_c</span>(</span>
+<span id="cb19-27"><a href="#cb19-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">option =</span> <span class="st">"magma"</span>,</span>
+<span id="cb19-28"><a href="#cb19-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">direction =</span> <span class="sc">-</span><span class="dv">1</span>,</span>
+<span id="cb19-29"><a href="#cb19-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"Prix prédit</span><span class="sc">\n</span><span class="st">(€/m²)"</span>,</span>
+<span id="cb19-30"><a href="#cb19-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> scales<span class="sc">::</span><span class="fu">label_number</span>(</span>
+<span id="cb19-31"><a href="#cb19-31" aria-hidden="true" tabindex="-1"></a>      <span class="at">accuracy =</span> <span class="dv">1</span>,</span>
+<span id="cb19-32"><a href="#cb19-32" aria-hidden="true" tabindex="-1"></a>      <span class="at">big.mark =</span> <span class="st">" "</span>,</span>
+<span id="cb19-33"><a href="#cb19-33" aria-hidden="true" tabindex="-1"></a>      <span class="at">suffix =</span> <span class="st">" €"</span></span>
+<span id="cb19-34"><a href="#cb19-34" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-35"><a href="#cb19-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">na.value =</span> <span class="st">"grey90"</span>,</span>
+<span id="cb19-36"><a href="#cb19-36" aria-hidden="true" tabindex="-1"></a>    <span class="at">guide =</span> <span class="fu">guide_colorbar</span>(</span>
+<span id="cb19-37"><a href="#cb19-37" aria-hidden="true" tabindex="-1"></a>      <span class="at">barheight =</span> grid<span class="sc">::</span><span class="fu">unit</span>(<span class="dv">65</span>, <span class="st">"mm"</span>),</span>
+<span id="cb19-38"><a href="#cb19-38" aria-hidden="true" tabindex="-1"></a>      <span class="at">barwidth =</span> grid<span class="sc">::</span><span class="fu">unit</span>(<span class="dv">5</span>, <span class="st">"mm"</span>),</span>
+<span id="cb19-39"><a href="#cb19-39" aria-hidden="true" tabindex="-1"></a>      <span class="at">frame.colour =</span> <span class="st">"grey70"</span>,</span>
+<span id="cb19-40"><a href="#cb19-40" aria-hidden="true" tabindex="-1"></a>      <span class="at">ticks.colour =</span> <span class="st">"grey40"</span></span>
+<span id="cb19-41"><a href="#cb19-41" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-42"><a href="#cb19-42" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-43"><a href="#cb19-43" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-44"><a href="#cb19-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_sf</span>(<span class="at">datum =</span> <span class="cn">NA</span>, <span class="at">expand =</span> <span class="cn">FALSE</span>) <span class="sc">+</span></span>
+<span id="cb19-45"><a href="#cb19-45" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-46"><a href="#cb19-46" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb19-47"><a href="#cb19-47" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Prix immobiliers dans l'AAV de Nantes"</span>,</span>
+<span id="cb19-48"><a href="#cb19-48" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Prix au m² prédit pour un logement de référence</span><span class="sc">\n</span><span class="st">(maison de 95 m², 5 pièces avec terrain de 526 m²)"</span>,</span>
+<span id="cb19-49"><a href="#cb19-49" aria-hidden="true" tabindex="-1"></a>    <span class="at">caption =</span> <span class="fu">paste</span>(</span>
+<span id="cb19-50"><a href="#cb19-50" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Source : DVF+ (Cerema) et contours IRIS (IGN)."</span>,</span>
+<span id="cb19-51"><a href="#cb19-51" aria-hidden="true" tabindex="-1"></a>      <span class="st">"Estimations issues d'un modèle hédonique avec effets fixes IRIS."</span>,</span>
+<span id="cb19-52"><a href="#cb19-52" aria-hidden="true" tabindex="-1"></a>      <span class="at">sep =</span> <span class="st">"</span><span class="sc">\n</span><span class="st">"</span></span>
+<span id="cb19-53"><a href="#cb19-53" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb19-54"><a href="#cb19-54" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb19-55"><a href="#cb19-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb19-56"><a href="#cb19-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_void</span>(<span class="at">base_size =</span> <span class="dv">12</span>) <span class="sc">+</span></span>
+<span id="cb19-57"><a href="#cb19-57" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb19-58"><a href="#cb19-58" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.title =</span> <span class="fu">element_text</span>(</span>
+<span id="cb19-59"><a href="#cb19-59" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="dv">17</span>,</span>
+<span id="cb19-60"><a href="#cb19-60" aria-hidden="true" tabindex="-1"></a>      <span class="at">face =</span> <span class="st">"bold"</span>,</span>
+<span id="cb19-61"><a href="#cb19-61" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"#20252B"</span>,</span>
+<span id="cb19-62"><a href="#cb19-62" aria-hidden="true" tabindex="-1"></a>      <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">7</span>)</span>
+<span id="cb19-63"><a href="#cb19-63" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-64"><a href="#cb19-64" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.subtitle =</span> <span class="fu">element_text</span>(</span>
+<span id="cb19-65"><a href="#cb19-65" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="fl">10.5</span>,</span>
+<span id="cb19-66"><a href="#cb19-66" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"grey35"</span>,</span>
+<span id="cb19-67"><a href="#cb19-67" aria-hidden="true" tabindex="-1"></a>      <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">b =</span> <span class="dv">15</span>)</span>
+<span id="cb19-68"><a href="#cb19-68" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-69"><a href="#cb19-69" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.caption =</span> <span class="fu">element_text</span>(</span>
+<span id="cb19-70"><a href="#cb19-70" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="fl">8.5</span>,</span>
+<span id="cb19-71"><a href="#cb19-71" aria-hidden="true" tabindex="-1"></a>      <span class="at">color =</span> <span class="st">"grey45"</span>,</span>
+<span id="cb19-72"><a href="#cb19-72" aria-hidden="true" tabindex="-1"></a>      <span class="at">hjust =</span> <span class="dv">0</span>,</span>
+<span id="cb19-73"><a href="#cb19-73" aria-hidden="true" tabindex="-1"></a>      <span class="at">margin =</span> <span class="fu">margin</span>(<span class="at">t =</span> <span class="dv">14</span>)</span>
+<span id="cb19-74"><a href="#cb19-74" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-75"><a href="#cb19-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.position =</span> <span class="st">"right"</span>,</span>
+<span id="cb19-76"><a href="#cb19-76" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.title =</span> <span class="fu">element_text</span>(</span>
+<span id="cb19-77"><a href="#cb19-77" aria-hidden="true" tabindex="-1"></a>      <span class="at">size =</span> <span class="dv">10</span>,</span>
+<span id="cb19-78"><a href="#cb19-78" aria-hidden="true" tabindex="-1"></a>      <span class="at">face =</span> <span class="st">"bold"</span></span>
+<span id="cb19-79"><a href="#cb19-79" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb19-80"><a href="#cb19-80" aria-hidden="true" tabindex="-1"></a>    <span class="at">legend.text =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">9</span>),</span>
+<span id="cb19-81"><a href="#cb19-81" aria-hidden="true" tabindex="-1"></a>    <span class="at">plot.margin =</span> <span class="fu">margin</span>(<span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">15</span>, <span class="dv">15</span>)</span>
+<span id="cb19-82"><a href="#cb19-82" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="retrouver-le-gradient-spatial-du-modèle-monocentrique" class="level2">
+<h2 class="anchored" data-anchor-id="retrouver-le-gradient-spatial-du-modèle-monocentrique">6. Retrouver le gradient spatial du modèle monocentrique</h2>
+<section id="un-centre-et-une-mesure-de-distance" class="level3">
+<h3 class="anchored" data-anchor-id="un-centre-et-une-mesure-de-distance">6.1 Un centre et une mesure de distance</h3>
+<p>Nous retenons l’IRIS <strong><code>441090106</code></strong> comme point de référence pour définir le centre de Nantes (<em>Central Business District</em>, CBD).</p>
+<p>Ce choix se justifie par sa localisation au cœur du <strong>centre historique et administratif de Nantes</strong>, à proximité de lieux emblématiques comme l’hôtel de ville, la cathédrale et le château des ducs de Bretagne.</p>
+<p>Il s’agit néanmoins d’un <strong>choix méthodologique</strong>, et non d’une définition unique du centre économique de Nantes. D’autres localisations pourraient être retenues, notamment en privilégiant la concentration des emplois ou des activités économiques.</p>
+<p><strong>Question :</strong> le choix du CBD peut-il influencer le gradient spatial des prix immobiliers que nous allons estimer ?</p>
+<p>Nous calculons ci-dessous la <strong>distance à vol d’oiseau</strong> entre chaque IRIS de l’AAV de Nantes et le centre de référence retenu. Cette distance, exprimée en kilomètres, correspond à la distance géographique la plus courte entre deux points, <strong>sans tenir compte du réseau routier ni des infrastructures de transport</strong>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>centres_iris <span class="ot">&lt;-</span> iris_aav_nantes <span class="sc">%&gt;%</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_point_on_surface</span>()</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>cbd <span class="ot">&lt;-</span> centres_iris <span class="sc">%&gt;%</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(code_iris <span class="sc">==</span> <span class="st">"441090106"</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Distance à vol d'oiseau en Lambert-93 : mètres -&gt; kilomètres.</span></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>centres_iris<span class="sc">$</span>distance_cbd_km <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">st_distance</span>(centres_iris, cbd)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>) <span class="sc">/</span> <span class="dv">1000</span></span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(centres_iris<span class="sc">$</span>distance_cbd_km)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Distance euclidienne ≠ coût généralisé de transport.</strong> Les réseaux, les temps de trajet, les correspondances et le confort peuvent modifier l’accessibilité indépendamment de la distance géométrique.</p>
+</section>
+<section id="effets-fixes-iris-et-distance-au-cbd" class="level3">
+<h3 class="anchored" data-anchor-id="effets-fixes-iris-et-distance-au-cbd">6.2 Effets fixes IRIS et distance au CBD</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>fe_iris <span class="ot">&lt;-</span> fe_iris <span class="sc">%&gt;%</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>    centres_iris <span class="sc">%&gt;%</span></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">st_drop_geometry</span>() <span class="sc">%&gt;%</span></span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(code_iris, distance_cbd_km),</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">by =</span> <span class="st">"code_iris"</span></span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">%&gt;%</span></span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="fu">is.finite</span>(distance_cbd_km), distance_cbd_km <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="deuxième-étape-gradient-descriptif" class="level3">
+<h3 class="anchored" data-anchor-id="deuxième-étape-gradient-descriptif">6.3 Deuxième étape : gradient descriptif</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>modele_gradient <span class="ot">&lt;-</span> <span class="fu">feols</span>(</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  fe_iris_log <span class="sc">~</span> <span class="fu">log</span>(distance_cbd_km),</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> fe_iris</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a><span class="fu">etable</span>(modele_gradient)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(fe_iris, <span class="fu">aes</span>(<span class="at">x =</span> distance_cbd_km, <span class="at">y =</span> fe_iris)) <span class="sc">+</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">alpha =</span> .<span class="dv">55</span>, <span class="at">color =</span> <span class="st">"grey35"</span>) <span class="sc">+</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Régression linéaire</span></span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x,</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">se =</span> F, <span class="at">color =</span> <span class="st">"#D55E00"</span>) <span class="sc">+</span></span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Régression quadratique</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_smooth</span>(</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">method =</span> <span class="st">"lm"</span>,</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">formula =</span> y <span class="sc">~</span> x <span class="sc">+</span> <span class="fu">I</span>(x<span class="sc">^</span><span class="dv">2</span>),</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">se =</span> F,</span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">color =</span> <span class="st">"#0072B2"</span>,</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">linewidth =</span> <span class="fl">1.1</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Gradient spatial des prix ajustés"</span>,</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>       <span class="at">subtitle =</span> <span class="st">"Effets fixes IRIS issus du modèle hédonique"</span>,</span>
+<span id="cb23-16"><a href="#cb23-16" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Distance au centre (km)"</span>,</span>
+<span id="cb23-17"><a href="#cb23-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Effet fixe IRIS"</span>) <span class="sc">+</span></span>
+<span id="cb23-18"><a href="#cb23-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-important callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Limite économétrique de la seconde étape
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Cette régression porte sur des <strong>effets fixes estimés</strong> : ils sont mesurés avec erreur et n’ont pas tous la même précision. Les erreurs standards naïves de la seconde étape ne tiennent pas automatiquement compte de cette incertitude. Le coefficient décrit une corrélation spatiale, <strong>pas un effet causal de la distance</strong>.</p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+À vous de jouer : Nantes est-elle une ville monocentrique ?
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Dans le cours, nous avons vu que <strong>Liotta et al.&nbsp;(2022)</strong> estiment qu’en moyenne, les loyers diminuent d’environ <strong>1,5 % pour chaque kilomètre supplémentaire d’éloignement du centre-ville (CBD)</strong>.</p>
+<p>À partir des données immobilières de l’AAV de Nantes et des effets fixes IRIS estimés précédemment, nous cherchons à déterminer si le gradient spatial des prix immobiliers nantais est comparable à celui observé dans leur étude.</p>
+<ol type="1">
+<li><p><strong>Choix de la spécification.</strong> Quelle forme fonctionnelle faut-il retenir pour estimer une variation <em>en pourcentage</em> des prix immobiliers associée à chaque kilomètre supplémentaire de distance au CBD ? Écrivez l’équation correspondante et estimez le modèle.</p></li>
+<li><p><strong>Interprétation du gradient.</strong> Quelle est la variation estimée du prix au m² lorsque l’on s’éloigne d’un kilomètre du centre de Nantes ? Interprétez économiquement le coefficient obtenu.</p></li>
+<li><p><strong>Comparaison avec Liotta et al.&nbsp;(2022).</strong> Le gradient estimé à Nantes est-il plus ou moins prononcé que celui de <strong>−1,5 % par kilomètre</strong> rapporté dans l’étude ? Que suggère cette comparaison sur le degré de concentration spatiale des valeurs immobilières à Nantes ?</p></li>
+<li><p><strong>Biais lié à la présence de pôles d’emploi secondaires.</strong> Si certains emplois sont localisés en dehors du CBD, dans quelle mesure l’omission de la distance à ces pôles peut-elle biaiser le coefficient estimé de la distance au centre ? Le gradient des prix risque-t-il d’être surestimé ou sous-estimé en valeur absolue ? Justifiez votre réponse en précisant le signe attendu de l’effet de la distance au pôle secondaire le plus proche sur les prix, sa corrélation probable avec la distance au centre et, en conséquence, <strong>le sens du biais sur le gradient spatial estimé</strong>.</p></li>
+<li><p><strong>Aménités locales et prix immobiliers.</strong> Identifiez trois aménités ou désaménités dont la répartition spatiale est susceptible d’être corrélée à la distance au CBD et qui peuvent également influencer les prix immobiliers.</p></li>
+<li><p><strong>Biais de variable omise.</strong> Choisissez l’une de ces aménités ou désaménités et expliquez comment son omission peut biaiser le coefficient estimé de la distance au CBD.</p></li>
+</ol>
+</div>
+</div>
+</section>
+</section>
+<section id="aller-plus-loin-distance-et-temps-de-trajet-par-la-route" class="level2">
+<h2 class="anchored" data-anchor-id="aller-plus-loin-distance-et-temps-de-trajet-par-la-route">7. Aller plus loin : distance et temps de trajet par la route</h2>
+<p>Jusqu’à présent, nous avons mesuré l’éloignement au centre de Nantes à partir de la distance à vol d’oiseau (ou distance euclidienne). Cette mesure est simple à calculer, mais elle ne tient pas compte des contraintes réelles de déplacement : configuration des routes, franchissement de la Loire, sens de circulation, etc.</p>
+<p>Pour mieux mesurer l’accessibilité au centre-ville, nous utilisons OSRM (Open Source Routing Machine), un moteur de calcul d’itinéraires qui s’appuie sur le réseau routier issu d’OpenStreetMap.</p>
+<p>La fonction osrmTable() permet de calculer, entre chaque IRIS et le centre de Nantes : - <strong>La distance routière (km)</strong> : la longueur de l’itinéraire calculé sur le réseau routier. - <strong>La durée du trajet (minutes)</strong> : le temps de parcours estimé par OSRM, en fonction du réseau routier et des vitesses associées aux différents types de voies. Il ne s’agit pas d’une mesure du trafic en temps réel.</p>
+<p><strong>Quel indicateur est le plus pertinent économiquement ?</strong></p>
+<p>Dans le modèle monocentrique, les ménages arbitrent entre le coût du logement et le coût des déplacements vers le centre d’emploi. Ce dernier ne dépend pas uniquement de la distance parcourue, mais également du temps de trajet, du coût monétaire et des conditions de déplacement.</p>
+<p>Le temps de trajet peut donc constituer une meilleure approximation du coût de transport que la simple distance géographique. Il reste néanmoins imparfait : ici, OSRM mesure l’accessibilité en voiture, sans prendre en compte les transports en commun, les coûts de stationnement ou la congestion réelle.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Définir les origines (tous les iris) et la destination (le CBD)</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>origines <span class="ot">&lt;-</span> centres_iris <span class="sc">%&gt;%</span> <span class="fu">st_transform</span>(<span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(code_iris)</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>destination <span class="ot">&lt;-</span> cbd <span class="sc">%&gt;%</span> <span class="fu">st_transform</span>(<span class="dv">4326</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(code_iris)</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Fonction de calcul de distance par la route et durée de trajet en voiture</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>test_osrm <span class="ot">&lt;-</span> <span class="fu">osrmTable</span>(</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">src =</span> origines,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">dst =</span> destination,</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">measure =</span> <span class="fu">c</span>(<span class="st">"distance"</span>, <span class="st">"duration"</span>) <span class="co"># distance en km et durée en minutes</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>centres_iris<span class="sc">$</span>duree_cbd_min <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(test_osrm<span class="sc">$</span>durations)</span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>centres_iris<span class="sc">$</span>dist_route_cbd_km <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(test_osrm<span class="sc">$</span>distance)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+À vous de jouer
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Réestimez le gradient spatial avec chacune de variables de distance : distance à vol d’oiseau, distance par la route et temps de trajet en voiture. Quelle est la variable qui explique le mieux les effets fixes des zones iris (prix au m2 quand les caractéristiques observables des logements et effets fixes temporels sont égaux à zéro) ?</p>
+</div>
+</div>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
