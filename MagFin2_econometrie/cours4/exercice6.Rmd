@@ -1,0 +1,240 @@
+---
+title: "Exercice 6 - Homoscédasticité et autocorrélation des aléas"
+# author: "Gabrielle Gambuli"
+date: "2025-02-17"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Soupçon d'hétéroscédasticité et d'autocorrélation du modèle d'évaluation du titre financier Mobil {-}
+
+```{r, include = T}
+CAPM  <-  read.csv("C:/Users/gabri/OneDrive/Documents/Teaching/TD_MagFin2/data/CAPM.csv", header=T, dec=".", sep=";")
+
+# On calcule les primes de risques 
+CAPM$PR_MOBIL <- CAPM$Ri_MOBIL - CAPM$RF_FREE
+CAPM$PR_TEXACO <- CAPM$Ri_TEXACO - CAPM$RF_FREE
+CAPM$PR_IBM <- CAPM$ Ri_IBM - CAPM$RF_FREE
+CAPM$PR_DATGEN <- CAPM$Ri_DATGEN - CAPM$RF_FREE
+CAPM$PR_TANDY <- CAPM$Ri_TANDY - CAPM$RF_FREE
+CAPM$PR_GERBER <- CAPM$Ri_GERBER - CAPM$RF_FREE
+CAPM$PR_GENMIL <- CAPM$Ri_GENMIL - CAPM$RF_FREE
+
+CAPM$PRM <- CAPM$RM_MARKET - CAPM$RF_FREE
+
+# On régresse la prime de risque de l'action mobil sur la prime de risque de marché
+reg_mobil <- lm(CAPM$PR_MOBIL ~ CAPM$PRM)
+
+# On récupère résidus
+res_mobil <- residuals(reg_mobil)
+
+# On récupère les prédictions
+yhat_mobil <- fitted(reg_mobil)
+
+plot(CAPM$PRM, CAPM$PR_MOBIL, type="p", xlab="PRM", ylab="PR_Mobil")
+abline(coef=coef(reg_mobil))
+```
+
+# Installation et chargement des packages
+
+```{r, message = FALSE}
+# install.packages("lmtest")            #pour le test de Breusch-Pagan
+# install.packages("MASS")              #pour la correction de l'hétéroscédasticité
+# install.packages("car")               #pour le test d'autocorrélation de Durbin-Watson
+# install.packages("sandwich")               #pour le test d'autocorrélation de Durbin-Watson
+
+library(lmtest)
+library(MASS)
+library(car)
+library(sandwich)
+
+```
+
+# Graphique des résidus 
+
+On reprend l'estimation de l'exercice 5 sur le Capital Asset Pricing Model (CAPM) où on estimait le modèle linéaire de la prime de risque des actions (notamment l'action mobil) par la prime de risque de marché (PRM). 
+
+On représente graphiquement les résidus.
+
+**Est-ce que la variance des résidus semble varier avec la valeur de la variable explicative ?**
+
+```{r}
+plot(CAPM$PRM, res_mobil, type="p", xlab="PRM", ylab="res_mobil")
+```
+
+Le nuage de résidus a une forme légèrement triangulaire : la variabilité des résidus semble augmenter quand les valeurs de la prime de risque de marché (variable explicative) augmentent. Il semble donc qu'il y ait de l'hétéroscédasticité des résidus (à vérifier avec un test et corriger si nécessaire).
+
+On va maintenant effectuer des tests sur les résidus pour déterminer : 
+
+* s'il y a homoscédasticité ou non, 
+
+* si les résidus sont indépendants entre eux ou s'il y a autocorrélation.
+
+# Tests d'homoscédasticité
+
+Dans tous les cas, notre hypothèse nulle est **H0 : homoscédasticité (variance constante).**
+
+## Test de Breusch-Pagan 
+
+Le test de Breusch-Pagan est uniquement pour les **formes linéaires** d'hétéroscédasticité (variance des résidus dépend des variables explicatives suivant une relation linéaire).
+
+**Test B&P original :**
+
+```{r}
+bptest(reg_mobil, studentize = FALSE)
+```
+La valeur-p est inférieure à 0.05, on rejette l'hypothèse H0 d'homoscédasticité au seuil de significativité de 5%. Nos résidus sont donc bien hétéroscédastiques.
+
+**Test B&P avec approximation de Student :**
+
+Même principe que pour le test précédent, sauf qu'on test la significativité des coefficients associés aux variables explicatives dans la régression des résidus au carré.
+
+```{r}
+bptest(reg_mobil, studentize = T)
+```
+
+Même conclusion pour le test B&P avec approximation de Student.
+
+Le test de B&P teste uniquement formes linéaires d'hétéroscédasticité (régression des résidus au carré sur les variables explicatives). 
+
+On pourrait aussi vouloir regarder directement les résultats de la régression des résidus au carré (N*R^2 pour le test BP classique, stat de Student pour le test BP avec approximation de Student) :
+
+```{r}
+res_mobil_sq <- (res_mobil)^2
+
+reg_bp <- lm(res_mobil_sq ~ CAPM$PRM)
+summary(reg_bp)
+```
+
+Par contraste, le test de White prend en compte des **non-linéarités** et s'appuie sur une régression des résidus au carré sur les variables explicatives, les variables explicatives au carré et les termes croisés. Pour une régression linéaire simple, pas de termes croisés.
+
+## Test à la White : 
+
+La fonction I() protège l'objet auquel on fait subir une opération, le conserve au même format, etc.
+
+```{r}
+bptest(reg_mobil, ~ CAPM$PRM + I(CAPM$PRM^2))
+```
+Pour voir le détail de la régression auxiliaire :
+```{r}
+white_reg <- lm(res_mobil_sq ~ CAPM$PRM + I(CAPM$PRM^2))
+summary(white_reg)
+```
+
+On rejette H0 donc il y a de l'hétéroscédasticité, il faut la corriger pour pouvoir faire des tests d'hypothèses.
+
+Il s'agit de corriger la matrice de variance-covariance pour une **matrice de variance-covariance robuste à l'hétéroscédasticité.**
+
+# Correction de l'hétéroscédasticité
+
+On utilise la fonction **rlm()** du package **MASS**.
+lm() et rlm() estiment à peu près les mêmes coefficients, mais rlm() donne un beta moins influencé par les points extrêmes et est plus robuste lorsque les résidus ne sont pas normalement distribués.
+
+Le résumé de rlm() inclut souvent les poids attribués aux observations.
+
+```{r}
+help(rlm)
+```
+
+```{r}
+robust_mobil <- rlm(CAPM$PR_MOBIL ~ CAPM$PRM)
+
+summary(robust_mobil)
+```
+Si le beta diffère entre les modèles lm() et rlm(), cela indique la présence de valeurs aberrantes dans les données.
+
+⚠️ **Attention :**  
+Il vaut mieux estimer les erreurs standards, avec le **package sandwich**. Il permet de calculer des erreurs standards robustes à l’hétéroscédasticité sans modifier les coefficients ni le poids des observations, mais il ne protège pas contre l’influence des valeurs aberrantes.
+
+```{r}
+coeftest(reg_mobil)  # 1er model 
+coeftest(reg_mobil, vcov = vcovHC(reg_mobil, type = "HC1"))  # corrige l'hétéroscédasticité 
+# type = HC0 : corrige l'hétéroscédasticité selon la méthode de White, efficace pour des grands échantillons
+## type = HC1 : corrige l'hétéroscédasticité pour de petits échantillons
+#
+```
+Le premier modèle sous-estimait les erreurs standards, ce qui aurait pu conduire à ne pas rejeter l’hypothèse nulle selon laquelle le beta est égal à zéro.
+Mais le beta reste bien significativement différent de zéro.
+
+**Sauvegarde des résidus robustes :**
+
+```{r}
+res_rmobil <- residuals(robust_mobil)
+```
+
+# Tests d'autocorrélation sur les résidus robustes
+
+Réflexe à adopter : regarder l'allure des résidus dans le temps en les représentant graphiquement :
+
+```{r}
+plot(res_rmobil)
+```
+
+On ajoute une ligne horizontale pour mieux voir leur allure au-dessus et en-dessous de 0. On peut en choisir la couleur, par exemple bleue :
+
+```{r}
+plot(res_rmobil)
+abline(h=0, col='blue')
+```
+
+Les résidus ne semblent pas particulièrement auto-corrélés. 
+
+## Test d'autocorrélation de Durbin-Watson
+
+**H0 : aléas non-autocorrélés (covariance nulle).**
+
+Plusieurs fonctions disponibles dans R, il faut le package "car" pour la seconde.
+
+```{r}
+dwtest(robust_mobil)
+```
+
+```{r}
+durbinWatsonTest(robust_mobil)
+```
+
+La statistique de DW est proche de 2, on retient H0, les résidus ne sont pas autocorrélés (la valeur-p est supérieure à 0.05, on ne rejette pas H0).
+
+## Test d'autocorrélation en régressant les résidus
+
+On peut aussi tester la significativité de la corrélation entre les résidus en t et les résidus en t-1 (= autocorrélation) en régressant les résidus en t sur les résidus en t-1. 
+
+Pour la création du lag des résidus : fonction **lag()**.
+
+La fonction **as.ts()** traite une série comme une série temporelle (nécessaire pour créer une variable retardée) et vérifie qu'elle peut être traitée comme telle.
+
+```{r}
+res_rmobil.L1 <- lag(res_rmobil, 1)
+```
+
+On crée une matrice avec dans la première colonne les résidus en t, dans la deuxième colonne, les résidus en t-1.
+
+ts.intersect() joint les deux vecteurs en enlevant les données manquantes.
+
+```{r}
+resmobil.mat <- ts.intersect(as.ts(res_rmobil), as.ts(res_rmobil.L1))
+```
+
+On donne un nom aux colonnes pour pouvoir les appeler dans la régression.
+
+```{r}
+colnames(resmobil.mat) = c("utmobil", "utmobil.L1")
+```
+
+On régresse les résidus sur leur retard.
+
+```{r}
+lmres_mobil <- lm(utmobil ~ utmobil.L1, data = resmobil.mat)
+
+summary(lmres_mobil)
+```
+
+Le coefficient de cette régression des résidus en t sur les résidus en t-1 est non-significatif. Il ne semble donc pas y avoir de corrélation significative entre les résidus en t et les résidus en t-1. Nos résidus semblent donc bien non-autocorrélés.
+
