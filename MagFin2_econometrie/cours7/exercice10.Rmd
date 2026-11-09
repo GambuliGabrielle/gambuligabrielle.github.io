@@ -1,0 +1,462 @@
+---
+title: "Exercice 10 - Modèles à variable expliquée qualitative "
+# author: "Gabrielle Gambuli"
+date: "2025-03-17"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Probit et logit (simples) {-}
+
+# Installation et chargement des packages
+
+On installe et on charge le package "mfx" qui permet d'obtenir directement les "odds" dont on aura besoin plus tard.
+
+```{r, warning=FALSE, message=FALSE}
+#install.packages("mfx")
+#install.packages("margins")
+
+library(mfx)                #pour avoir directement les odds du modèle logit
+library(margins)     # pour avoir les effets marginaux du modèle probit
+#library(dplyr)
+
+options(scipen = 999) # pour avoir des nombres en notation décimale classique plutôt qu'en notation scientifique
+
+```
+
+# Importation et visualisation des données 
+
+Nous travaillons sur un jeu de données qui porte sur des individus ayant contracté un crédit, avec des informations démographiques, financières et comportementales.
+
+```{r, message = FALSE}
+default_data <- read.csv("C:/Users/gabri/OneDrive/Documents/Teaching/TD_MagFin2/data/default.csv", header = TRUE, dec = ".", sep = ";")
+
+#Type des variables
+unlist(lapply(default_data, class))
+
+#Visualisation des premières lignes
+head(default_data)
+```
+Les variables présentes dans la base de données :
+
+* **ID** Identifiant    
+
+* **CREDIT** Montant du crédit en euros  
+
+* **GENDER** Genre (0 pour femme, 1 pour homme)
+
+* **EDUCATION** Niveau d'éducation (0 avant lycée, 1 lycée, 2 diplôme d'université, 3 diplôme avancé) 
+
+* **MARRIAGE** Statut marital (0 jamais marié, 1 marié, 2 veuf ou divorcé)
+
+* **AGE** Age en années  
+
+* **PAY_1** Dépenses dans le mois dernier en euros   
+
+* **PAY_2** Dépenses dans l'avant-dernier mois en euros
+
+* **DEFAULT** A fait défaut (0 pour non, 1 pour oui) 
+
+# Manipulation des données 
+
+Spécifier à R que les variables DEFAULT, GENDER, MARRIAGE et EDUCATION sont des facteurs (c'est-à-dire, des ensembles définis de modalités) et non des "integers" (entiers nuériques) avec la fonction **as.factor()**.
+
+```{r}
+default_data$DEFAULT <- as.factor(default_data$DEFAULT)
+default_data$GENDER <- as.factor(default_data$GENDER)
+default_data$MARRIAGE <- as.factor(default_data$MARRIAGE)
+default_data$EDUCATION <- as.factor(default_data$EDUCATION)
+
+# #ou encore, avec le package dplyr,
+# 
+# default_data <- default_data %>% 
+#   mutate(
+#     DEFAULT = as.factor(DEFAULT),
+#     GENDER = as.factor(GENDER),
+#     MARRIAGE = as.factor(MARRIAGE),
+#     EDUCATION = as.factor(EDUCATION)
+#          )
+```
+
+# Statistiques descriptives
+
+On utilise la fonction **summary()** afin d'avoir une idée des ordres de grandeur, de la distribution et des principales statistiques des différentes variables.
+
+```{r}
+summary(default_data)
+```
+**Répondez aux questions suivantes :**
+
+* Combien y a-t-il d'individus dans le jeu de données ?
+
+```{r}
+length(unique(default_data$ID))
+```
+
+* Quel est le niveau de crédit moyen ? Minimal ? Maximal ? Médian ? A quoi ressemble sa dispersion ?
+
+
+* Quelle est la proportion de femmes dans le jeu de données ?
+
+```{r}
+length(unique(default_data$ID[default_data$GENDER==0])) / length(unique(default_data$ID))
+```
+
+* Quel est le niveau d'éducation médian ?
+
+* Quel âge ont les individus étudiés ?
+
+* Quel est le pourcentage d'individus qui ont fait défaut sur leur crédit ?
+
+```{r}
+length(unique(default_data$ID[default_data$DEFAULT==1])) / length(unique(default_data$ID))
+```
+
+# Question économétrique et stratégie d'identification
+
+* Ces données sont-elles des données :
+  * en coupe transversale ?
+  * en séries temporelles ?
+  * de panel ?
+
+* Quelle est la question à laquelle il est possible de répondre à partir de ces données ?
+
+* Quelle stratégie économétrique va t-on mettre en oeuvre ?
+
+* Quels sont les effets attendus de chaque variable explicative *a priori* ?
+
+# Tableau de contingence
+
+Le tableau de contingence (ou tableau croisé) permet d’analyser la relation entre deux variables qualitatives en comptabilisant les effectifs pour chaque combinaison de modalités.
+
+Il constitue une première étape pour :
+
+* détecter une association entre variables 
+
+* analyser des différences de comportement
+
+* formuler des hypothèses économiques
+
+## Tableau en effectifs
+
+On peut construire un tableau de contingence avec la fonction **xtabs()** :
+
+```{r}
+xtabs(~ GENDER + DEFAULT, data = default_data)
+xtabs(~ MARRIAGE + DEFAULT, data = default_data)
+xtabs(~ EDUCATION + DEFAULT, data = default_data)
+```
+
+Pour améliorer la lecture, on peut recoder nos facteurs pour les rendre plus lisibles :
+
+```{r}
+default_data$GENDER2 <- factor(default_data$GENDER, levels = c(0, 1), labels = c("female", "male"))
+default_data$DEFAULT2 <- factor(default_data$DEFAULT, levels = c(0, 1), labels = c("no default", "default"))
+
+xtabs(~ GENDER2 + DEFAULT2, data = default_data)
+
+```
+
+On calcule les **effectifs totaux** en ligne et en colonne.
+
+```{r}
+cat("Tableau de contigence \n")
+tab <- table(default_data$GENDER2, default_data$DEFAULT2)
+tab
+
+cat("\nEffectifs totaux \n")
+colSums(tab)
+rowSums(tab)
+```
+
+**Exemples d'interprétation :**
+
+* 14 349 femmes n'ont pas fait défaut dans notre échantillon.
+
+* 6 636 personnes ont fait défaut dans notre échantillon (tout genre confondu).
+
+* Il y a 11 888 hommes dans notre échantillon (sans différencier en fonction du statut de défaut).
+
+Ces tableaux donnent uniquement des effectifs bruts.
+
+**Limite :** Les effectifs seuls sont **insuffisants pour interpréter une relation**. Il faut raisonner en **proportions**.
+
+**Représentation graphique** du tableau de contingence :
+
+```{r}
+barplot(tab, legend=T, beside=T, main='')
+```
+
+## Tableau en proportions
+
+On réalise le **tableau de contingence en proportions** :
+
+Vous pouvez également obtenir les **proportions** (en pourcentage), en ligne ou en colonne dans votre tableau de contingence.
+
+```{r}
+prop.table(table(default_data$GENDER2, default_data$DEFAULT2))*100 # % totaux
+
+prop.table(table(default_data$GENDER2, default_data$DEFAULT2), margin = 1)*100 # % en ligne 
+
+prop.table(table(default_data$GENDER2, default_data$DEFAULT2), margin = 2)*100 # % en colonne
+```
+
+**Exemples d'interprétation :**
+
+* Table 1 : 47.83% des individus de notre échantillon sont des femmes qui n'ont pas fait défaut. Les hommmes qui ont fait défaut représentent 9.58% des individus de notre échantillon.
+
+* Table 2 : 24.17% des hommes ont fait défaut dans notre échantillon, contre 20.78% des femmmes.
+
+* Table 3 : Parmi les personnes qui ont fait défaut, 56.71% sont des femmes, 43.29% sontt des hommmes.
+
+**Quelle est la table qu'on privilégie pour avoir une idée du risque de défaut ?**
+
+* Les tableaux 1 et 3 présentent la **structure de l’échantillon** et non le risque de défaut. Les proportions totales ou par colonne permettent surtout de décrire la composition de la population.
+
+* Le tableau 2 met en évidence le **risque de défaut pour chaque groupe**. Les proportions par ligne sont à privilégier pour analyser le comportement des individus.
+
+Vous pouvez vous entraîner en reproduisant cette démarche pour les autres tableaux de contingence (MARRIAGE et DEFAULT, EDUCATION et DEFAULT).
+
+# Estimation d'un modèle probit 
+
+On va utiliser la fonction **glm()** ("generalized linear model") qui permet ensuite de spécifier plusieurs lois différentes pour les résidus. Les coefficients sont estimés avec la méthode du maximum de vraisemblance (qui utilise l'algorithme Fisher scoring ici).
+
+On précise l'option "probit" comme suit :
+
+```{r}
+probit_model <- glm(DEFAULT ~ CREDIT + GENDER + EDUCATION + MARRIAGE + AGE + PAY_1 + PAY_2, family = binomial(link = "probit"), data = default_data)
+
+summary(probit_model)
+```
+
+Les coefficients sont en **probabilité** dans un modèle probit.
+
+**Attention:** on interprète uniquement le signe et la significativité du coefficient, pas sa valeur.
+
+**Interprétation :** pour une hausse d'une unité de la variable X, la probabilité de l'évènement augmente/diminue.
+
+Ici, par exemple, quand le montant du crédit augmente d'un euros, la probabilité de faire défaut diminue. Cette corrélation semble hautement significative statistiquement. *Cela vous semble-t-il théoriquement correct ?*
+
+**Performance du modèle :**
+
+* La différence entre déviance résiduelle et déviance nulle correspond au gain expliqué par le modèle. Le modèle probit explique mieux que le modèle nul (sans variable explicative) : déviance résiduelle < déviance nulle. 
+
+* L’AIC (Akaike Information Criterion) est un indicateur de performance qui permet de comparer ce modèle à d’autres. Plus l'AIC est petit, plus le modèle est performant.
+
+* Les itérations montrent que la convergence a été rapide.
+
+# Estimation d'un modèle logit 
+
+On précise l'option "logit" dans la fonction **glm()**.
+
+```{r}
+logit_model <- glm(DEFAULT ~ CREDIT + GENDER + EDUCATION + MARRIAGE + AGE + PAY_1 + PAY_2, family = binomial(link = "logit"), data = default_data)
+
+summary(logit_model)
+```
+
+Les coefficients sont en forme **"log-odds"** dans un modèle logit.
+
+**Attention:** on interprète uniquement le signe et la significativité du coefficient, pas sa valeur.
+
+**Interprétation :** pour une hausse d'une unité de la variable X, les log odds de l'évènement (par rapport à son contraire) augmentent/diminuent.
+
+Ici, par exemple, quand l'âge augmente d'une année, les log odds du défaut (par rapport au non-défaut) augmentent. Cette corrélation est significative statistiquement au seuil de 5%.
+
+# Coefficients en "odds"
+
+**Rappel:** l'odds d'un évènement est le rapport du nombre d’individus présentant l’événement considéré sur le nombre d’individus ne le présentant pas. Autrement dit, c'est le rapport de probabilité d’un événement sur la probabilité de son non-événement.
+
+L'odds correspond à l'exponentielle des log odds. Ils vont de 0 à l’infini (contrairement à une probabilité qui va de 0 à 1).
+
+Pour calculer les "odds", on peut **appliquer l'exponentielle** aux coefficients log odds. 
+
+```{r}
+cbind(Estimate = round(coef(logit_model), 5), OD = round(exp(coef(logit_model)), 5))
+```
+
+Pour avoir directement les odds, on a besoin du **package "mfx"** qu'on a préalablement installé et chargé et la fonction **logitor()**.
+
+```{r}
+logit_OD <- logitor(DEFAULT~CREDIT + GENDER + EDUCATION + MARRIAGE + AGE + PAY_1 + PAY_2, data = default_data)
+
+logit_OD
+```
+**Interprétation :**
+
+* odd ratio > 1 → risque de défaut plus élevé.
+
+* odd ratio < 1 → risque de défaut plus faible.
+
+* odd ratio = 1 → pas d’effet
+
+# Effets marginaux en probabilité 
+
+On utilise la fonction **logitmfx()** pour avoir les **effets marginaux** (changement dans la *probabilité* quand la variable explicative change d'une unité) à partir du modèle logit.
+
+```{r}
+logit_me <- logitmfx(DEFAULT ~ CREDIT + GENDER + EDUCATION + MARRIAGE + AGE + PAY_1 + PAY_2, data = default_data)
+
+logit_me
+```
+**Interprétation :**
+
+Les effets marginaux sont toujours en unités de probabilité, sur l’échelle [0;1].
+Pour rendre l'interprétation plus intuitive, on peut multiplier les coefficients par 100 pour lire l’effet marginal en points de pourcentage (que ce soit pour les variables binaires ou continues).
+
+Exemple : Si **GENDER** passe de 0 à 1 (femme → homme), la probabilité de défaut augmente de 0.0291 sur l’échelle [0;1]. Autrement dit, les hommes ont une probabilité de défaut supérieure de 2.91 points de pourcentage par rapport aux femmes.
+
+Pour les **effets marginaux estimés à partir du modèle probit**, on fait :
+
+```{r}
+summary(margins(probit_model))  # calcule directement les effets marginaux
+```
+
+# Probabilité prédite de faire défaut 
+
+Prédire la probabilité de faire défaut pour un individu présentant les caractéristiques suivantes : homme de 55 ans, marié, diplômé de l'université, montant de 50 000 euros de crédit, a dépensé 2000 euros dans les 2 derniers mois.
+
+La fonction **predict()** permet de faire cela pour un "generalized linear model".
+
+On commence par **construire les données** correspondantes :
+
+```{r}
+indiv1 <- data.frame(CREDIT = 50000, GENDER = 1, EDUCATION = 2, MARRIAGE = 1, AGE = 55, PAY_1 = 2000, PAY_2 = 2000)
+indiv1$GENDER <- as.factor(indiv1$GENDER)
+indiv1$EDUCATION <- as.factor(indiv1$EDUCATION)
+indiv1$MARRIAGE <- as.factor(indiv1$MARRIAGE)
+```
+
+Puis on **prédit la probabilité** associée :
+
+```{r}
+prob_logit <- predict(logit_model, newdata = indiv1, type = "response")
+prob_logit
+```
+
+La probabilité de faire défaut pour un homme de 55 ans, marié, diplômé de l'université, avec 50 000 euros de crédit et qui a dépensé 2000 euros dans les 2 derniers mois est de 35.61%.
+
+Idem pour le **probit** :
+
+```{r}
+prob_probit <- predict(probit_model, newdata = indiv1, type = "response")
+prob_probit
+```
+
+Comparez les résultats.
+
+# Tester le pouvoir explicatif du modèle 
+
+Test à partir du **ratio de vraisemblance** :
+
+Mon modèle avec diverses variables explicatives a-t-il un plus grand pouvoir explicatif que le modèle nul (c'est-à-dire, simplement modélisé par la constante) ?
+
+**H0 :** le modèle nul est plus explicatif.
+
+La commande suivante nous donne la p-value du test : 
+
+```{r}
+with(logit_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+```
+
+On rejette H0, notre modèle logit a un plus grand pouvoir explicatif que le modèle nul. 
+
+```{r}
+with(probit_model, pchisq(null.deviance - deviance, df.null - df.residual, lower.tail = FALSE))
+```
+
+On rejette H0, notre modèle probit a un plus grand pouvoir explicatif que le modèle nul. 
+
+**Quel modèle, entre le probit et le logit, est plus performant ?**
+
+```{r}
+AIC(logit_model, probit_model)
+```
+
+Ou encore, avec le BIC :
+```{r}
+BIC(logit_model, probit_model)
+```
+
+**Règle générale :** plus le AIC et le BIC sont petits → meilleur est l'ajustement du modèle.
+
+Ici : AIC logit < AIC probit → logit est légèrement préféré en termes d’ajustement global.
+
+# Linear Probability Model
+
+
+```{r}
+default_data$DEFAULT_num <- as.numeric(default_data$DEFAULT) # pour un linear model, on a besoin que la variable dépendante soit numérique
+
+lpm_model <- lm(DEFAULT_num ~ CREDIT + GENDER + EDUCATION + MARRIAGE + AGE + PAY_1 + PAY_2,
+                data = default_data)
+
+summary(lpm_model)
+
+```
+**Avantage du LPM :** il estime directement des effets marginaux.
+**Désavantage :** il peut générer des probabilités impossibles (<0 ou >1), souffre d’hétéroscédasticité, et les inférences statistiques (p‑values, intervalles) sont moins fiables que dans les modèles logit ou probit.
+
+**Comparer ajustement des différents modèles** (LPM, logit, probit)
+
+```{r}
+AIC(lpm_model, logit_model, probit_model)
+```
+
+L'ajustement du LPM est bien moins bon que l'ajustement des modèles logit et probit.
+
+**Prédire la probabilité de défaut pour un profil**
+
+```{r}
+predict(lpm_model, indiv1, type = "response")      # LPM
+predict(logit_model, indiv1, type = "response")   # Logit
+predict(probit_model, indiv1, type = "response")  # Probit
+```
+
+La probabilité estimée par le LPM dépasse 1, ce qui montre une limite pratique.
+
+**BONUS : visualiser les différences**
+
+```{r}
+library(ggplot2)
+library(tidyr)
+
+# Prévoir pour différentes valeurs de CREDIT
+credit_seq <- seq(0, 100000, by = 5000)
+
+df_plot <- data.frame(
+  CREDIT = credit_seq,
+  GENDER = factor(1),
+  EDUCATION = factor(2),
+  MARRIAGE = factor(1),
+  AGE = 55,
+  PAY_1 = 2000,
+  PAY_2 = 2000
+)
+
+df_plot$LPM <- predict(lpm_model, df_plot)
+df_plot$Logit <- predict(logit_model, df_plot, type = "response")
+df_plot$Probit <- predict(probit_model, df_plot, type = "response")
+
+# Mettre en format long pour ggplot
+df_long <- pivot_longer(df_plot, cols = c("LPM","Logit","Probit"), names_to = "Model", values_to = "Prob")
+
+ggplot(df_long, aes(x = CREDIT, y = Prob, color = Model)) +
+  geom_line(size = 1.2) +
+  labs(title = "Comparaison LPM vs Logit vs Probit",
+       x = "Montant du crédit (€)",
+       y = "Probabilité prédite de défaut") +
+  theme_minimal()
+```
+
+
+
+
+

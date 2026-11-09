@@ -1,0 +1,232 @@
+---
+title: "Exercice 8 - Modèle APT"
+# author: "Gabrielle Gambuli"
+date: "2026-02-24"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Libraries
+
+```{r}
+library(dplyr)
+library(lmtest) # tests d'hétéroscédasticité et autocorrélation des erreurs
+```
+
+# L’estimation d’un modèle APT : la régression linéaire multiple {-}
+
+On estime un modèle APT avec la base Microsoft.csv. Cela demande un premier travail de transformation des variables car on regresse les rendements en excès (i.e. les primes de risque) sur différentes variables explicatives (régression linéaire multiple) exprimées en différence première. 
+
+
+# Importation des données 
+
+```{r}
+APT <- read.csv("C:/Users/gabri/OneDrive/Documents/Teaching/TD_MagFin2/data/Microsoft.csv", header = T, dec = "," , sep = ";")
+
+class(APT)
+
+dim(APT)
+
+names(APT)
+```
+
+* **Date :** Date
+
+* **Microsoft :** prix de l'action Microsoft
+
+* **SP :** indice Standard and Poor's
+
+* **IPC :** indice des prix à la consommation
+
+* **industrial.production :** production industrielle
+
+* **USTB3M :** taux court (3 mois) 
+
+* **USTB10Y :** taux long (10 ans)
+
+* **money.supply :** offre de monnaie
+
+* **consumer.credit :** crédit à la consommation
+
+* **baa.aaa.spread :** écart entre Baa et Aaa (prime de risque de crédit entre obligations moyennes et très sûres)   
+
+# Manipulation des données 
+
+## Opération sur la variable expliquée (avec *dplyr*)
+
+On cherche à expliquer le **rendement** mensuel des actions Microsoft **en excès** (par rapport à un taux sans risque). C'est notre variable expliquée.
+
+On a le prix de l'action, il nous faut donc calculer le rendement de l'action (i.e. le taux de croissance du prix de l'action).
+
+**Calcul du rendement (en %) :** ((P_t - P_{t-1}) / P_{t-1}) * 100
+
+On doit donc **créer le prix retardé (le lag des prix)** de l'action Microsoft : pour chaque période t, on associe le prix observé à la période t−1. Cela permet d'avoir le prix et son retard dans une même ligne, pour ensuite faire des calculs utilisant ces deux séries.
+
+```{r}
+APT <- APT %>% 
+  mutate(Date = as.Date(Date, format = "%d/%m/%Y"),
+         Micro.L1 = lag(Microsoft,1))
+```
+
+Enfin, on **calcule le rendement** (cad, le taux de croissance du prix de l'action Microsoft) :
+
+```{r}
+APT <- APT %>% 
+  mutate(Micro.return = (Microsoft - Micro.L1)/Micro.L1 * 100)
+```
+
+On calcule ensuite le **rendement en excès** par rapport à un taux sans risque (i.e., le taux le plus court, ici à 3 mois).
+
+**Attention :** le taux est un taux annuel alors que les rendements sont mensuels donc on doit le diviser par 12.
+
+```{r}
+APT <- APT %>% 
+  mutate(Micro.excess.return = Micro.return - USTB3M/12)
+```
+
+## Méthode alternative : 
+
+Vous pouvez réaliser exactement les mêmes opérations sur la variable expliquée en créant les nouvelles variables (lag, rendement et rendement en excès) sans *dplyr*, avec la syntaxe plus classique "data$colonne".
+
+```{r, message = FALSE, warning = FALSE}
+APT2 <- APT
+
+#créer le lag des prix de l'action Microsoft (variable des prix retardée d'une observation)
+APT2$Micro.L1 <- lag(APT2$Microsoft, 1)
+
+#calculer le rendement (cad, le taux de croissance du prix de l'action Microsoft)
+APT2$Micro.return <- ((APT2$Microsoft - APT2$Micro.L1) / APT2$Micro.L1) * 100
+
+#calculer le rendement en excès par rapport à un taux sans risque 
+#attention : taux annuel à diviser par 12 car les rendements sont mensuels 
+APT2$Micro.excess.return <- APT2$Micro.return - APT2$USTB3M / 12
+```
+
+## Opération sur les variables explicatives
+
+Le modèle APT fait l'hypothèse que ce sont des **changements non anticipés** dans les variables explicatives qui affectent les rendements en excès d'une action (et non pas les variables en niveau).
+
+On **transforme donc toutes les variables explicatives en différences** avec la fonction **diff()**.
+
+```{r}
+APT <- APT %>%
+  mutate(
+    dcredit = consumer.credit - lag(consumer.credit ,1),
+    dspread = baa.aaa.spread - lag(baa.aaa.spread ,1),
+    dprod   = industrial.production - lag(industrial.production ,1),
+    dmoney  = money.supply - lag(money.supply ,1)
+  )
+```
+
+On calcule **l'inflation** : le taux de croissance de l'indice des prix à la consommation (IPC) avec la même méthode que précédemment.
+
+```{r}
+
+APT <- APT %>%
+  mutate(
+    IPC.L1     = lag(IPC,1),                         #lag de l'IPC
+    inflation  = ((IPC - IPC.L1) / IPC.L1) * 100,    #calcul du taux de croissance de l'IPC
+    dinflation = inflation - lag(inflation,1)         #transformation de la variable en différence
+  )
+```
+
+On calcule **la prime de maturité** : la différence entre les taux longs (10 ans) et les taux courts (3 mois) sur les obligations souveraines américaines. 
+
+On a toujours besoin d'exprimer cette variable explicative en différence.
+
+```{r}
+APT <- APT %>%
+  mutate(
+    maturity  = USTB10Y - USTB3M,
+    dmaturity = maturity - lag(maturity ,1)
+  )
+```
+
+On calcule les **rendements du marché (indice Standard and Poor's) en excès**, qui sont également choisis comme variable explicative.
+
+```{r}
+APT <- APT %>%
+  mutate(
+    SP.L1             = lag(SP ,1),                     #lag de l'indice
+    SP.return         = ((SP - SP.L1) / SP.L1) * 100,   #calcul du taux de croissance de l'indice
+    SP.excess.return  = SP.return - USTB3M / 12         #transformation de la variable en différence
+  )
+```
+
+**Remarque** : Les lags entraînent des valeurs manquantes, et la variable dinflation a une observation supplémentaire absente par rapport aux autres. Il est possible de les supprimer explicitement, mais lm() ignore ces observations manquantes automatiquement lors de la régression.
+
+```{r}
+APT2 <- APT %>% 
+  filter(complete.cases(.)) # ne garde que les lignes sans aucune observation manquante (NA value)
+```
+
+# Régression multiple   
+
+## Modèle ATP   
+
+On estime un modèle APT pour expliquer le **rendement** mensuel des actions Microsoft **en excès** (par rapport à un taux sans risque) par différentes variables explicatives exprimées en différence première : les crédits à la consommation, la production industrielle, l'écart entre Baa et Aaa, l'offre de monnaie, l'inflation, la prime de maturité et les rendements du marché en excès. 
+
+```{r}
+reg_APT <- lm(Micro.excess.return ~ dcredit + dprod + dspread + dmoney + dinflation + dmaturity + SP.excess.return, data = APT)
+
+summary(reg_APT)
+```
+
+Un R² de 0,25 indique que notre modèle APT explique environ 25 % de la variation du rendement mensuel des actions Microsoft en excès.
+
+On observe des relations positives et statistiquement significatives entre le rendement en excès des actions Microsoft et la prime de maturité ou les rendements du marché en excès, ceteris paribus. 
+
+Le rendement en excès des actions Microsoft augmente de 4,50 point de pourcentage (pp) pour un pp supplémentaire de prime de maturité et de 1,39 pp pour un pp supplémentaire de rendements du marché en excès, **toutes choses égales par ailleurs (TCEPA)**.
+
+## Modèle CAPM
+
+Dans le modèle CAPM, on explique le rendement d'un actif en excès (celui de Microsoft ici, *Micro.excess.return*) par le rendement du marché en excès (*SP.excess.return*).
+
+```{r}
+reg_CAPM <- lm(Micro.excess.return ~ SP.excess.return, data = APT2)
+summary(reg_CAPM)
+```
+
+Le rendement en excès des actions Microsoft augmente de 1,36 pp pour un pp supplémentaire de rendements du marché en excès. Le coefficient estimé est peu plus faible que celui du modèle APT (1,39) : y a-t-il un biais de variable omise ? C'est le cas si la variable omise (*dmaturity*) est corrélée à la variable expliquée (*Micro.excess.return*) et à la variable explicative (*SP.excess.return*).
+
+```{r}
+cor.test(APT2$SP.excess.return, APT2$dmaturity, method = "pearson")
+```
+
+Ici, il n’existe aucune corrélation linéaire significative entre le rendement en excès du marché (SP.excess.return) et la prime de maturité (dmaturity). La p-value est très supérieure à 0.05, donc on ne rejette pas l’hypothèse nulle d’absence de corrélation, et l’intervalle contient 0, ce qui confirme qu’on ne peut pas conclure à une corrélation différente de zéro.
+
+Dans ce cas, la petite différence entre le coefficient CAPM et le coefficient du marché dans l’APT n’est pas due à un biais de variable omise, mais plutôt à l’ajout de multiples facteurs supplémentaires, qui en fait n’apportent pas d’explication supplémentaire significative (R² ajusté est à 0.2266 pour le modèle CAPM, contre 0.2346 pour le modèle APT).
+
+Pour cette série particulière, le CAPM et l’APT donnent des résultats similaires, et les facteurs supplémentaires de l’APT ne sont pas pertinents statistiquement pour expliquer Micro.excess.return.
+
+## Tests sur les résidus
+
+```{r}
+# Résidus
+res <- residuals(reg_APT)
+
+# Résidus standardisés
+res_std <- rstandard(reg_APT)
+
+# Tests de normalité des résidus (Shapiro-Wilk)
+shapiro.test(res)            
+
+# Test d'autocorrélation (Durbin-Watson)
+dwtest(reg_APT)                   
+
+# Test d'hétéroscédasticité (Breusch-Pagan)
+bptest(reg_APT)               
+```
+
+**Normalité des résidus (Shapiro-Wilk)** : La p-valeur est très faible, ce qui indique que les résidus ne suivent pas une loi normale. Conclusion : L’hypothèse de normalité est rejetée. Cela peut affecter les tests de significativité si l’échantillon est petit, mais avec un grand échantillon, l’OLS reste consistant.
+
+**Autocorrélation (Durbin-Watson)** : La statistique est proche de 2 et la p-valeur est élevée, ce qui indique absence d’autocorrélation positive dans les résidus. Conclusion : Pas de problème d’autocorrélation pour la régression.
+
+**Hétéroscédasticité (Breusch-Pagan)** : La p-valeur est élevée, ce qui signifie que l’on ne peut pas rejeter l’hypothèse d’homoscédasticité. Conclusion : Pas de problème d’hétéroscédasticité.

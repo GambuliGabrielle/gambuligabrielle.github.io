@@ -1,0 +1,128 @@
+---
+title: "Exercice 1 - les vecteurs"
+# author: "Gabrielle Gambuli"
+date: "2026-01-27"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Analyse de données de gain {-}
+
+Vous décidez de faire des analyses sur des données collectées pour un joueur en une semaine à Las Vegas.
+
+Au poker :
+
+    Lundi, il a gagné 140$.
+    Mardi, il a perdu 50$.
+    Mercredi, il a gagné 20$.
+    Jeudi, il a perdu 120$.
+    Vendredi, il a gagné 240$.
+
+A la roulette :
+
+    Lundi, il a perdu 24$.
+    Mardi, il a perdu 50$.
+    Mercredi, il a gagné 100$.
+    Jeudi, il a perdu 350$.
+    Vendredi, il a gagné 10$.
+    
+Exercice dérivé de Luka Ignjatović et DataCamp : https://github.com/LukaIgnjatovic/DataCamp_-_Track_-_Data_Scientist_with_R_-_Course_01_-_Introduction_to_R/blob/master/README.md.
+
+# Créer des vecteurs
+
+Créer des vecteurs de gains hebdomadaires.
+
+```{r}
+# Au poker
+vect_poker <- c(140, -50, 20, -120, 240)
+
+# A la roulette 
+vect_roulette <-  c(-24, -50, 100, -350, 10)
+```
+
+# Nommer des vecteurs
+
+Assigner les jours de la semaine comme noms des éléments des vecteurs poker et roulette grâce à la fonction names().
+
+```{r}
+#Créer un vecteur jour
+vect_jours <- c("Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi")
+
+#Nommer les éléments des vecteurs de gains à la roulette et au poker grâce ce vecteur jour 
+names(vect_poker) <- vect_jours
+names(vect_roulette) <- vect_jours
+```
+
+# Calculer les totaux
+
+Calculer le total des gains hebdomadaires au poker et à la roulette respectivement grâce à la fonction sum(), puis le gain total de la semaine toute activité confondue.
+
+```{r}
+# Totaux des gains hebdomadaires au poker et à la roulette 
+tot_poker <- sum(vect_poker)
+tot_poker
+tot_roulette <- sum(vect_roulette) 
+tot_roulette 
+
+# Gains totaux de la semaine
+tot_semaine <- tot_poker + tot_roulette
+tot_semaine
+```
+Sur l'ensemble de la semaine, il a gagné 230$ au poker et perdu 314$ à la roulette, générant une perte totale de 84$.
+
+# Comparer les totaux
+
+Vérifier si les gains totaux réalisés sont égaux, différents ou plus élevés au poker qu'à la roulette 
+
+```{r}
+# Egalité
+tot_poker == tot_roulette
+#Différence
+tot_poker != tot_roulette
+# Inégalité
+tot_poker > tot_roulette
+```
+Ses gains hebdomadaires sont plus élevés au poker qu'à la roulette.
+
+
+# Calculer la moyenne d'une sélection
+
+Sélectionner les résultats à la roulette du mardi au vendredi et ceux au poker du lundi au mercredi. Calculez les gains moyens pour chacune de ces sélections.
+
+```{r}
+# Définir de nouvelles variables basées sur des sélections
+vect_select_roulette <- vect_roulette[2:5]
+poker_debut <- vect_poker[c("Lundi", "Mardi", "Mercredi")]
+  
+# Calculez les moyennes des éléments séléctionnés
+mean(vect_select_roulette)
+mean(poker_debut)
+```
+En moyenne, il a perdu 72.5$ à la roulette du mardi au vendredi et gagné 36.67$ au poker du lundi au mercredi.
+
+# Selection par comparaison
+
+Quels jours le joueur a-t-il gagné de l'argent au poker et à la roulette respectivement ?
+
+```{r}
+# Selectionner les jours où les gains sont supérieurs à 0
+select_gain_poker <- vect_poker > 0
+select_gain_roulette <- vect_roulette > 0
+
+# Les inscrire dans de nouveaux vecteurs
+poker_jours_gagnants <- vect_poker[select_gain_poker]
+poker_jours_gagnants
+roulette_jours_gagnants <- vect_roulette[select_gain_roulette]
+roulette_jours_gagnants
+```
+Le joueur a gagné de l'argent au poker lundi, mercredi et vendredi. Il a gagné à la roulette mercredi et vendredi.
+
+
+
