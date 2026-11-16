@@ -14,23 +14,29 @@ Ce cours, destiné aux étudiants du M2 ECAP, propose une introduction à l’é
 
 ### Matériel
 - [Syllabus](/teaching/economie-geographique-et-urbaine-graduate/syllabus.pdf)
-- Séance 1
+- **Séance 1**
 	- [Slides](/teaching/economie-geographique-et-urbaine-graduate/slides_01_intro_economie_geographique_urbaine.pdf)
 	- [Tutoriel](/teaching/economie-geographique-et-urbaine-graduate/tutoriel_01_rappel_r_intro_donnees_spatiales.html)
-- Séance 2
+- **Séance 2**
 	- [Slides](/teaching/economie-geographique-et-urbaine-graduate/slides_02.pdf)
 	- [Tutoriel partie 1](/teaching/economie-geographique-et-urbaine-graduate/tutoriel_02_1_intro_donnees_spatiales.html) + [correction](/teaching/economie-geographique-et-urbaine-graduate/correction_tuto_02_partie_1.R)
 
 	- [Tutoriel partie 2](/teaching/economie-geographique-et-urbaine-graduate/tuto_02_gecon.html) + [correction exercice 1](/teaching/economie-geographique-et-urbaine-graduate/correction_tuto_02_partie_2_ex_1.R)
-- Séance 3
+- **Séance 3**
 	- [Slides](/teaching/economie-geographique-et-urbaine-graduate/slides_03.pdf)
 	- Tutoriel de la séance 2, partie 2 (exercices 2 et 3) + [correction](/teaching/economie-geographique-et-urbaine-graduate/correction_tuto_2_partie_2_ex_2_3.R)
 	- [Consignes pour vos projets](/teaching/economie-geographique-et-urbaine-graduate/consigne_projets_binome.pdf)
 	- [Vos sujets](/teaching/economie-geographique-et-urbaine-graduate/sujets_projets.pdf)
-- Séance 4
+- **Séance 4**
 	- [Slides](/teaching/economie-geographique-et-urbaine-graduate/slides_04.pdf)
 	- [Tutoriel](/teaching/economie-geographique-et-urbaine-graduate/tuto_seance_04.html)
-- Séance 5
+- **Séance 5**
 	- [Slides](/teaching/economie-geographique-et-urbaine-graduate/slides_05b.pdf)
-	- [Tutoriel](/teaching/economie-geographique-et-urbaine-graduate/tuto_05.html)
-
+	- Tutoriel
+		- [Fichier html](/teaching/economie-geographique-et-urbaine-graduate/tuto_05.html)
+		- [Fichier quarto (exécutable directement sur RStudio)](/teaching/economie-geographique-et-urbaine-graduate/tuto_05.qmd)
+	- Tirage au sort de l'ordre de passage des groupes à l'oral
+		- [Script R](/teaching/economie-geographique-et-urbaine-graduate/tirage_ordre_passage_oral.R)
+		- [Résultat](/teaching/economie-geographique-et-urbaine-graduate/ordre_de_passage_groupes.png)
+- **Séance sur vos projets**
+	- [Organisation de la séance](/teaching/economie-geographique-et-urbaine-graduate/organisation_seance_jeudi_19_nov.pdf)
