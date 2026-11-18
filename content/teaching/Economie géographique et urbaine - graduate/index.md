@@ -40,3 +40,5 @@ Ce cours, destiné aux étudiants du M2 ECAP, propose une introduction à l’é
 		- [Résultat](/teaching/economie-geographique-et-urbaine-graduate/ordre_de_passage_groupes.png)
 - **Séance sur vos projets**
 	- [Organisation de la séance](/teaching/economie-geographique-et-urbaine-graduate/organisation_seance_jeudi_19_nov.pdf)
+	- [Consignes pour vos projets](/teaching/economie-geographique-et-urbaine-graduate/consignes_projets_eco_geo.pdf)
+
