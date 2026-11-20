@@ -1,0 +1,699 @@
+---
+title: "Tutoriel séance 5 : Le gradient spatial des prix immobiliers dans l'AAV de Nantes"
+author: "Gabrielle Gambuli"
+
+execute:
+  echo: true
+  output: false
+  warning: false
+  message: false
+
+format:
+  html:
+    toc: true
+    toc-location: left
+    toc-depth: 3
+
+editor: visual
+---
+
+## Objectifs et question économique
+
+L'objectif de ce tutoriel est d'étudier **comment les prix immobiliers varient avec la distance au centre de Nantes** (*Central Business District, CBD*). Nous chercherons à mettre en évidence le gradient spatial des prix immobiliers, une prédiction centrale du modèle de ville monocentrique.
+
+Notre analyse porte sur les transactions immobilières situées dans l'**aire d'attraction de la ville (AAV) de Nantes**, à une échelle géographique fine : celle des **IRIS**.
+
+Deux zonages sont donc mobilisés :
+
+-   **L'aire d'attraction des villes (AAV)** : définie par l'INSEE, elle permet d'appréhender la ville au-delà de ses limites administratives. Elle comprend un pôle de population et d'emploi ainsi qu'une couronne de communes dont une part significative des actifs travaille dans ce pôle (autour de 15%). Elle constitue ainsi une approximation du fonctionnement économique de l'espace urbain.
+-   **Les IRIS** (*Îlots Regroupés pour l'Information Statistique*) : ce sont des unités géographiques infracommunales définies par l'INSEE, regroupant généralement environ 2 000 habitants.
+
+**Notre démarche** : identifier les communes appartenant à l'AAV de Nantes, sélectionner les IRIS correspondants, puis analyser les différences de valorisation immobilière entre ces quartiers.
+
+**Question** : les logements situés dans les quartiers les plus proches du centre de Nantes sont-ils plus chers, une fois prises en compte leurs caractéristiques ?
+
+## 1. Préparer les fichiers et R
+
+### 1.1 Télécharger les données
+
+-   **Communes de l'AAV de Nantes** : sur [Cartiflette](https://inseefrlab.github.io/cartiflette/), téléchargez le fichier **GeoParquet des communes de Loire-Atlantique (département 44)**, millésime **2026**, en choisissant une **simplification des géométries à 80 %** afin d'alléger le fichier. **Pourquoi utiliser cette source ?** Outre les contours géographiques des communes, elle contient leur code d'appartenance à une **aire d'attraction des villes (AAV)**. Nous pourrons ainsi identifier les communes appartenant à l'AAV de Nantes et délimiter notre zone d'étude.
+-   **Contours IRIS** : sur [IGN --- Contours IRIS](https://cartes.gouv.fr/rechercher-une-donnee/dataset/IGNF_CONTOURS-IRIS), téléchargez le fichier **Contours... IRIS®** en sélectionnant la zone **FXX France métropolitaine**, au format **GeoPackage** et CRS **RGF93 v1 / Lambert-93 - France**.
+-   **Transactions DVF+** : [Cerema --- DVF+](https://cerema.app.box.com/v/dvfplus-opendata/folder/77228357248) ; dans la livraison d'octobre 2026, récupérer le Parquet de la région Pays de la Loire.
+-   **Dictionnaire des variables** : [Datafoncier --- table mutation](https://doc-datafoncier.cerema.fr/doc/dv3f/mutation).
+
+### 1.2 Charger les packages
+
+```{r}
+# À exécuter une seule fois si nécessaire :
+# install.packages(c("arrow", "dplyr", "sf", "sfarrow", "ggplot2",
+#                    "fixest", "tidyr", "scales", "osrm", "mapview"))
+
+library(arrow)
+library(dplyr)
+library(sf)
+library(sfarrow)
+library(ggplot2)
+library(fixest)
+library(tidyr)
+library(scales)
+library(osrm)
+library(mapview)
+
+```
+
+```{r}
+# À ADAPTER sur votre ordinateur
+path_data <- "G:/Mon Drive/TEACHING/MCF_Nantes/cours/M2_eco_spatiale/data/"
+
+path_aav  <- file.path(path_data, "prix_hedoniques/COM2026.parquet")
+
+path_iris <- file.path(path_data,
+  "contours_iris/1_DONNEES_LIVRAISON_2026-07-00042/CONTOURS-IRIS_3-0_GPKG_LAMB93_FXX-ED2026-01-01/iris.gpkg")
+
+path_dvf  <- file.path(path_data, "prix_hedoniques/dvf_plus.parquet")
+```
+
+## 2. Délimiter l'AAV de Nantes
+
+### 2.1 Communes de l'AAV
+
+```{r}
+# Data communes
+communes <- st_read_parquet(path_aav)
+
+# L'AAV de Nantes est codée « 008 » (variable AAV2020).
+communes_aav_nantes <- communes %>%
+  st_drop_geometry() %>%
+  filter(AAV2020 == "008") %>%
+  select(INSEE_COM,NOM) %>%
+  distinct()
+
+rm(communes)
+```
+
+::: callout-tip
+### À vous de jouer
+
+Combien de communes contient l'AAV de Nantes ?
+:::
+
+### 2.2 IRIS de la zone d'étude
+
+```{r}
+iris <- st_read(path_iris, quiet = TRUE)
+
+iris_aav_nantes <- iris %>%
+  filter(as.character(code_insee) %in% communes_aav_nantes$INSEE_COM) %>%
+  select(code_iris, code_insee, nom_iris, geometrie) %>% 
+  left_join(communes_aav_nantes %>% 
+              rename(code_insee = INSEE_COM, nom_commune = NOM)
+            )
+
+rm(iris)
+```
+
+::: callout-tip
+### À vous de jouer
+
+Combien d'iris contient l'AAV de Nantes ? Combien d'iris se trouvent dans la commune de Nantes ?
+:::
+
+### 2.3 Première carte : les communes et les IRIS de notre zone d'étude
+
+```{r}
+ggplot() +
+  geom_sf(
+    data = iris_aav_nantes,
+    aes(fill = code_insee),
+    color = "grey35",
+    linewidth = 0.08
+  ) +
+  coord_sf(datum = NA) +
+  guides(fill = "none") +
+  labs(
+    title = "AAV de Nantes",
+    subtitle = "Couleurs : communes ; traits gris : limites des IRIS"
+  ) +
+  theme_minimal()
+```
+
+## 3. Explorer et filtrer les transactions DVF+
+
+### 3.1 Pourquoi utiliser Parquet ?
+
+Le fichier DVF+ est très volumineux. Pour éviter de charger inutilement l'ensemble des données en mémoire, nous utilisons `open_dataset()`, qui permet de travailler avec des **requêtes différées** (*lazy evaluation*).
+
+Les opérations de filtrage (`filter()`) et de sélection des variables (`select()`) sont préparées sans charger les données. Elles ne sont exécutées qu'au moment de l'appel à `collect()`, qui importe dans R **uniquement les observations et les variables retenues**.
+
+Cette méthode permet de **réduire la consommation de mémoire et d'accélérer le traitement des fichiers volumineux**.
+
+Avant même de téléchargez les données sur notre espace de travail, on peut regarder quelles variables elles contiennent.
+
+```{r}
+dvf_lazy <- open_dataset(path_dvf)
+
+names(dvf_lazy)
+
+#dvf_lazy$schema
+```
+
+### 3.2 Les principales variables du fichier DVF+
+
+Le fichier DVF+ contient des informations sur les transactions immobilières, leur localisation et les caractéristiques des biens concernés. Pour notre analyse hédonique, nous retiendrons les variables suivantes :
+
+-   **Identification de la transaction**
+    -   `idmutation` : identifiant de la mutation immobilière.
+-   **Prix immobilier**
+    -   `valeurfonc` : valeur foncière déclarée lors de la transaction (en euros). C'est notre variable d'intérêt, que l'on transformera en prix au mètre carré.
+-   **Localisation géographique**
+    -   `coddep` : code du département.
+    -   `l_codinsee` : liste des codes INSEE des communes concernées par la mutation.
+    -   `nbcomm` : nombre de communes concernées par la mutation.
+    -   `geompar` : géométrie des parcelles associées à la mutation, encodée au format WKB (*Well-Known Binary*), le format GeoParquet. Après une étape de conversion en objet spatial sf, cette variable nous permettra de cartographier les transactions immobilières et de rattacher chaque transaction à son IRIS.
+-   **Date de transaction**
+    -   `datemut` : date de la mutation.
+    -   `anneemut` : année de la mutation.
+    -   `moismut` : mois de la mutation.
+-   **Caractéristiques des biens immobiliers**
+    -   `libtypbien` : type de bien concerné par la mutation (maison, appartement, etc.).
+    -   `sbati` : surface bâtie totale (en m²).
+    -   `sterr` : surface du terrain (en m²).
+    -   `nblocmai` : nombre de locaux de type maison.
+    -   `nblocapt` : nombre de locaux de type appartement.
+-   **Nombre de pièces des logements**
+    -   `nbapt1pp` à `nbapt5pp` : nombre d'appartements selon leur catégorie de pièces principales (de 1 à 5 pièces ou plus).
+    -   `nbmai1pp` à `nbmai5pp` : même information pour les maisons.
+
+Ces variables nous permettront de construire un **prix au m²**, de contrôler les principales caractéristiques des logements et d'étudier les différences de prix entre quartiers.
+
+**Point de vigilance :** une mutation peut concerner plusieurs biens ou parcelles. Nous sélectionnerons donc les transactions correspondant à une seule maison ou à un seul appartement, afin de disposer d'un échantillon plus homogène pour l'estimation du modèle hédonique.
+
+### 3.3 Filtrer avant `collect()`
+
+```{r}
+dvf <- dvf_lazy %>%
+  filter(
+    coddep == "44",
+    nbcomm == 1,
+    libnatmut == "Vente",
+    libtypbien %in% c("UNE MAISON", "UN APPARTEMENT"),
+    nblocmai+nblocapt==1,
+    !is.na(sbati), sbati > 20,
+    !is.na(valeurfonc), valeurfonc > 0,
+    !is.na(geompar)
+  ) %>%
+  select(
+    idmutation, valeurfonc, l_codinsee, coddep,
+    datemut, anneemut, moismut, sbati, sterr,
+    nblocmai, nblocapt,
+    nbapt1pp, nbapt2pp, nbapt3pp, nbapt4pp, nbapt5pp,
+    nbmai1pp, nbmai2pp, nbmai3pp, nbmai4pp, nbmai5pp,
+    libtypbien, geompar
+  ) %>%
+  collect()
+```
+
+### 3.4 Convertir les listes de communes et traiter les géométries
+
+```{r}
+# Avec nbcomm == 1, on extrait le seul code de la liste.
+dvf$codinsee <- vapply(dvf$l_codinsee, function(x) {
+  if (length(x) == 0 || is.na(x[[1]])) NA_character_ else as.character(x[[1]])
+}, character(1))
+
+dvf <- dvf %>%
+  filter(codinsee %in% communes_aav_nantes$INSEE_COM)
+
+# Conversion de geompar (WKB) en géométrie sf
+dvf$geometry <- sf::st_as_sfc(dvf$geompar, crs = 2154)
+
+# Création de l'objet spatial
+dvf_sf <- sf::st_as_sf(dvf, sf_column_name = "geometry") %>%
+  filter(!sf::st_is_empty(geometry))
+```
+
+### 3.5 Localiser chaque mutation dans un IRIS
+
+```{r}
+# Un point représentatif situé dans la géométrie de parcelle.
+dvf_points <- dvf_sf %>%
+  mutate(geometry = sf::st_point_on_surface(geometry)) %>%
+  st_join(iris_aav_nantes %>% 
+            select(code_iris,nom_commune,nom_iris), join = st_within, left = FALSE)
+```
+
+## 4. Construire et visualiser les variables hédoniques
+
+```{r}
+dvf_points <- dvf_points %>%
+  mutate(
+    # DUMMIES TYPE DE BIEN
+    appartement = ifelse(nblocapt > 0, 1, 0),
+    maison = ifelse(nblocmai > 0, 1, 0),
+    
+    # RECONSTRUCTION DU NOMBRE DE PIÈCES
+    nb_pieces_appart =
+      1 * nbapt1pp +
+      2 * nbapt2pp +
+      3 * nbapt3pp +
+      4 * nbapt4pp +
+      5 * nbapt5pp,
+    
+    nb_pieces_maison =
+      1 * nbmai1pp +
+      2 * nbmai2pp +
+      3 * nbmai3pp +
+      4 * nbmai4pp +
+      5 * nbmai5pp,
+    
+    # total pièces
+    nb_pieces_total = nb_pieces_appart + nb_pieces_maison,
+    
+    # renommer les autres variables
+    prix = valeurfonc,
+    surface = sbati,
+    surf_terrain = sterr,
+    annee = anneemut,
+    mois = moismut,
+    
+    # calculer variable dépendante
+    prix_m2 = prix / surface
+  ) %>%
+  filter(is.finite(prix_m2))
+```
+
+Statistiques descriptives des biens immobiliers :
+
+```{r}
+dvf_points %>%
+  st_drop_geometry() %>%
+  summarise(
+    transactions = n(),
+    prix_m2_median = median(prix_m2, na.rm = TRUE),
+    surface_mediane = median(surface, na.rm = TRUE),
+    part_maisons = mean(maison, na.rm = TRUE),
+    premiere_annee = min(annee, na.rm = TRUE),
+    derniere_annee = max(annee, na.rm = TRUE)
+  )
+```
+
+### 4.1 Distribution des prix au m²
+
+```{r}
+ggplot(dvf_points %>% st_drop_geometry(), aes(x = prix_m2)) +
+  geom_histogram(bins = 1000, fill = "#4477AA", color = "white") +
+  scale_x_continuous(labels = label_number(big.mark = " ")) +
+  coord_cartesian(xlim = quantile(dvf_points$prix_m2, c(.01, .99), na.rm = TRUE)) +
+  labs(title = "Distribution des prix au m²",
+       x = "Prix au m² (€)", y = "Nombre de mutations") +
+  theme_minimal()
+```
+
+### 4.2 Maisons et appartements
+
+```{r}
+ggplot(dvf_points %>% st_drop_geometry(),
+       aes(x = libtypbien, y = prix_m2)) +
+  geom_boxplot(fill = "#66AACC", outlier.alpha = .08) +
+  coord_cartesian(ylim = quantile(dvf_points$prix_m2, c(.01, .95), na.rm = TRUE)) +
+  labs(title = "Prix au m² selon le type de bien",
+       x = NULL, y = "Prix au m² (€)") +
+  theme_minimal()
+```
+
+### 4.3 Carte des prix médians par IRIS
+
+```{r}
+stat_iris <- dvf_points %>%
+  st_drop_geometry() %>%
+  group_by(code_iris,nom_commune,nom_iris) %>%
+  summarise(n = n(), prix_m2_median = median(prix_m2, na.rm = TRUE),
+            .groups = "drop")
+
+carte_prix <- iris_aav_nantes %>%
+  left_join(stat_iris, by = "code_iris")
+
+ggplot(carte_prix) +
+  geom_sf(aes(fill = prix_m2_median), color = "white", linewidth = .07) +
+  scale_fill_viridis_c(option = "C", na.value = "grey90",
+                       labels = label_number(big.mark = " ")) +
+  labs(title = "Prix médians au m² par IRIS", fill = "€/m²",
+       caption = "Gris : aucune mutation retenue dans l'IRIS") +
+  theme_void()
+```
+
+::: callout-caution
+## Attention
+
+Certains IRIS enregistrent très peu de transactions immobilières, ce qui rend le calcul du prix moyen au m² peu représentatif du marché immobilier local.
+
+Par exemple, l'IRIS 440260106 ne compte que 6 transactions, avec un prix moyen de 5 171 €/m². Ce prix élevé doit donc être interprété avec prudence.
+
+En visualisant cet IRIS avec mapview et un fond de carte OpenStreetMap, on constate qu'il se situe dans une zone à dominante industrielle. Le faible nombre de transactions peut ainsi refléter la faible présence de logements dans ce quartier.
+
+Pour limiter l'influence de ces observations peu représentatives, nous choisissons de conserver uniquement les IRIS comptant au moins 30 transactions sur la période étudiée.
+:::
+
+## 5. Estimer un modèle de prix hédonique
+
+### 5.1 Spécification
+
+On estime :
+
+$$
+\ln(p_{izt}/m^2) = \beta_1\ln(Surface_{izt}) + \beta_2 Pieces_{izt}
++ \beta_3 Maison_{izt} + \beta_4\operatorname{asinh}(Terrain_{izt})
++ \alpha_z + \gamma_t + \varepsilon_{izt}.
+$$
+
+Les effets fixes $\alpha_z$ absorbent les caractéristiques **invariantes dans le temps** des IRIS ; les effets fixes $\gamma_t$ absorbent les chocs annuels communs. Le modèle reste descriptif en présence de caractéristiques non observées variant dans le temps ou de tri résidentiel.
+
+### 5.2 Préparer l'échantillon d'estimation
+
+```{r}
+# Exclure les IRIS ayant trop peu de transactions (choix pédagogique).
+iris_retenus <- stat_iris %>%
+  filter(n > 30) %>%
+  pull(code_iris)
+
+dvf_est <- dvf_points %>%
+  filter(code_iris %in% iris_retenus) %>%
+  st_drop_geometry() %>%
+  mutate(surf_terrain = coalesce(surf_terrain, 0)) %>%
+  filter(!is.na(nb_pieces_total), !is.na(annee))
+```
+
+### 5.3 Modèle hédonique
+
+```{r}
+modele_hedonique <- feols(
+  log(prix_m2) ~ log(surface) + nb_pieces_total +
+    maison + asinh(surf_terrain) | code_iris + annee^mois,
+  data = dvf_est,
+  vcov = ~code_iris
+)
+
+etable(modele_hedonique, digits = 3)
+```
+
+### 5.4 Extraire les effets fixes IRIS
+
+On recouvre les effets fixes des zones iris et on visualise le niveau de valorisation immobilière propre à chaque iris.
+
+```{r}
+fe <- fixef(modele_hedonique)
+
+fe_iris <- data.frame(
+  code_iris = names(fe[["code_iris"]]),
+  fe_iris_log = as.numeric(fe[["code_iris"]])
+)
+
+fe_iris$fe_iris <- exp(fe_iris$fe_iris_log)
+
+fe_iris_sf <- iris_aav_nantes %>% 
+  left_join(fe_iris)
+
+mapview(fe_iris_sf, zcol="fe_iris")
+```
+
+Les **effets fixes IRIS** sont estimés en prenant comme référence une situation fictive dans laquelle les caractéristiques des logements sont égales à zéro, de même que l'effet de l'année de référence. Leur valeur absolue n'est donc **pas interprétable économiquement**.
+
+En revanche, ce sont les **écarts entre les effets fixes des différents IRIS** qui nous intéressent : ils permettent de mesurer les différences de valorisation immobilière entre quartiers, une fois contrôlées les caractéristiques observées des logements et les effets temporels communs.
+
+Ces écarts reflètent notamment des caractéristiques locales non observées dans le modèle, comme l'accessibilité, les aménités ou la qualité de l'environnement résidentiel.
+
+### 5.5 Prédire le prix au m2 d'un bien de référence
+
+```{r}
+# Le bien de référence : appartement ou maison ?
+prop_maison <- dvf_points %>%
+  st_drop_geometry() %>%
+  summarise(maison_prop = mean(maison))
+
+maison_ref <- ifelse(prop_maison$maison_prop>0.5,1,0)
+
+# Logement de référence
+logement_ref <- dvf_points %>%
+  st_drop_geometry() %>%
+  filter(maison == maison_ref) %>%
+  summarise(
+    surface = median(surface, na.rm = TRUE),
+    nb_pieces_total = as.numeric(
+      names(which.max(table(nb_pieces_total)))
+    ),
+    surf_terrain = median(surf_terrain, na.rm = TRUE),
+    maison = unique(maison)
+  )
+
+# Prédire le prix au m² du logement de référence dans chaque IRIS
+
+# Coefficients estimés des caractéristiques du logement
+beta <- coef(modele_hedonique)
+
+# Calcul du prix au m² ajusté
+fe_iris_sf <- fe_iris_sf %>%
+  mutate(
+    prix_m2_ref_log =
+      beta["log(surface)"] * log(logement_ref$surface) +
+      beta["nb_pieces_total"] * logement_ref$nb_pieces_total +
+      beta["maison"] * logement_ref$maison +
+      beta["asinh(surf_terrain)"] * asinh(logement_ref$surf_terrain) +
+      fe_iris_log,
+
+    # Conversion en euros par m²
+    prix_m2_ref = exp(prix_m2_ref_log)
+  )
+
+fe_iris <- fe_iris_sf %>% 
+  st_drop_geometry()
+```
+
+Carte
+
+```{r}
+# Carte du prix au m² prédit pour le logement de référence
+
+# Contours communaux pour faciliter la lecture
+contours_communes <- fe_iris_sf %>%
+  group_by(code_insee) %>%
+  summarise(.groups = "drop")
+
+ggplot() +
+  # Prix ajustés par IRIS
+  geom_sf(
+    data = fe_iris_sf,
+    aes(fill = prix_m2_ref),
+    color = NA,
+    linewidth = 0.08
+  ) +
+
+  # Limites communales
+  geom_sf(
+    data = contours_communes,
+    fill = NA,
+    color = "grey35",
+    linewidth = 0.25
+  ) +
+
+  # Palette et légende
+  scale_fill_viridis_c(
+    option = "magma",
+    direction = -1,
+    name = "Prix prédit\n(€/m²)",
+    labels = scales::label_number(
+      accuracy = 1,
+      big.mark = " ",
+      suffix = " €"
+    ),
+    na.value = "grey90",
+    guide = guide_colorbar(
+      barheight = grid::unit(65, "mm"),
+      barwidth = grid::unit(5, "mm"),
+      frame.colour = "grey70",
+      ticks.colour = "grey40"
+    )
+  ) +
+
+  coord_sf(datum = NA, expand = FALSE) +
+
+  labs(
+    title = "Prix immobiliers dans l'AAV de Nantes",
+    subtitle = "Prix au m² prédit pour un logement de référence\n(maison de 95 m², 5 pièces avec terrain de 526 m²)",
+    caption = paste(
+      "Source : DVF+ (Cerema) et contours IRIS (IGN).",
+      "Estimations issues d'un modèle hédonique avec effets fixes IRIS.",
+      sep = "\n"
+    )
+  ) +
+
+  theme_void(base_size = 12) +
+  theme(
+    plot.title = element_text(
+      size = 17,
+      face = "bold",
+      color = "#20252B",
+      margin = margin(b = 7)
+    ),
+    plot.subtitle = element_text(
+      size = 10.5,
+      color = "grey35",
+      margin = margin(b = 15)
+    ),
+    plot.caption = element_text(
+      size = 8.5,
+      color = "grey45",
+      hjust = 0,
+      margin = margin(t = 14)
+    ),
+    legend.position = "right",
+    legend.title = element_text(
+      size = 10,
+      face = "bold"
+    ),
+    legend.text = element_text(size = 9),
+    plot.margin = margin(15, 20, 15, 15)
+  )
+```
+
+## 6. Retrouver le gradient spatial du modèle monocentrique
+
+### 6.1 Un centre et une mesure de distance
+
+Nous retenons l'IRIS **`441090106`** comme point de référence pour définir le centre de Nantes (*Central Business District*, CBD).
+
+Ce choix se justifie par sa localisation au cœur du **centre historique et administratif de Nantes**, à proximité de lieux emblématiques comme l'hôtel de ville, la cathédrale et le château des ducs de Bretagne.
+
+Il s'agit néanmoins d'un **choix méthodologique**, et non d'une définition unique du centre économique de Nantes. D'autres localisations pourraient être retenues, notamment en privilégiant la concentration des emplois ou des activités économiques.
+
+**Question :** le choix du CBD peut-il influencer le gradient spatial des prix immobiliers que nous allons estimer ?
+
+Nous calculons ci-dessous la **distance à vol d'oiseau** entre chaque IRIS de l'AAV de Nantes et le centre de référence retenu. Cette distance, exprimée en kilomètres, correspond à la distance géographique la plus courte entre deux points, **sans tenir compte du réseau routier ni des infrastructures de transport**.
+
+```{r}
+centres_iris <- iris_aav_nantes %>%
+  st_point_on_surface()
+
+cbd <- centres_iris %>%
+  filter(code_iris == "441090106")
+
+# Distance à vol d'oiseau en Lambert-93 : mètres -> kilomètres.
+centres_iris$distance_cbd_km <- as.numeric(
+  st_distance(centres_iris, cbd)
+) / 1000
+
+summary(centres_iris$distance_cbd_km)
+```
+
+**Distance euclidienne ≠ coût généralisé de transport.** Les réseaux, les temps de trajet, les correspondances et le confort peuvent modifier l'accessibilité indépendamment de la distance géométrique.
+
+### 6.2 Effets fixes IRIS et distance au CBD
+
+```{r}
+fe_iris <- fe_iris %>%
+  left_join(
+    centres_iris %>%
+      st_drop_geometry() %>%
+      select(code_iris, distance_cbd_km),
+    by = "code_iris"
+  ) %>%
+  filter(is.finite(distance_cbd_km), distance_cbd_km >= 0)
+
+```
+
+### 6.3 Deuxième étape : gradient descriptif
+
+```{r}
+modele_gradient <- feols(
+  fe_iris_log ~ log(distance_cbd_km),
+  data = fe_iris
+)
+
+etable(modele_gradient)
+```
+
+```{r}
+ggplot(fe_iris, aes(x = distance_cbd_km, y = fe_iris)) +
+  geom_point(alpha = .55, color = "grey35") +
+  # Régression linéaire
+  geom_smooth(method = "lm", formula = y ~ x,
+              se = F, color = "#D55E00") +
+  # Régression quadratique
+  geom_smooth(
+    method = "lm",
+    formula = y ~ x + I(x^2),
+    se = F,
+    color = "#0072B2",
+    linewidth = 1.1
+  ) +
+  labs(title = "Gradient spatial des prix ajustés",
+       subtitle = "Effets fixes IRIS issus du modèle hédonique",
+       x = "Distance au centre (km)",
+       y = "Effet fixe IRIS") +
+  theme_minimal()
+```
+
+::: callout-important
+## Limite économétrique de la seconde étape
+
+Cette régression porte sur des **effets fixes estimés** : ils sont mesurés avec erreur et n'ont pas tous la même précision. Les erreurs standards naïves de la seconde étape ne tiennent pas automatiquement compte de cette incertitude. Le coefficient décrit une corrélation spatiale, **pas un effet causal de la distance**.
+:::
+
+::: callout-tip
+### À vous de jouer : Nantes est-elle une ville monocentrique ?
+
+Dans le cours, nous avons vu que **Liotta et al. (2022)** estiment qu'en moyenne, les loyers diminuent d'environ **1,5 % pour chaque kilomètre supplémentaire d'éloignement du centre-ville (CBD)**.
+
+À partir des données immobilières de l'AAV de Nantes et des effets fixes IRIS estimés précédemment, nous cherchons à déterminer si le gradient spatial des prix immobiliers nantais est comparable à celui observé dans leur étude.
+
+1.  **Choix de la spécification.** Quelle forme fonctionnelle faut-il retenir pour estimer une variation *en pourcentage* des prix immobiliers associée à chaque kilomètre supplémentaire de distance au CBD ? Écrivez l'équation correspondante et estimez le modèle.
+
+2.  **Interprétation du gradient.** Quelle est la variation estimée du prix au m² lorsque l'on s'éloigne d'un kilomètre du centre de Nantes ? Interprétez économiquement le coefficient obtenu.
+
+3.  **Comparaison avec Liotta et al. (2022).** Le gradient estimé à Nantes est-il plus ou moins prononcé que celui de **−1,5 % par kilomètre** rapporté dans l'étude ? Que suggère cette comparaison sur le degré de concentration spatiale des valeurs immobilières à Nantes ?
+
+4.  **Biais lié à la présence de pôles d'emploi secondaires.** Si certains emplois sont localisés en dehors du CBD, dans quelle mesure l'omission de la distance à ces pôles peut-elle biaiser le coefficient estimé de la distance au centre ? Le gradient des prix risque-t-il d'être surestimé ou sous-estimé en valeur absolue ? Justifiez votre réponse en précisant le signe attendu de l'effet de la distance au pôle secondaire le plus proche sur les prix, sa corrélation probable avec la distance au centre et, en conséquence, **le sens du biais sur le gradient spatial estimé**.
+
+5.  **Aménités locales et prix immobiliers.** Identifiez trois aménités ou désaménités dont la répartition spatiale est susceptible d'être corrélée à la distance au CBD et qui peuvent également influencer les prix immobiliers.
+
+6.  **Biais de variable omise.** Choisissez l'une de ces aménités ou désaménités et expliquez comment son omission peut biaiser le coefficient estimé de la distance au CBD.
+:::
+
+## 7. Aller plus loin : distance et temps de trajet par la route
+
+Jusqu'à présent, nous avons mesuré l'éloignement au centre de Nantes à partir de la distance à vol d'oiseau (ou distance euclidienne). Cette mesure est simple à calculer, mais elle ne tient pas compte des contraintes réelles de déplacement : configuration des routes, franchissement de la Loire, sens de circulation, etc.
+
+Pour mieux mesurer l'accessibilité au centre-ville, nous utilisons OSRM (Open Source Routing Machine), un moteur de calcul d'itinéraires qui s'appuie sur le réseau routier issu d'OpenStreetMap.
+
+La fonction osrmTable() permet de calculer, entre chaque IRIS et le centre de Nantes : - **La distance routière (km)** : la longueur de l'itinéraire calculé sur le réseau routier. - **La durée du trajet (minutes)** : le temps de parcours estimé par OSRM, en fonction du réseau routier et des vitesses associées aux différents types de voies. Il ne s'agit pas d'une mesure du trafic en temps réel.
+
+**Quel indicateur est le plus pertinent économiquement ?**
+
+Dans le modèle monocentrique, les ménages arbitrent entre le coût du logement et le coût des déplacements vers le centre d'emploi. Ce dernier ne dépend pas uniquement de la distance parcourue, mais également du temps de trajet, du coût monétaire et des conditions de déplacement.
+
+Le temps de trajet peut donc constituer une meilleure approximation du coût de transport que la simple distance géographique. Il reste néanmoins imparfait : ici, OSRM mesure l'accessibilité en voiture, sans prendre en compte les transports en commun, les coûts de stationnement ou la congestion réelle.
+
+```{r}
+
+# Définir les origines (tous les iris) et la destination (le CBD)
+origines <- centres_iris %>% st_transform(4326) %>%
+  select(code_iris)
+destination <- cbd %>% st_transform(4326) %>%
+  select(code_iris)
+
+# Fonction de calcul de distance par la route et durée de trajet en voiture
+test_osrm <- osrmTable(
+  src = origines,
+  dst = destination,
+  measure = c("distance", "duration") # distance en km et durée en minutes
+)
+
+centres_iris$duree_cbd_min <- as.numeric(test_osrm$durations)
+centres_iris$dist_route_cbd_km <- as.numeric(test_osrm$distance)
+
+```
+
+::: callout-tip
+### À vous de jouer
+
+Réestimez le gradient spatial avec chacune de variables de distance : distance à vol d'oiseau, distance par la route et temps de trajet en voiture. Quelle est la variable qui explique le mieux les effets fixes des zones iris (prix au m2 quand les caractéristiques observables des logements et effets fixes temporels sont égaux à zéro) ?
+:::

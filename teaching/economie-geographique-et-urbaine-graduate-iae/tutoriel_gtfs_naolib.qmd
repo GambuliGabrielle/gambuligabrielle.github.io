@@ -1,0 +1,661 @@
+---
+title: "Des fichiers GTFS à la mesure de l'accessibilité en transport collectif"
+subtitle: "Reconstituer le réseau Naolib et calculer les temps de trajet entre arrêts de Nantes Métropole"
+author: "Gabrielle Gambuli"
+lang: fr
+format:
+  html:
+    toc: true
+    toc-depth: 3
+    number-sections: true
+    code-fold: false
+    code-tools: true
+    theme: cosmo
+execute:
+  echo: true
+  warning: false
+  message: false
+  eval: false
+---
+
+::: {.callout-important}
+## Avant de commencer
+
+Les blocs de code sont **désactivés par défaut** (`execute: eval: false`) afin que le document puisse être rendu sans disposer des données locales. Pour exécuter l'analyse, remplacer cette option par `eval: true` et renseigner les chemins dans la section *Paramètres*. Les résultats numériques ne sont pas pré-calculés ici.
+:::
+
+## Objectifs
+
+À la fin de ce tutoriel, vous saurez :
+
+1. identifier les principaux fichiers du standard **GTFS Schedule** et les relier ;
+2. extraire des trajets représentatifs d'une journée-type de semaine ;
+3. construire un **graphe orienté et pondéré** du réseau de transport ;
+4. représenter les correspondances entre lignes, avec un temps de marche et une pénalité d'attente ;
+5. calculer les plus courts chemins entre arrêts, puis agréger les résultats aux **IRIS** ;
+6. discuter les hypothèses et limites d'un modèle de temps de trajet statique.
+
+## Données à télécharger
+
+- **Données GTFS du réseau Naolib** : [Portail national des données de transport](https://transport.data.gouv.fr/datasets/reseau-de-transports-collectifs-naolib). Télécharger l'archive **`gtfs_lumidata_id.zip`**, qui contient notamment les arrêts, les lignes et les horaires des transports en commun.
+
+- **Contours géographiques des IRIS** : [Contours IRIS® – IGN](https://www.data.gouv.fr/datasets/contours-iris-r-2). Télécharger les données **Contours IRIS®, zone FXX (France métropolitaine)**, au format **GeoPackage (`.gpkg`)**, en projection **Lambert-93 (EPSG:2154)**.
+
+Une fois les fichiers téléchargés, adapter les chemins `path_gtfs` et `path_iris` dans le script R pour qu'ils correspondent à leur emplacement sur votre ordinateur.
+
+## Qu'est-ce qu'un fichier GTFS ?
+
+Le **General Transit Feed Specification (GTFS)** est un format standardisé décrivant l'offre de transports collectifs. Un flux *GTFS Schedule* est généralement distribué sous forme d'une archive ZIP contenant plusieurs tables texte (CSV). Il décrit une **offre programmée**, et non les positions des véhicules en temps réel (qui relèvent de GTFS Realtime).
+
+| Fichier | Unité d'observation | Variables utiles |
+|:--|:--|:--|
+| `stops.txt` | arrêt, quai ou station | `stop_id`, `stop_name`, `stop_lat`, `stop_lon`, éventuellement `parent_station` |
+| `routes.txt` | ligne / itinéraire commercial | `route_id`, `route_short_name`, `route_type` |
+| `trips.txt` | course d'un véhicule | `trip_id`, `route_id`, `service_id`, `direction_id` |
+| `stop_times.txt` | passage d'une course à un arrêt | `trip_id`, `stop_id`, `stop_sequence`, `arrival_time`, `departure_time` |
+| `calendar.txt` | régularité hebdomadaire d'un service | `service_id`, jours de semaine, dates de validité |
+| `calendar_dates.txt` | exceptions au calendrier | `service_id`, `date`, `exception_type` |
+| `shapes.txt` | tracé géographique (facultatif) | `shape_id`, `shape_pt_lat`, `shape_pt_lon` |
+
+La structure relationnelle essentielle est :
+
+```text
+routes.txt          calendar.txt / calendar_dates.txt
+    |                          |
+ route_id                  service_id
+    |                          |
+    +--------- trips.txt ------+
+                    |
+                  trip_id
+                    |
+               stop_times.txt -------- stops.txt
+                                       stop_id
+```
+
+Un **arrêt** (`stop_id`) n'est pas une **ligne** (`route_id`), ni une **course** (`trip_id`). Une même ligne possède de nombreuses courses ; une course visite plusieurs arrêts dans l'ordre défini par `stop_sequence`. Selon le producteur, deux quais d'une même station peuvent avoir des identifiants distincts.
+
+::: {.callout-note}
+## Deux définitions du temps de trajet
+
+- **Temps théorique sur réseau statique** : somme des temps de circulation, de marche et des pénalités de correspondance sur un chemin minimal.
+- **Temps dépendant de l'horaire de départ** : inclut les attentes jusqu'au prochain véhicule et la faisabilité des correspondances à un instant donné.
+
+**Nous calculons ici le premier.** Une pénalité fixe de cinq minutes par changement de ligne ne remplace pas un calcul d'itinéraire à horaires contraints.
+:::
+
+## Préparer l'environnement
+
+### Packages
+
+```{r}
+# À exécuter une seule fois si nécessaire :
+# install.packages(c("sf", "dplyr", "readr", "stringr", "tidyr",
+#                    "tibble", "purrr", "igraph", "ggplot2"))
+
+library(sf)
+library(dplyr)
+library(readr)
+library(stringr)
+library(tidyr)
+library(tibble)
+library(purrr)
+library(igraph)
+library(ggplot2)
+```
+
+### Paramètres modifiables
+
+```{r}
+# A modifier par votre chemin d'accès aux données
+path_data <- "G:/Mon Drive/TEACHING/MCF_Nantes/cours/M2_eco_spatiale/data/"
+
+# Archive GTFS Naolib, téléchargée au préalable.
+path_gtfs <- paste0(path_data,"gtfs_lumidata_id.zip")
+
+# Contours IRIS en Lambert-93, téléchargés au préalable.
+path_iris <- paste0(path_data,"contours_iris/1_DONNEES_LIVRAISON_2026-07-00042/CONTOURS-IRIS_3-0_GPKG_LAMB93_FXX-ED2026-01-01/iris.gpkg")
+
+# Fichier géographique des communes de Nantes Métropole (facultatif).
+# Peut être obtenu depuis le portail open data de Nantes Métropole.
+url_communes <- paste0(
+  "https://data.nantesmetropole.fr/api/explore/v2.1/catalog/datasets/",
+  "244400404_communes-nantes-metropole/exports/geojson"
+)
+
+vitesse_marche_kmh <- 4.5
+marche_max_min <- 10
+penalite_correspondance_min <- 5
+heure_min <- 7  
+heure_max <- 23 
+```
+
+L'archive GTFS et les contours IRIS doivent être récupérés séparément. 
+
+## Importer et explorer les tables GTFS
+
+### Lecture sans perdre les identifiants
+
+Les identifiants GTFS sont des **chaînes de caractères** : ne pas les convertir en nombres, car certains comportent des zéros initiaux ou des lettres.
+
+```{r}
+read_gtfs <- function(nom, requis = TRUE) {
+  contenu <- unzip(path_gtfs, list = TRUE)$Name
+  correspondance <- contenu[basename(contenu) == nom]
+  if (length(correspondance) == 0) {
+    if (requis) stop("Fichier manquant dans le ZIP : ", nom)
+    return(NULL)
+  }
+  read_csv(
+    unz(path_gtfs, correspondance[1]),
+    col_types = cols(.default = col_character()),
+    show_col_types = FALSE
+  )
+}
+
+stops <- read_gtfs("stops.txt")
+routes <- read_gtfs("routes.txt")
+trips <- read_gtfs("trips.txt")
+stop_times <- read_gtfs("stop_times.txt")
+calendar <- read_gtfs("calendar.txt", requis = FALSE)
+calendar_dates <- read_gtfs("calendar_dates.txt", requis = FALSE)
+
+stop_times <- stop_times %>%
+  mutate(stop_sequence = as.integer(stop_sequence))
+
+cat("Arrêts :", n_distinct(stops$stop_id), "\n")
+cat("Lignes :", n_distinct(trips$route_id), "\n")
+cat("Courses :", n_distinct(trips$trip_id), "\n")
+cat("Passages :", nrow(stop_times), "\n")
+```
+
+### Décrire les lignes
+
+```{r}
+trips %>%
+  count(route_id, name = "nombre_courses") %>%
+  left_join(routes %>% select(route_id, route_short_name, route_type),
+            by = "route_id") %>%
+  arrange(desc(nombre_courses)) %>%
+  print(n = 20)
+```
+
+**Question :** pourquoi une ligne peut-elle avoir plusieurs centaines de `trip_id` ? En quoi une course diffère-t-elle d'une ligne ?
+
+## Définir une journée-type et choisir les courses
+
+Pour une analyse rigoureuse de l'offre d'un **jour précis**, il faut combiner `calendar.txt` et `calendar_dates.txt`. Les noms des `service_id` ne constituent **pas** une définition fiable des jours de circulation : on évite donc de filtrer les identifiants contenant « mercredi », « vendredi », etc.
+
+### Identifier les services actifs à une date donnée
+
+```{r}
+# Choisir une date de semaine couverte par l'archive GTFS.
+date_etude <- as.Date("2026-10-15") # à adapter aux dates du flux
+
+services_actifs <- function(date, calendar, calendar_dates) {
+  date_txt <- format(date, "%Y%m%d")
+  jour <- c("monday", "tuesday", "wednesday", "thursday",
+            "friday", "saturday", "sunday")[
+              as.integer(format(date, "%u"))
+            ]
+
+  actifs <- character()
+  if (!is.null(calendar)) {
+    stopifnot(all(c("service_id", "start_date", "end_date", jour) %in%
+                    names(calendar)))
+    actifs <- calendar %>%
+      filter(start_date <= date_txt, end_date >= date_txt,
+             .data[[jour]] == "1") %>%
+      pull(service_id)
+  }
+
+  if (!is.null(calendar_dates)) {
+    exceptions <- calendar_dates %>% filter(.data$date == date_txt)
+    actifs <- union(actifs, exceptions$service_id[
+      exceptions$exception_type == "1"])
+    actifs <- setdiff(actifs, exceptions$service_id[
+      exceptions$exception_type == "2"])
+  }
+  unique(actifs)
+}
+
+actifs <- services_actifs(date_etude, calendar, calendar_dates)
+if (length(actifs) == 0) {
+  stop("Aucun service actif : vérifier la date et la période couverte par le GTFS.")
+}
+trips_jour <- trips %>% filter(service_id %in% actifs)
+```
+
+### Convertir les heures GTFS en secondes
+
+Les heures GTFS peuvent dépasser `24:00:00` pour décrire un service se prolongeant après minuit. Il faut donc **éviter** de les analyser comme de simples heures de la journée.
+
+```{r}
+gtfs_secondes <- function(x) {
+  morceaux <- str_split_fixed(x, ":", 3)
+  h <- suppressWarnings(as.numeric(morceaux[, 1]))
+  m <- suppressWarnings(as.numeric(morceaux[, 2]))
+  s <- suppressWarnings(as.numeric(morceaux[, 3]))
+  ifelse(is.na(h) | is.na(m) | is.na(s), NA_real_,
+         3600 * h + 60 * m + s)
+}
+
+stop_times_jour <- stop_times %>%
+  semi_join(trips_jour, by = "trip_id") %>%
+  mutate(
+    arrivee_sec = gtfs_secondes(arrival_time),
+    depart_sec = gtfs_secondes(departure_time)
+  )
+
+# Les courses retenues démarrent dans la plage horaire étudiée.
+# Leurs passages ultérieurs sont conservés, même après heure_max.
+departs_courses <- stop_times_jour %>%
+  group_by(trip_id) %>%
+  arrange(stop_sequence, .by_group = TRUE) %>%
+  summarise(
+    debut_sec = first(depart_sec),
+    nombre_arrets = n_distinct(stop_sequence),
+    .groups = "drop"
+  ) %>%
+  filter(debut_sec >= heure_min * 3600,
+         debut_sec < heure_max * 3600)
+
+# Pour une représentation statique simple : une course représentative
+# par ligne ET sens, de préférence la plus complète et proche de midi.
+trips_candidats <- trips_jour %>%
+  mutate(direction_id = coalesce(direction_id, "non_renseigne")) %>%
+  inner_join(departs_courses, by = "trip_id") %>%
+  mutate(ecart_midi = abs(debut_sec - 12 * 3600))
+
+trips_representatifs <- trips_candidats %>%
+  group_by(route_id, direction_id) %>%
+  arrange(desc(nombre_arrets), ecart_midi, trip_id, .by_group = TRUE) %>%
+  slice_head(n = 1) %>%
+  ungroup()
+
+passages <- stop_times_jour %>%
+  semi_join(trips_representatifs, by = "trip_id") %>%
+  left_join(trips_representatifs %>%
+              select(trip_id, route_id, direction_id), by = "trip_id")
+```
+
+::: {.callout-warning}
+## Hypothèse forte : une course par ligne et par sens
+
+Ce choix pédagogique facilite la construction d'un graphe lisible, mais peut **omettre les branches, les terminus partiels et les variantes d'itinéraire**. Il peut aussi mélanger des courses représentatives prises à des moments différents de la journée. Pour une analyse de recherche, il est préférable de conserver plusieurs courses et d'agréger les temps par segment, ou de calculer des itinéraires dépendant des horaires.
+:::
+
+## Calculer les temps entre arrêts consécutifs
+
+On ne joint pas tous les arrêts d'une course entre eux : chaque arrêt est relié à son **successeur immédiat** dans l'ordre de `stop_sequence`.
+
+Pour deux arrêts consécutifs $i$ et $j$ sur une même course :
+
+$$
+t_{ij}=\frac{\operatorname{arrivee}(j)-\operatorname{depart}(i)}{60}.
+$$
+
+```{r}
+segments <- passages %>%
+  group_by(trip_id, route_id, direction_id) %>%
+  arrange(stop_sequence, .by_group = TRUE) %>%
+  mutate(
+    stop_id_to = lead(stop_id),
+    arrivee_suivante = lead(arrivee_sec),
+    temps_trajet_min = (arrivee_suivante - depart_sec) / 60
+  ) %>%
+  ungroup() %>%
+  transmute(
+    route_id, trip_id, direction_id,
+    stop_id_from = stop_id,
+    stop_id_to,
+    temps_trajet_min
+  ) %>%
+  filter(!is.na(stop_id_to), !is.na(temps_trajet_min),
+         temps_trajet_min >= 0, stop_id_from != stop_id_to)
+
+# Réduire les doublons de segments sur une même ligne.
+segments <- segments %>%
+  group_by(route_id, stop_id_from, stop_id_to) %>%
+  summarise(temps_trajet_min = median(temps_trajet_min),
+            .groups = "drop")
+
+summary(segments$temps_trajet_min)
+```
+
+**Pourquoi conserver des arêtes orientées ?** Le réseau peut être asymétrique : sens uniques, arrêts différents selon le sens, itinéraires de retour distincts.
+
+## Représenter les correspondances à pied
+
+On suppose une vitesse de marche $v=4{,}5$ km/h, un rayon maximal de dix minutes de marche (soit **750 m**) et une pénalité fixe de cinq minutes lors d'un changement de ligne.
+
+$$
+t_{\mathrm{correspondance}}(i,j)=
+\frac{d(i,j)}{1000\,v}\times 60 + 5.
+$$
+
+La distance $d(i,j)$ est ici une distance **à vol d'oiseau** en mètres, calculée en Lambert-93. Elle ne reflète pas nécessairement les cheminements piétons réels.
+
+### Pourquoi des nœuds « arrêt × ligne » ?
+
+Si le graphe utilise uniquement `stop_id` comme identifiant de nœud, un voyageur peut passer d'une ligne à une autre au même arrêt **sans payer la pénalité**. Pour éviter ce problème, un nœud représente le couple `(stop_id, route_id)`. Les déplacements en véhicule relient les nœuds d'une même ligne ; les correspondances relient des nœuds de lignes différentes.
+
+```{r}
+# Les nœuds incluent les deux extrémités des segments.
+noeuds <- bind_rows(
+  segments %>% select(stop_id = stop_id_from, route_id),
+  segments %>% select(stop_id = stop_id_to, route_id)
+) %>%
+  distinct() %>%
+  mutate(noeud_id = paste(stop_id, route_id, sep = "@@"))
+
+# Vérifier l'unicité de la clé.
+stopifnot(!anyDuplicated(noeuds$noeud_id))
+
+stops_geo <- stops %>%
+  transmute(
+    stop_id,
+    stop_lon = as.numeric(stop_lon),
+    stop_lat = as.numeric(stop_lat)
+  ) %>%
+  filter(!is.na(stop_lon), !is.na(stop_lat)) %>%
+  distinct(stop_id, .keep_all = TRUE)
+
+noeuds_geo <- noeuds %>%
+  inner_join(stops_geo, by = "stop_id") %>%
+  st_as_sf(coords = c("stop_lon", "stop_lat"), crs = 4326) %>%
+  st_transform(2154)
+
+rayon_m <- vitesse_marche_kmh * 1000 * marche_max_min / 60
+voisins <- st_is_within_distance(noeuds_geo, noeuds_geo, dist = rayon_m)
+
+paires_voisines <- tibble(
+  i = rep(seq_along(voisins), lengths(voisins)),
+  j = unlist(voisins, use.names = FALSE)
+) %>%
+  filter(i != j) %>%
+  mutate(
+    route_from = noeuds_geo$route_id[i],
+    route_to = noeuds_geo$route_id[j]
+  ) %>%
+  filter(route_from != route_to)
+
+# Les deux sens sont conservés : les correspondances sont dirigées.
+# Les géométries Lambert-93 permettent de mesurer une distance en mètres.
+correspondances <- paires_voisines %>%
+  mutate(
+    from = noeuds_geo$noeud_id[i],
+    to = noeuds_geo$noeud_id[j],
+    distance_m = as.numeric(st_distance(
+      noeuds_geo[i, ], noeuds_geo[j, ], by_element = TRUE
+    )),
+    temps_trajet_min = distance_m / 1000 / vitesse_marche_kmh * 60 +
+      penalite_correspondance_min
+  ) %>%
+  select(from, to, temps_trajet_min)
+
+# Sur un réseau dense, le nombre de paires peut être important.
+nrow(correspondances)
+```
+
+::: {.callout-tip}
+## Correspondances plus réalistes
+
+Pour améliorer ce modèle, on peut : (i) utiliser les liens `transfers.txt` ou `pathways.txt` lorsqu'ils existent ; (ii) distinguer les quais d'une station et leurs éventuels `parent_station` ; (iii) calculer des distances sur le réseau piéton ; (iv) limiter les correspondances aux paires d'arrêts physiquement accessibles.
+:::
+
+## Construire le graphe orienté et pondéré
+
+Les arêtes de circulation sont associées à une même ligne. Les arêtes de correspondance permettent de passer d'une ligne à une autre. Leur poids est toujours exprimé en **minutes**.
+
+```{r}
+aretes_vehicule <- segments %>%
+  transmute(
+    from = paste(stop_id_from, route_id, sep = "@@"),
+    to = paste(stop_id_to, route_id, sep = "@@"),
+    temps_trajet_min
+  )
+
+aretes <- bind_rows(aretes_vehicule, correspondances) %>%
+  group_by(from, to) %>%
+  summarise(temps_trajet_min = min(temps_trajet_min),
+            .groups = "drop")
+
+# Garder aussi les nœuds isolés, le cas échéant.
+graphe <- graph_from_data_frame(
+  d = aretes,
+  directed = TRUE,
+  vertices = noeuds %>% select(name = noeud_id, stop_id, route_id)
+)
+
+E(graphe)$weight <- aretes$temps_trajet_min
+
+cat("Nombre de nœuds :", vcount(graphe), "\n")
+cat("Nombre d'arêtes :", ecount(graphe), "\n")
+cat("Composantes faibles :", components(graphe, mode = "weak")$no, "\n")
+```
+
+**Interprétation :** les sommets sont désormais des couples arrêt–ligne, et non de simples arrêts. Un même `stop_id` peut donc apparaître dans plusieurs sommets.
+
+## Calculer la matrice origine-destination
+
+Pour chaque couple de nœuds $u,v$, l'algorithme de Dijkstra cherche le chemin de poids total minimal :
+
+$$
+T_{uv}=\min_{p\in\mathcal P(u,v)}\sum_{e\in p}w_e.
+$$
+
+Pour obtenir une matrice **entre arrêts physiques**, on retient le minimum sur les lignes accessibles à l'origine et à la destination :
+
+$$
+T_{ij}=\min_{\ell\in L(i),\,m\in L(j)}T_{(i,\ell),(j,m)}.
+$$
+
+Cela revient à supposer qu'à l'origine on peut choisir sa ligne sans attente initiale. Les `Inf` correspondent à des destinations inaccessibles dans le graphe.
+
+```{r}
+# Attention : une matrice complète occupe une mémoire proportionnelle
+# au carré du nombre de nœuds. Voir les conseils ci-dessous.
+matrice_noeuds <- distances(
+  graphe,
+  mode = "out",
+  weights = E(graphe)$weight,
+  algorithm = "dijkstra"
+)
+
+# Récupérer les arrêts physiques des nœuds dans l'ordre de la matrice.
+index_noeuds <- tibble(
+  noeud_id = V(graphe)$name,
+  stop_id = vertex_attr(graphe, "stop_id")
+)
+
+# Matrice entre arrêts : minimum sur les lignes de départ et d'arrivée.
+# On travaille ici sur les valeurs finies, sans les confondre avec zéro.
+temps_od <- as_tibble(matrice_noeuds, rownames = "from") %>%
+  pivot_longer(-from, names_to = "to", values_to = "temps_trajet_min") %>%
+  left_join(index_noeuds %>%
+              select(from = noeud_id, stop_id_from = stop_id), by = "from") %>%
+  left_join(index_noeuds %>%
+              select(to = noeud_id, stop_id_to = stop_id), by = "to") %>%
+  group_by(stop_id_from, stop_id_to) %>%
+  summarise(temps_trajet_min = min(temps_trajet_min), .groups = "drop") %>%
+  filter(stop_id_from != stop_id_to)
+
+# Ne garder que les OD réalisables pour les indicateurs ultérieurs.
+temps_od_accessibles <- temps_od %>%
+  filter(is.finite(temps_trajet_min))
+
+summary(temps_od_accessibles$temps_trajet_min)
+```
+
+::: {.callout-warning}
+## Mémoire et interprétation
+
+Le calcul toutes origines–toutes destinations peut devenir coûteux : pour $N$ nœuds, la matrice contient $N^2$ valeurs. Pour un réseau important, il est préférable de calculer les distances **par lots d'origines** et d'agréger les résultats progressivement, plutôt que de créer deux très grandes matrices en mémoire.
+
+En outre, supprimer les OD inaccessibles sans les comptabiliser peut **surestimer l'accessibilité**. Il faut toujours rapporter la proportion de destinations atteignables.
+:::
+
+### Vérifications élémentaires
+
+```{r}
+stopifnot(all(E(graphe)$weight >= 0))
+stopifnot(!anyNA(E(graphe)$weight))
+
+# Une OD entre deux arrêts peut être asymétrique.
+exemple_od <- temps_od_accessibles %>% slice_head(n = 10)
+print(exemple_od)
+
+part_accessible <- mean(is.finite(temps_od$temps_trajet_min))
+cat("Part des paires d'arrêts atteignables :",
+    round(100 * part_accessible, 1), "%\n")
+```
+
+## Passer de l'arrêt à l'IRIS
+
+Les **IRIS** (îlots regroupés pour l'information statistique) sont des unités infracommunales utilisées pour diffuser des statistiques locales. Associer chaque arrêt à son IRIS permet de construire une matrice OD territoriale.
+
+### Charger les contours de Nantes Métropole
+
+```{r}
+stopifnot(file.exists(path_iris))
+
+communes <- st_read(url_communes, quiet = TRUE) %>%
+  st_transform(2154)
+
+iris <- st_read(path_iris, quiet = TRUE) %>%
+  st_transform(2154)
+
+# Adapter les noms de champs si le millésime de contours diffère.
+stopifnot("code_insee" %in% names(iris),
+          "code_iris" %in% names(iris),
+          "id_insee" %in% names(communes))
+
+iris_nm <- iris %>%
+  filter(code_insee %in% communes$id_insee)
+```
+
+### Attribuer un IRIS à chaque arrêt
+
+```{r}
+arrets_sf <- stops_geo %>%
+  filter(stop_id %in% unique(c(temps_od$stop_id_from,
+                               temps_od$stop_id_to))) %>%
+  st_as_sf(coords = c("stop_lon", "stop_lat"), crs = 4326) %>%
+  st_transform(2154)
+
+# st_within : évite de dupliquer un arrêt situé sur une frontière.
+# Un arrêt sur une frontière peut rester sans IRIS.
+arrets_iris <- st_join(
+  arrets_sf,
+  iris_nm %>% select(code_iris),
+  join = st_within,
+  left = TRUE
+) %>%
+  st_drop_geometry() %>%
+  distinct(stop_id, .keep_all = TRUE) %>%
+  select(stop_id, code_iris)
+
+cat("Arrêts sans IRIS :", sum(is.na(arrets_iris$code_iris)), "\n")
+```
+
+### Construire la matrice OD entre IRIS
+
+Nous calculons ici la **moyenne des temps entre les paires d'arrêts accessibles** de deux IRIS :
+
+$$
+\overline T_{AB}=
+\frac{1}{|\mathcal P_{AB}|}\sum_{(i,j)\in\mathcal P_{AB}}T_{ij}.
+$$
+
+Attention : ce n'est pas le temps moyen de trajet de l'ensemble des habitants de l'IRIS. Ici, chaque paire d'arrêts est pondérée également, indépendamment de la population, de la fréquence de service et de la localisation résidentielle.
+
+```{r}
+temps_od_iris <- temps_od %>%
+  left_join(arrets_iris %>%
+              rename(stop_id_from = stop_id,
+                     code_iris_from = code_iris), by = "stop_id_from") %>%
+  left_join(arrets_iris %>%
+              rename(stop_id_to = stop_id,
+                     code_iris_to = code_iris), by = "stop_id_to") %>%
+  filter(!is.na(code_iris_from), !is.na(code_iris_to)) %>%
+  group_by(code_iris_from, code_iris_to) %>%
+  summarise(
+    n_paires = n(),
+    n_accessibles = sum(is.finite(temps_trajet_min)),
+    part_accessible = n_accessibles / n_paires,
+    temps_moyen_min = if (all(!is.finite(temps_trajet_min))) NA_real_
+      else mean(temps_trajet_min[is.finite(temps_trajet_min)]),
+    temps_median_min = if (all(!is.finite(temps_trajet_min))) NA_real_
+      else median(temps_trajet_min[is.finite(temps_trajet_min)]),
+    .groups = "drop"
+  )
+
+print(temps_od_iris, n = 10)
+```
+
+## Construire un indicateur de centralité
+
+Un indicateur simple de proximité est la somme des inverses des temps de trajet vers les autres IRIS :
+
+$$
+C_A=\sum_{B\neq A,\;T_{AB}<\infty}\frac{1}{T_{AB}}.
+$$
+
+Les IRIS accessibles rapidement contribuent davantage à la centralité. **On exclut les couples $A=B$** pour éviter les divisions par zéro et ne pas faire dépendre l'indicateur des déplacements internes à l'IRIS. L'indicateur dépend aussi du nombre de destinations considérées : il ne faut pas l'interpréter comme une mesure normalisée d'accessibilité à la population ou à l'emploi.
+
+```{r}
+centralite_iris <- temps_od_iris %>%
+  filter(code_iris_from != code_iris_to,
+         is.finite(temps_moyen_min),
+         temps_moyen_min > 0) %>%
+  group_by(code_iris_from) %>%
+  summarise(
+    centralite = sum(1 / temps_moyen_min),
+    nombre_iris_accessibles = n(),
+    .groups = "drop"
+  ) %>%
+  rename(code_iris = code_iris_from)
+
+centralite_iris_sf <- iris_nm %>%
+  left_join(centralite_iris, by = "code_iris")
+
+ggplot(centralite_iris_sf) +
+  geom_sf(aes(fill = centralite), color = NA) +
+  scale_fill_viridis_c(na.value = "grey90", option = "C") +
+  labs(
+    title = "Centralité théorique du réseau de transport collectif",
+    subtitle = "Nantes Métropole — graphe GTFS statique",
+    fill = "Centralité",
+    caption = "Temps de circulation et de marche + 5 min par changement de ligne"
+  ) +
+  theme_minimal()
+```
+
+## Interprétation économique et limites
+
+La matrice de temps peut servir à étudier l'accessibilité à l'emploi, aux équipements ou aux services. Une extension naturelle consiste à pondérer les destinations par une masse d'opportunités $O_B$ :
+
+$$
+A_A=\sum_{B\neq A} O_B\,f(T_{AB}),
+$$
+
+avec, par exemple, $f(t)=\exp(-\beta t)$, où $\beta>0$ traduit la décroissance de l'accessibilité avec le temps.
+
+**Principales limites de la méthode proposée :**
+
+- **Fréquences et horaires :** les temps d'attente au départ et les correspondances réalisables à une heure donnée ne sont pas modélisés.
+- **Course représentative :** une course par ligne et par sens ne représente pas toutes les branches, fréquences et variations horaires.
+- **Correspondances :** le rayon de 750 m est mesuré à vol d'oiseau ; une traversée réelle peut être plus longue ou impossible.
+- **Pénalité uniforme :** cinq minutes pour chaque changement de ligne est une hypothèse, pas une mesure empirique.
+- **Déplacements à pied :** la marche est utilisée pour changer de ligne, mais pas pour rejoindre une station depuis n'importe quel point d'un IRIS.
+- **Agrégation spatiale :** une moyenne entre arrêts ne représente pas nécessairement l'accessibilité moyenne des résidents.
+- **Sens du réseau :** les temps $T_{AB}$ et $T_{BA}$ peuvent différer.
+- **Couverture :** les OD non atteignables doivent être documentées et non ignorées silencieusement.
+
+Pour des temps de trajet **réellement dépendants de l'heure de départ**, il faut envisager un calcul d'itinéraires fondé sur les horaires GTFS (algorithme de type RAPTOR ou Connection Scan), en intégrant les temps de marche et les règles de correspondance.
+
+::: {.callout-note}
+## À retenir
+
+Une matrice OD issue d'un graphe GTFS statique mesure un **potentiel de déplacement dans une représentation simplifiée du réseau**. Elle est utile pour comparer des configurations spatiales, à condition de documenter les hypothèses de sélection des courses, de marche, de correspondance et d'agrégation territoriale.
+:::
