@@ -1,0 +1,79 @@
+---
+title: "Exercice 3 - régression linéaire multiple"
+# author: "Gabrielle Gambuli"
+date: "2025-02-03"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Temps record sur différentes courses à pied en Ecosse {-}
+
+**Objectifs :** 
+
+* Trouver une problématique et les effets attendus a priori 
+
+* Proposer une stratégie économétrique 
+
+* Interpréter les résultats et répondre à la question initiale
+
+# Chargement des packages
+
+Le paquetage MASS dans R fournit des fonctions et des bases de données correspondant au livre de Venables et Ripley « Modern Applied Statistics with S ». Il s'agit d'un package populaire pour réaliser des statistiques appliquées (modèles linéaires et linéaires généralisés, etc.).
+
+```{r}
+#install.packages("MASS")
+
+library(MASS)
+```
+
+# Chargement et visualisation des données 
+
+```{r, message=FALSE}
+data(hills)
+
+View(hills)
+
+?hills
+```
+
+**Temps record dans les courses de côte écossaises**
+
+**Description :** Les temps records en 1984 pour 35 courses de côte écossaises.
+
+**Usage :** hills
+
+**Format :** 
+
+* dist : distance en milles sur la carte (miles).
+
+* climb : hauteur totale atteinte au cours de l'itinéraire, en pieds (feet).
+
+* time : enregistrement du temps en minutes.
+
+**Source :** A.C. Atkinson (1986) Comment: Aspects of diagnostic regression analysis. Statistical Science 1, 397–402.
+
+**Références :** Venables, W. N. and Ripley, B. D. (2002) Modern Applied Statistics with S. Fourth edition. Springer.
+
+# Régression multiple
+
+Régression des records de temps dans les courses de côte écossaises sur la distance et la hauteur parcourues
+
+```{r}
+reg2 <- lm(hills$time ~ hills$dist + hills$climb)
+
+summary(reg2)
+```
+
+un R² de 0,92 indique que notre modèle (nos variables explicatives - la distance et la côte - modélisées à l'aide d'une régression multiple) explique environ 92 % de la variation du temps record dans les courses de côte écossaises.
+
+Ici, on n'interpréte pas la constante (-8.99) car cela n'a pas de sens de regarder la durée d'une course lorsque la distance et la montée sont tous deux nuls. 
+
+On observe des relations positives et hautement significatives statistiquement entre le temps de la course et sa distance ou sa côte, cetris paribus. Le temps record dans les courses de côte écossaises augmente de 6.22 minutes pour un mille de distance supplémentaire et de 0.01 minutes pour un pied supplémentaire de montée, **toutes choses égales par ailleurs (TCEPA)**.
+
